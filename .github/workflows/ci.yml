@@ -18,6 +18,8 @@ jobs:
         os: [macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     env:
+      # 윈도우 콘솔 기본 인코딩(cp1252)으로 한글을 출력하다 깨지지 않게 파이썬을 UTF-8로
+      PYTHONUTF8: 1
       PY: ${{ matrix.os == 'windows-latest' && 'python' || 'python3' }}
       FAKE_CLAUDE: ${{ matrix.os == 'windows-latest' && 'docs/qa/fixtures/fake-claude.cmd' || 'docs/qa/fixtures/fake-claude.sh' }}
     steps:
