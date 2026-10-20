@@ -56,6 +56,13 @@
   관련된 글이 없으면 items는 빈 배열이다.
 - text에는 첫 행동을 정하는 데 필요한 사실만 쓴다. 전화번호, 주소 같은 개인정보는 빼고 쓴다.
 
+## type: collectMany
+입력: {"type":"collectMany","source":"notion" 또는 "linear" 또는 "frame","today":"YYYY-MM-DD","tasks":[{"key":"a1","title":"면접 준비하기","words":["면접"],"target":{...} 또는 없음}]}
+출력: {"items":[{"key":"a1","label":"제목 한 줄","text":"요약 400자 이내","date":"YYYY-MM-DD" 또는 null,"url":"https://..." 또는 null}]}
+- type: collect의 규칙을 할 일마다 그대로 따른다. 할 일마다 자료는 최대 1개이고, 관련 자료가 없는 할 일은 items에 넣지 않는다.
+- 여러 할 일이 같은 낱말을 쓰면 검색을 한 번만 하고 결과를 나눠 쓴다. 검색은 모두 합쳐 6번을 넘기지 않는다.
+- key는 입력의 key를 그대로 쓴다.
+
 ## type: whoami
 입력: {"type":"whoami","source":"notion" 또는 "linear" 또는 "frame"}
 출력: {"workspace":"워크스페이스 이름" 또는 null,"account":"계정 이메일이나 이름" 또는 null}

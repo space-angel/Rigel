@@ -35,8 +35,18 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
   const [words, setWords] = useState<WordChip[]>(() => splitWords(todo.title, todo.rawText));
   const [local, setLocal] = useState<ToolResult[] | null>(null);
   const mcpOn = MCP_SOURCES.filter((s) => data.settings.tools.mcp[s]);
+  // 확인 창에서 붙여 둔 자료가 있으면 다시 읽지 않고 그대로 쓴다. 낱말을 바꾸면 그때 다시 읽는다.
+  const stored = (s: McpSource): ToolResult | null => {
+    const n = todo.context.find((c) => c.source === s);
+    if (!n) return null;
+    return {
+      source: s,
+      status: "ok",
+      item: { source: s, label: n.label, text: n.text, date: n.date, open: n.url ? { kind: "url", source: s, url: n.url } : null, ...(n.workspace && { workspace: n.workspace }) },
+    };
+  };
   const [mcp, setMcp] = useState<Partial<Record<McpSource, ToolResult>>>(() =>
-    Object.fromEntries(mcpOn.map((s) => [s, { source: s, status: "loading", item: null }])),
+    Object.fromEntries(mcpOn.map((s) => [s, stored(s) ?? { source: s, status: "loading", item: null }])),
   );
   const [picked, setPicked] = useState<Set<ToolSource> | null>(null);
   const [waitingSince, setWaitingSince] = useState<number | null>(null);
@@ -60,6 +70,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
     const tm = setTimeout(
       () => {
         for (const s of mcpOn) {
+          if (first && stored(s)) continue;
           setMcp((m) => ({ ...m, [s]: { source: s, status: "loading", item: null } }));
           api.collectMcp(todo.id, s, onWords).then((r) => live && setMcp((m) => ({ ...m, [s]: r })));
         }

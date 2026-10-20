@@ -75,6 +75,7 @@ export function applyAction(data: AppData, action: TodoAction, now: Date = new D
         // AI를 거치지 않고 바로 넣은 할 일은 정리 안 된 할 일이다.
         isClear: false,
         shortcutId: action.shortcutId ?? null,
+        context: [],
       });
       break;
     }
@@ -99,6 +100,7 @@ export function applyAction(data: AppData, action: TodoAction, now: Date = new D
           rawText: action.rawText,
           isClear: item.isClear,
           shortcutId: item.shortcutId,
+          context: item.context ?? [],
         });
       }
       break;

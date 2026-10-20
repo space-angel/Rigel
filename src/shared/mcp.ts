@@ -16,6 +16,8 @@ export type McpSource = keyof typeof MCP_SERVICES;
 export const MCP_SOURCES = Object.keys(MCP_SERVICES) as McpSource[];
 
 export type McpStatus = "connected" | "needs-auth" | "failed" | "pending" | "missing";
+// 확인 창에서 서비스별로 자료를 찾는 상태
+export type EnrichStatus = "loading" | "done" | "empty" | "failed" | "needs-auth" | "slow";
 
 // mcp__<서버 이름의 영문·숫자 외 문자를 _로>__<도구>
 export function toolPrefix(server: string): string {
@@ -96,4 +98,39 @@ export function whoamiRequest(source: McpSource): string {
 
 export function collectRequest(source: McpSource, words: string[], today: string, target?: { fileKey: string; nodeId: string | null } | null): string {
   return JSON.stringify({ type: "collect", source, words, today, ...(target && { target }) });
+}
+
+// 확인 창: 나눈 할 일 여러 개를 서비스마다 한 번의 호출로 찾는다. 할 일마다 따로 부르면 claude가 여러 개 떠서 무겁다.
+export interface CollectTask {
+  key: string;
+  title: string;
+  words: string[];
+  target?: { fileKey: string; nodeId: string | null } | null;
+}
+
+export const CollectManyResult = z.object({
+  items: z.array(
+    z.object({
+      key: z.string(),
+      label: z.string().min(1),
+      text: z.string().default(""),
+      date: z.string().nullable().optional(),
+      url: z.string().nullable().optional(),
+    }),
+  ),
+});
+export type CollectManyResult = z.infer<typeof CollectManyResult>;
+
+export function collectManyRequest(source: McpSource, tasks: CollectTask[], today: string): string {
+  return JSON.stringify({ type: "collectMany", source, today, tasks: tasks.map((t) => ({ key: t.key, title: t.title, words: t.words, ...(t.target && { target: t.target }) })) });
+}
+
+// 생각에 서비스 이름이 나오는지. 켜 두지 않은 서비스를 언급하면 켜라고 알려 준다.
+const MENTIONS: Record<McpSource, RegExp> = {
+  notion: /노션|notion/i,
+  linear: /리니어|linear/i,
+  frame: /피그마|figma/i,
+};
+export function mentionedServices(text: string): McpSource[] {
+  return MCP_SOURCES.filter((s) => MENTIONS[s].test(text));
 }

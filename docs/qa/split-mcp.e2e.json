@@ -1,0 +1,58 @@
+[
+  {
+    "name": "긴 생각을 넣는다 (노션·리니어·피그마 언급)",
+    "win": "quick",
+    "run": "__e2e.type('textarea', '노션에 정리한 면접 질문 보고 자기소개 1분 버전 쓰고, 포트폴리오 피드백 반영해서 피그마 덱 고치기, 리니어에 웹 앱 화면 이슈 정리하기'); __e2e.key('textarea', 'Enter'); return true;",
+    "wait": 300
+  },
+  {
+    "name": "나누기 끝 · MCP는 뒤에서 찾는 중",
+    "win": "review",
+    "until": "__e2e.all('.draft').length > 0",
+    "timeout": 60000,
+    "wait": 300,
+    "snap": true,
+    "expect": "__e2e.text().includes('Looking in')",
+    "note": "나누기는 기다리지 않고 바로 보이는가"
+  },
+  {
+    "name": "MCP 칩이 채워진다",
+    "win": "review",
+    "until": "!__e2e.text().includes('Looking in')",
+    "timeout": 120000,
+    "snap": true
+  },
+  {
+    "name": "칩 목록",
+    "win": "review",
+    "run": "return __e2e.all('.note-chip').map(c => c.textContent);"
+  },
+  {
+    "name": "칩 하나를 뺀다",
+    "win": "review",
+    "run": "const before = __e2e.all('.note-chip').length; const x = __e2e.$('.note-chip__remove'); if (x) __e2e.click(x); return before;",
+    "wait": 300
+  },
+  {
+    "name": "넣기",
+    "win": "review",
+    "run": "__e2e.click('.review__footer .button--primary'); return true;",
+    "wait": 800
+  },
+  {
+    "name": "할 일에 자료가 붙었다",
+    "win": "list",
+    "run": "const d = await window.todoban.getData(); return d.todos.filter(t => t.context.length).map(t => t.title + ' ← ' + t.context.map(c => c.source + ':' + c.label).join(', '));",
+    "expect": "true"
+  },
+  {
+    "name": "빚기 · 붙여 둔 자료를 다시 읽지 않고 바로 쓴다",
+    "win": "list",
+    "main": "shape:@context",
+    "until": "__e2e.$('.shape')",
+    "wait": 500,
+    "snap": true,
+    "expect": "__e2e.all('.tool.is-on').some(t => t.textContent.includes('MCP') && !t.textContent.includes('Reading'))",
+    "note": "열자마자 Notion·Linear 카드가 자료로 채워져 있는가"
+  }
+]

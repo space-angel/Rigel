@@ -1,0 +1,67 @@
+[
+  {
+    "name": "긴 생각을 넣는다 (노션·리니어·피그마 언급)",
+    "win": "quick",
+    "ok": true,
+    "ms": 428,
+    "value": true
+  },
+  {
+    "name": "나누기 끝 · MCP는 뒤에서 찾는 중",
+    "win": "review",
+    "ok": true,
+    "ms": 8656,
+    "note": "나누기는 기다리지 않고 바로 보이는가",
+    "snap": "02-review.png"
+  },
+  {
+    "name": "MCP 칩이 채워진다",
+    "win": "review",
+    "ok": true,
+    "ms": 36841,
+    "snap": "03-review.png"
+  },
+  {
+    "name": "칩 목록",
+    "win": "review",
+    "ok": true,
+    "ms": 0,
+    "value": [
+      "Notion · 답변 공통 규칙 · 면접 답변 쓰는 법",
+      "Notion · v4 피드백 정리 · Figma 적용 전 확인",
+      "Linear · SIL-74 · [개발] 웹 앱 화면 만들기 (A1~A4)"
+    ]
+  },
+  {
+    "name": "칩 하나를 뺀다",
+    "win": "review",
+    "ok": true,
+    "ms": 305,
+    "value": 3
+  },
+  {
+    "name": "넣기",
+    "win": "review",
+    "ok": true,
+    "ms": 816,
+    "value": true
+  },
+  {
+    "name": "할 일에 자료가 붙었다",
+    "win": "list",
+    "ok": true,
+    "ms": 3,
+    "value": [
+      "포폴 피드백 반영해 피그마 덱 고치기 ← notion:v4 피드백 정리 · Figma 적용 전 확인",
+      "웹 앱 화면 리니어 이슈 정리하기 ← linear:SIL-74 · [개발] 웹 앱 화면 만들기 (A1~A4)"
+    ]
+  },
+  {
+    "name": "빚기 · 붙여 둔 자료를 다시 읽지 않고 바로 쓴다",
+    "win": "list",
+    "ok": true,
+    "ms": 884,
+    "note": "열자마자 Notion·Linear 카드가 자료로 채워져 있는가",
+    "snap": "08-list.png"
+  }
+]

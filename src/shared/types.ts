@@ -3,6 +3,17 @@ import { z } from "zod";
 // 할 날짜와 날짜 비교는 모두 로컬 날짜 문자열(YYYY-MM-DD)로 한다.
 export const DateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
+// 할 일에 붙여 둔 자료. 확인 창에서 MCP 도구로 찾아 둔 것이고, 빚기(C1)가 다시 읽지 않고 쓴다.
+export const ContextNote = z.object({
+  source: z.string(),
+  label: z.string(),
+  text: z.string().default(""),
+  date: z.string().nullable().default(null),
+  url: z.string().nullable().default(null),
+  workspace: z.string().nullable().default(null),
+});
+export type ContextNote = z.infer<typeof ContextNote>;
+
 export const TodoItem = z.object({
   id: z.string(),
   title: z.string(),
@@ -13,6 +24,7 @@ export const TodoItem = z.object({
   rawText: z.string(),
   isClear: z.boolean(),
   shortcutId: z.string().nullable(),
+  context: z.array(ContextNote).default([]),
 });
 export type TodoItem = z.infer<typeof TodoItem>;
 
@@ -87,7 +99,7 @@ export type TodoAction =
   | {
       type: "addMany";
       rawText: string;
-      items: { title: string; plannedDate: string | null; isClear: boolean; shortcutId: string | null }[];
+      items: { title: string; plannedDate: string | null; isClear: boolean; shortcutId: string | null; context?: ContextNote[] }[];
     }
   | { type: "applyFirstStep"; id: string; title: string; shortcutId: string | null; toToday?: boolean }
   | { type: "toggle"; id: string }

@@ -2249,3 +2249,63 @@ body::-webkit-scrollbar-thumb {
 .toast__undo:hover {
   background: var(--white-08);
 }
+
+/* 확인 창: 할 일마다 MCP 도구에서 찾은 자료 칩 */
+.draft__notes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.note-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  min-width: 0;
+  padding: 3px 4px 3px 9px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgb(255 106 42 / 30%);
+  background: rgb(255 106 42 / 8%);
+  font-size: 11px;
+  color: var(--orange-200);
+}
+.note-chip__label {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--white-90);
+  font-size: 11px;
+}
+.note-chip__label:not(:disabled):hover {
+  text-decoration: underline;
+}
+.note-chip__remove {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-text-tertiary);
+}
+.note-chip__remove:hover {
+  background: var(--white-10);
+  color: var(--color-text-primary);
+}
+.note-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--color-text-tertiary);
+}
+.review__mention {
+  margin-top: -4px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}

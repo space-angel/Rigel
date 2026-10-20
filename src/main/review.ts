@@ -8,6 +8,8 @@ import type { ReviewDraft, ReviewState } from "@shared/review";
 import type { AppData } from "@shared/types";
 import { localDate } from "@shared/todos";
 import { runClaude } from "./claude/client";
+import { collectManyMcp } from "./tools/mcp";
+import { MCP_SOURCES, mentionedServices } from "@shared/mcp";
 
 // 빠른 입력 원문은 claude를 부르기 전에 먼저 저장한다. 넣기나 취소 전까지 남겨 두고,
 // 그 사이 앱이 꺼지면 다음 실행 때 확인 창을 다시 연다.
@@ -43,7 +45,7 @@ export class ReviewSession {
     private getData: () => AppData,
     private onChange: (s: ReviewState) => void,
   ) {
-    this.state = { sessionId: randomUUID(), rawText, status: "loading", startedAt: Date.now(), drafts: [], error: null };
+    this.state = { sessionId: randomUUID(), rawText, status: "loading", startedAt: Date.now(), drafts: [], error: null, context: {}, enrich: {}, mentions: [] };
   }
 
   private set(patch: Partial<ReviewState>): void {
@@ -55,7 +57,7 @@ export class ReviewSession {
     this.abort?.abort();
     const abort = new AbortController();
     this.abort = abort;
-    this.set({ status: "loading", startedAt: Date.now(), error: null, drafts: [] });
+    this.set({ status: "loading", startedAt: Date.now(), error: null, drafts: [], context: {}, enrich: {}, mentions: [] });
     const data = this.getData();
     try {
       const result = await runClaude(splitRequest(this.state.rawText, localDate(), data.shortcuts), SplitResult, {
@@ -72,12 +74,29 @@ export class ReviewSession {
         shortcutId: matchShortcutId(t.shortcut, data.shortcuts),
       }));
       this.set({ status: "ready", drafts });
+      this.enrich(abort);
     } catch (e) {
       if (abort.signal.aborted) return;
       const err = e instanceof ClaudeError ? e : new ClaudeError("failed", String(e));
       // 결과를 읽지 못했으면 원문 첫 줄을 제목으로 한 정리 안 된 할 일 하나를 넣어 둔다.
       if (err.kind === "parseFailed") this.set({ status: "ready", drafts: [fallbackDraft(this.state.rawText)], error: { kind: err.kind, message: err.message } });
       else this.set({ status: "error", error: { kind: err.kind, message: err.message } });
+    }
+  }
+
+  // 켜 둔 MCP 도구마다 한 번씩, 나눈 할 일 전부에 맞는 자료를 찾는다. 결과가 오는 대로 칩을 채운다.
+  private enrich(abort: AbortController): void {
+    const data = this.getData();
+    const on = MCP_SOURCES.filter((s) => data.settings.tools.mcp[s]);
+    const mentions = mentionedServices(this.state.rawText).filter((s) => !on.includes(s));
+    this.set({ enrich: Object.fromEntries(on.map((s) => [s, "loading"])), mentions });
+    for (const source of on) {
+      collectManyMcp(source, this.state.drafts, data, abort.signal).then((r) => {
+        if (abort.signal.aborted) return;
+        const context = { ...this.state.context };
+        for (const [key, note] of Object.entries(r.notes)) context[key] = [...(context[key] ?? []), note];
+        this.set({ context, enrich: { ...this.state.enrich, [source]: r.status } });
+      });
     }
   }
 

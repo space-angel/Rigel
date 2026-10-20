@@ -1,6 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ReviewDraft, ReviewState } from "@shared/review";
-import type { Shortcut } from "@shared/types";
+import type { ContextNote, Shortcut } from "@shared/types";
+import { MCP_SERVICES, type McpSource } from "@shared/mcp";
+import { SourceIcon } from "./components/SourceIcon";
+import { Spinner } from "./components/icons";
 import { localDate } from "@shared/todos";
 import { AiSparkle, ChevronDownIcon, CloseIcon, PlusIcon, RefreshIcon, TerminalIcon, WarningIcon } from "./components/icons";
 
@@ -14,16 +17,51 @@ function dayLabel(date: string | null, today: string): string {
   return `${Number(m)}/${Number(d)}`;
 }
 
+const serviceName = (s: string) => MCP_SERVICES[s as McpSource]?.name.replace(" frame", "") ?? s;
+
+// 확인 창 카드 아래 자료 줄: 찾는 중인 서비스, 찾은 자료 칩(✕로 빼기)
+function DraftNotes({ notes, loading, onRemove }: { notes: ContextNote[]; loading: McpSource[]; onRemove: (n: ContextNote) => void }) {
+  if (!notes.length && !loading.length) return null;
+  return (
+    <div className="draft__notes">
+      {notes.map((n) => (
+        <span className="note-chip" key={n.source}>
+          <SourceIcon source={n.source} size={11} />
+          <button
+            type="button"
+            className="note-chip__label"
+            title={n.text || n.label}
+            disabled={!n.url}
+            onClick={() => n.url && api.openToolItem({ kind: "url", source: n.source as McpSource, url: n.url })}
+          >
+            {serviceName(n.source)} · {n.label}
+          </button>
+          <button type="button" className="note-chip__remove" aria-label={`Remove ${serviceName(n.source)} note`} onClick={() => onRemove(n)}>
+            <CloseIcon size={10} />
+          </button>
+        </span>
+      ))}
+      {loading.length > 0 && (
+        <span className="note-loading">
+          <Spinner size={10} /> Looking in {loading.map(serviceName).join(", ")}…
+        </span>
+      )}
+    </div>
+  );
+}
+
 function DraftRow({
   draft,
   shortcuts,
   onChange,
   onRemove,
+  children,
 }: {
   draft: ReviewDraft;
   shortcuts: Shortcut[];
   onChange: (patch: Partial<ReviewDraft>) => void;
   onRemove: () => void;
+  children?: React.ReactNode;
 }) {
   const today = localDate();
   const [originalDate] = useState(draft.plannedDate);
@@ -73,6 +111,7 @@ function DraftRow({
           {draft.isClear ? "Clear" : "Unclear"}
         </button>
       </div>
+      {children}
     </div>
   );
 }
@@ -94,6 +133,8 @@ export function Review() {
   const [drafts, setDrafts] = useState<ReviewDraft[]>([]);
   const [shortcuts, setShortcuts] = useState<Shortcut[]>([]);
   const [rawOpen, setRawOpen] = useState(false);
+  // 확인 창에서 뺀 자료 칩 ("draft key:서비스")
+  const [removedNotes, setRemovedNotes] = useState<Set<string>>(new Set());
   const [slow, setSlow] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -109,10 +150,12 @@ export function Review() {
   }, []);
 
   // 새 결과가 오면 고칠 수 있는 사본을 만든다.
+  // 결과가 새로 오면 고칠 수 있는 사본을 만든다. 자료 칩이 채워질 때는 사본을 다시 만들지 않는다(고친 내용이 사라지지 않게).
   useEffect(() => {
     setDrafts(state?.drafts ?? []);
     setRawOpen(false);
-  }, [state?.sessionId, state?.status, state?.drafts]);
+    setRemovedNotes(new Set());
+  }, [state?.sessionId, state?.status]);
 
   useEffect(() => {
     setSlow(false);
@@ -141,7 +184,9 @@ export function Review() {
   if (!state) return <div ref={rootRef} className="review" />;
 
   const valid = drafts.filter((d) => d.title.trim());
-  const commit = () => valid.length && api.commitReview(valid);
+  const notesFor = (key: string) => (state.context?.[key] ?? []).filter((n) => !removedNotes.has(`${key}:${n.source}`));
+  const loadingSources = (Object.entries(state.enrich ?? {}) as [McpSource, string][]).filter(([, st]) => st === "loading").map(([s]) => s);
+  const commit = () => valid.length && api.commitReview(valid.map((d) => ({ ...d, context: notesFor(d.key) })));
   const update = (key: string, patch: Partial<ReviewDraft>) => setDrafts((ds) => ds.map((d) => (d.key === key ? { ...d, ...patch } : d)));
   const addDraft = () =>
     setDrafts((ds) => [...ds, { key: crypto.randomUUID(), title: "", plannedDate: localDate(), isClear: false, shortcutId: null }]);
@@ -210,6 +255,15 @@ export function Review() {
                 <AiSparkle size={14} /> {drafts.length} {drafts.length === 1 ? "task" : "tasks"} from your thought
               </h2>
             )}
+            {(state.mentions ?? []).length > 0 && (
+              <p className="review__mention">
+                Your thought mentions {state.mentions.map(serviceName).join(" and ")}. Turn {state.mentions.length === 1 ? "it" : "them"} on in{" "}
+                <button type="button" className="link" onClick={() => api.openSettings("tools")}>
+                  Settings → Tools
+                </button>{" "}
+                to look things up there.
+              </p>
+            )}
             <div className="drafts">
               {drafts.map((d) => (
                 <DraftRow
@@ -218,7 +272,13 @@ export function Review() {
                   shortcuts={shortcuts}
                   onChange={(p) => update(d.key, p)}
                   onRemove={() => setDrafts((ds) => ds.filter((x) => x.key !== d.key))}
-                />
+                >
+                  <DraftNotes
+                    notes={notesFor(d.key)}
+                    loading={loadingSources}
+                    onRemove={(n) => setRemovedNotes((r) => new Set(r).add(`${d.key}:${n.source}`))}
+                  />
+                </DraftRow>
               ))}
             </div>
           </>

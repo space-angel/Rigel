@@ -1,8 +1,9 @@
 import { spawn } from "node:child_process";
 import { ClaudeError } from "@shared/claude";
-import { CollectResult, MCP_SERVICES, WhoamiResult, allowedTools, collectRequest, figmaTarget, parseMcpList, safeServiceUrl, searched, toolPrefix, whoamiRequest, type McpSource, type McpStatus } from "@shared/mcp";
+import { CollectManyResult, CollectResult, MCP_SERVICES, collectManyRequest, type CollectTask, type EnrichStatus, WhoamiResult, allowedTools, collectRequest, figmaTarget, parseMcpList, safeServiceUrl, searched, toolPrefix, whoamiRequest, type McpSource, type McpStatus } from "@shared/mcp";
 import type { ToolResult } from "@shared/shape";
-import type { AppData, TodoItem } from "@shared/types";
+import type { AppData, ContextNote, TodoItem } from "@shared/types";
+import { splitWords } from "@shared/shape";
 import { localDate } from "@shared/todos";
 import { matchShortcutByKeywords } from "@shared/quickInput";
 import { EXTRA_PATHS, ensureWorkDir, findClaude } from "../claude/setup";
@@ -45,14 +46,14 @@ function frameTarget(todo: TodoItem, words: string[], data: AppData) {
 type Line = Record<string, any>;
 
 // claude를 한 번 실행해 stream-json 줄을 모두 받는다.
-function runOnce(path: string, args: string[], body: string, signal?: AbortSignal): Promise<Line[] | ClaudeError> {
+function runOnce(path: string, args: string[], body: string, signal?: AbortSignal, timeoutMs = COLLECT_TIMEOUT_MS): Promise<Line[] | ClaudeError> {
   return new Promise<Line[]>((resolve, reject) => {
     const child = spawn(path, args, { cwd: ensureWorkDir(), env: env() });
     let out = "";
     const timer = setTimeout(() => {
       child.kill("SIGTERM");
       reject(new ClaudeError("timeout", "collect 시간 초과"));
-    }, COLLECT_TIMEOUT_MS);
+    }, timeoutMs);
     const onAbort = () => {
       child.kill("SIGTERM");
       reject(new ClaudeError("failed", "취소했어요"));
@@ -133,6 +134,54 @@ export async function collectMcp(source: McpSource, todo: TodoItem, words: strin
       ...(info?.workspace && { workspace: info.workspace }),
     },
   };
+}
+
+// 확인 창: 나눈 할 일들에 맞는 자료를 서비스마다 한 번에 찾는다. 할 일 하나에 자료는 최대 하나.
+
+export async function collectManyMcp(
+  source: McpSource,
+  drafts: { key: string; title: string; shortcutId: string | null }[],
+  data: AppData,
+  signal: AbortSignal,
+): Promise<{ status: EnrichStatus; notes: Record<string, ContextNote> }> {
+  const none = (status: EnrichStatus) => ({ status, notes: {} });
+  const tasks: CollectTask[] = drafts.slice(0, 6).flatMap((d) => {
+    const words = splitWords(d.title, d.title).filter((w) => w.on).map((w) => w.word);
+    if (source !== "frame") return [{ key: d.key, title: d.title, words }];
+    // 피그마 프레임은 바로가기가 맞는 할 일만 읽는다.
+    const id = d.shortcutId ?? matchShortcutByKeywords(d.title, data.shortcuts);
+    const target = figmaTarget(data.shortcuts.find((s) => s.id === id)?.url ?? "");
+    return target ? [{ key: d.key, title: d.title, words, target }] : [];
+  });
+  if (!tasks.length) return none("empty");
+  const { path } = await findClaude(data.settings.claudePath);
+  if (!path) return none("failed");
+
+  let lines: Line[] | ClaudeError = [];
+  for (let attempt = 0; attempt < 2; attempt++) {
+    lines = await runOnce(path, collectArgs(source, data.settings.model, "collect"), collectManyRequest(source, tasks, localDate()), signal, 60_000);
+    if (lines instanceof ClaudeError) return none(lines.kind === "timeout" ? "slow" : "failed");
+    if (needsAuth(lines, source)) return none("needs-auth");
+    if (searched(source, calledTools(lines))) break;
+    if (attempt === 1) return none("failed");
+  }
+  const parsed = CollectManyResult.safeParse(resultJson(lines as Line[]));
+  if (!parsed.success) return none("failed");
+  const keys = new Set(tasks.map((t) => t.key));
+  const workspace = data.settings.tools.mcpInfo[source]?.workspace ?? null;
+  const notes: Record<string, ContextNote> = {};
+  for (const item of parsed.data.items) {
+    if (!keys.has(item.key) || notes[item.key]) continue;
+    notes[item.key] = {
+      source,
+      label: item.label.slice(0, 80),
+      text: item.text.slice(0, 400),
+      date: item.date && /^\d{4}-\d{2}-\d{2}$/.test(item.date) ? item.date : null,
+      url: safeServiceUrl(source, item.url),
+      workspace,
+    };
+  }
+  return { status: Object.keys(notes).length ? "done" : "empty", notes };
 }
 
 // 연결 상태 확인. 1) claude를 띄워 시작 메시지(init)의 서버 상태만 읽고 바로 끈다 — 모델을 부르지 않고 3초쯤 걸린다.

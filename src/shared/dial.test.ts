@@ -14,6 +14,7 @@ const t = (id: string, plannedDate: string | null, isClear = true, completedAt: 
   rawText: id,
   isClear,
   shortcutId: null,
+  context: [],
 });
 
 test("다이얼 묶음: 끝냄·지남·오늘·내일·나중", () => {

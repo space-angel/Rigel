@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { allowedTools, figmaTarget, parseMcpList, safeServiceUrl, searched, statusOf } from "./mcp.ts";
+import { allowedTools, collectManyRequest, figmaTarget, mentionedServices, parseMcpList, safeServiceUrl, searched, statusOf } from "./mcp.ts";
 
 test("claude mcp list 출력에서 서버 상태를 읽는다", () => {
   const out = [
@@ -47,4 +47,16 @@ test("검색 도구를 불렀는지 본다 (ToolSearch나 fetch만으로는 아�
   assert.equal(searched("notion", ["ToolSearch", "mcp__claude_ai_Notion__notion-fetch"]), false);
   assert.equal(searched("linear", []), false);
   assert.equal(searched("frame", ["mcp__claude_ai_Figma__get_design_context"]), true);
+});
+
+test("생각에 나온 서비스 이름을 찾는다", () => {
+  assert.deepEqual(mentionedServices("노션에 정리한 면접 질문 보고 답변 쓰기"), ["notion"]);
+  assert.deepEqual(mentionedServices("Linear 이슈 정리하고 피그마 장표 고치기"), ["linear", "frame"]);
+  assert.deepEqual(mentionedServices("운동 가기"), []);
+});
+
+test("여러 할 일을 한 번에 찾는 요청", () => {
+  const body = JSON.parse(collectManyRequest("notion", [{ key: "a", title: "면접 준비하기", words: ["면접"] }], "2026-10-20"));
+  assert.equal(body.type, "collectMany");
+  assert.deepEqual(body.tasks, [{ key: "a", title: "면접 준비하기", words: ["면접"] }]);
 });

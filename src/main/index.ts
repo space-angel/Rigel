@@ -628,7 +628,13 @@ function showWelcome(): void {
             } else if (kind === "shape") {
               // "shape:*"는 오늘 목록의 첫 정리 안 된 할 일
               const today = localDate();
-              const t = arg === "*" ? todayView(data.todos, today).open.find((x) => !x.isClear) : data.todos.find((x) => x.title === arg);
+              // "shape:@context"는 자료가 붙은 첫 할 일
+              const t =
+                arg === "*"
+                  ? todayView(data.todos, today).open.find((x) => !x.isClear)
+                  : arg === "@context"
+                    ? data.todos.find((x) => x.context.length > 0)
+                    : data.todos.find((x) => x.title === arg);
               if (!t) throw new Error(`할 일 없음: ${arg}`);
               listWindow?.webContents.send("shape:open", t.id, false);
             } else throw new Error(`모르는 동작: ${action}`);
