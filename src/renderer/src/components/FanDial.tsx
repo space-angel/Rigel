@@ -29,7 +29,8 @@ export function FanDial<K extends string | number>({
 }: {
   items: DialItem<K>[];
   value: K;
-  onChange: (key: K) => void;
+  // how: "step" = 한 칸씩 넘기는 입력(키보드·트랙패드, 연달아 올 수 있음), "jump" = 바로 고름(라벨 클릭·끌었다 놓기)
+  onChange: (key: K, how: "step" | "jump") => void;
   label: string;
   variant?: "box" | "bare";
 }) {
@@ -44,7 +45,7 @@ export function FanDial<K extends string | number>({
   const rotation = (mid - live) * STEP;
   const span = STEP * mid;
   const ticks = Array.from({ length: Math.round((span * 2 + 40) / TICK) + 1 }, (_, i) => -span - 20 + i * TICK);
-  const step = (d: number) => onChange(items[Math.min(items.length - 1, Math.max(0, index + d))]!.key);
+  const step = (d: number) => onChange(items[Math.min(items.length - 1, Math.max(0, index + d))]!.key, "step");
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === "ArrowLeft") step(-1);
     else if (e.key === "ArrowRight") step(1);
@@ -55,7 +56,7 @@ export function FanDial<K extends string | number>({
 
   const settle = (offset: number) => {
     const next = Math.min(items.length - 1, Math.max(0, index + Math.round(offset)));
-    if (next !== index) onChange(items[next]!.key);
+    if (next !== index) onChange(items[next]!.key, "jump");
   };
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     dragStart.current = { x: e.clientX, moved: false };
@@ -126,14 +127,15 @@ export function FanDial<K extends string | number>({
                 y={p.y}
                 className={`dial__label${near ? " is-active" : ""}${item.muted ? " is-muted" : ""}`}
                 transform={`rotate(${deg} ${p.x} ${p.y})`}
-                onClick={() => !justDragged.current && onChange(item.key)}
+                onClick={() => !justDragged.current && onChange(item.key, "jump")}
               >
                 {item.label}
               </text>
             );
           })}
         </g>
-        <path className="dial__needle" d={`M${CX - 4.5} ${CY - R + 13} L${CX + 4.5} ${CY - R + 13} L${CX} ${CY - R + 21} Z`} />
+        {/* 바늘은 눈금 아래에서 위(고른 칸)를 가리킨다 */}
+        <path className="dial__needle" d={`M${CX - 4.5} ${CY - R + 21} L${CX + 4.5} ${CY - R + 21} L${CX} ${CY - R + 13} Z`} />
       </svg>
     </div>
   );

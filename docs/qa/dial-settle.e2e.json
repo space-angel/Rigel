@@ -1,0 +1,10 @@
+[
+  { "name": "목록", "win": "list", "main": "openList", "wait": 900 },
+  { "name": "→ 세 번 연달아(40ms 간격): 다이얼은 바로, 목록·높이는 마지막 칸에서 한 번",
+    "win": "list",
+    "run": "const inner = __e2e.$('.shell__inner'); const shell = __e2e.$('.shell'); const heights = []; const labels = []; const ro = new ResizeObserver(() => heights.push(Math.round(inner.getBoundingClientRect().height))); ro.observe(inner); const moSec = new MutationObserver(() => { const l = __e2e.$('.section__label')?.textContent ?? 'today'; if (labels.at(-1) !== l) labels.push(l); }); moSec.observe(__e2e.$('.scroll'), { childList: true, subtree: true }); const aims = []; for (let i = 0; i < 3; i++) { __e2e.key('.window', 'ArrowRight'); await new Promise(r => setTimeout(r, 40)); aims.push(__e2e.$('.dial__label.is-active').textContent); } await new Promise(r => setTimeout(r, 600)); ro.disconnect(); moSec.disconnect(); return { aimsWhilePressing: aims, listShown: labels, heightChanges: heights.length - 1, finalLabel: __e2e.$('.section__label')?.textContent };" },
+  { "name": "← 한 번: 120ms 뒤 한 번 바뀜", "win": "list",
+    "run": "const t0 = performance.now(); __e2e.key('.window', 'ArrowLeft'); const before = __e2e.$('.section__label')?.textContent; let at = null; for (let i = 0; i < 40; i++) { await new Promise(r => setTimeout(r, 10)); if (__e2e.$('.section__label')?.textContent !== before) { at = Math.round(performance.now() - t0); break; } } return { changedAfterMs: at, now: __e2e.$('.section__label')?.textContent ?? 'today', dial: __e2e.$('.dial__label.is-active').textContent };" },
+  { "name": "라벨 클릭은 바로", "win": "list",
+    "run": "const t0 = performance.now(); __e2e.all('.dial__label').find(l => l.textContent === 'Today').dispatchEvent(new MouseEvent('click', { bubbles: true })); await new Promise(r => setTimeout(r, 0)); await new Promise(r => requestAnimationFrame(r)); return { ms: Math.round(performance.now() - t0), today: !__e2e.$('.section--view') };" }
+]

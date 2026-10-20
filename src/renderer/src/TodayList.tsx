@@ -309,7 +309,20 @@ export function TodayList() {
   const [data, setData] = useState<AppData | null>(null);
   const [draft, setDraft] = useState("");
   // 머리 다이얼로 고른 묶음. 목록을 열 때마다 Today로 돌아온다.
-  const [dial, setDial] = useState<DialView>("today");
+  // dial: 목록에 보이는 묶음. aim: 다이얼이 가리키는 칸(손을 바로 따라감).
+  // 한 칸씩 연달아 넘기면 aim만 따라가고, 멈춘 칸에서 한 번만 dial을 바꾼다(목록 교체·카드 높이가 한 번만 움직이게).
+  const [dial, setDialState] = useState<DialView>("today");
+  const [aim, setAim] = useState<DialView>("today");
+  const dialRef = useRef<DialView>("today");
+  const aimRef = useRef<DialView>("today");
+  const commitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 묶음을 바로 바꾼다(열 때, 새 할 일 보여 줄 때). 다이얼도 같이.
+  const setDial = (v: DialView) => {
+    if (commitTimer.current) clearTimeout(commitTimer.current);
+    dialRef.current = aimRef.current = v;
+    setDialState(v);
+    setAim(v);
+  };
   const [dialDir, setDialDir] = useState<"next" | "prev" | null>(null);
   const [selected, setSelected] = useState(0);
   const [firstSteps, setFirstSteps] = useState<FirstStepState[]>([]);
@@ -484,11 +497,21 @@ export function TodayList() {
   const [now, ...rest] = open;
   // 키보드로 고르는 줄: Today는 오늘 목록, 다른 묶음은 그 묶음의 할 일
   const rows = dial === "today" ? open : buckets[dial];
-  const turnDial = (v: DialView) => {
+  const commitDial = (v: DialView) => {
+    if (v === dialRef.current) return;
     // 다이얼이 도는 쪽에서 목록이 들어온다(오른쪽 묶음으로 가면 오른쪽에서).
-    setDialDir(DIAL_VIEWS.indexOf(v) > DIAL_VIEWS.indexOf(dial) ? "next" : "prev");
-    setDial(v);
+    setDialDir(DIAL_VIEWS.indexOf(v) > DIAL_VIEWS.indexOf(dialRef.current) ? "next" : "prev");
+    dialRef.current = v;
+    setDialState(v);
     setSelected(0);
+  };
+  const STEP_SETTLE_MS = 120;
+  const turnDial = (v: DialView, how: "step" | "jump" = "jump") => {
+    aimRef.current = v;
+    setAim(v);
+    if (commitTimer.current) clearTimeout(commitTimer.current);
+    if (how === "jump") commitDial(v);
+    else commitTimer.current = setTimeout(() => commitDial(v), STEP_SETTLE_MS);
   };
 
   const act = (a: Parameters<typeof api.act>[0]) => api.act(a).then(setData);
@@ -540,11 +563,11 @@ export function TodayList() {
       return;
     }
     const current = rows[selected];
-    const di = DIAL_VIEWS.indexOf(dial);
+    const di = DIAL_VIEWS.indexOf(aimRef.current);
     if (e.key === "ArrowDown") setSelected((s) => Math.min(s + 1, rows.length - 1));
     else if (e.key === "ArrowUp") setSelected((s) => Math.max(s - 1, 0));
-    else if (e.key === "ArrowLeft" && di > 0) turnDial(DIAL_VIEWS[di - 1]!);
-    else if (e.key === "ArrowRight" && di < DIAL_VIEWS.length - 1) turnDial(DIAL_VIEWS[di + 1]!);
+    else if (e.key === "ArrowLeft" && di > 0) turnDial(DIAL_VIEWS[di - 1]!, "step");
+    else if (e.key === "ArrowRight" && di < DIAL_VIEWS.length - 1) turnDial(DIAL_VIEWS[di + 1]!, "step");
     else if (e.key === " " && current) complete(current);
     else if (e.key === "Enter" && current && !current.isClear && !current.completedAt) (dial === "today" ? askFirstStep(current) : shape(current));
     else if (e.key === "Enter" && current && shortcutOf(current)) api.openShortcut(current.shortcutId!);
@@ -626,7 +649,7 @@ export function TodayList() {
             variant="bare"
             label="Which tasks to show"
             items={DIAL_VIEWS.map((v) => ({ key: v, label: DIAL_LABEL[v], muted: v !== "today" && buckets[v].length === 0 }))}
-            value={dial}
+            value={aim}
             onChange={turnDial}
           />
           <RatioBar view={dial} parts={dialRatio(dial, buckets)} />

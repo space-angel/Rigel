@@ -1,13 +1,50 @@
 [
-  { "name": "목록", "win": "list", "main": "openList", "wait": 700 },
-  { "name": "체크 · 시작 직후(80ms) 움직임", "win": "list",
-    "run": "__e2e.key('.window', 'ArrowDown'); await new Promise(r => setTimeout(r, 300)); __e2e.key('.window', ' '); await new Promise(r => setTimeout(r, 40)); const a = document.getAnimations(); a.forEach(x => { x.pause(); x.currentTime = 150; }); return [...new Set(a.map(x => (x.animationName ?? x.transitionProperty) + ' ' + x.effect.getTiming().delay + '+' + x.effect.getTiming().duration))];", "snap": true },
-  { "name": "체크 · 300ms (빛·밀려 나감)", "win": "list", "run": "document.getAnimations().forEach(x => { x.currentTime = 330; }); return true;", "snap": true },
-  { "name": "체크 끝 → 아래 줄이 올라옴(FLIP)", "win": "list",
-    "run": "document.getAnimations().forEach(x => x.play()); await new Promise(r => setTimeout(r, 450)); const a = document.getAnimations().filter(x => !x.animationName && !x.transitionProperty); return { flip: a.length, shellHeightTransition: document.getAnimations().some(x => x.transitionProperty === 'height') };" },
-  { "name": "다이얼 → Later: 목록이 오른쪽에서 + 카드 높이", "win": "list",
-    "run": "await new Promise(r => setTimeout(r, 400)); const before = __e2e.$('.shell').getBoundingClientRect().height; __e2e.key('.window', 'ArrowRight'); __e2e.key('.window', 'ArrowRight'); await new Promise(r => setTimeout(r, 60)); const a = document.getAnimations(); const names = [...new Set(a.map(x => x.animationName ?? x.transitionProperty))]; a.forEach(x => { x.pause(); x.currentTime = 120; }); return { before, mid: __e2e.$('.shell').getBoundingClientRect().height, styleHeight: __e2e.$('.shell').style.height, names };", "snap": true },
-  { "name": "다이얼 → 끝", "win": "list", "run": "document.getAnimations().forEach(x => x.play()); await new Promise(r => setTimeout(r, 400)); return { after: __e2e.$('.shell').getBoundingClientRect().height, styleHeight: __e2e.$('.shell').style.height || 'auto' };", "snap": true },
-  { "name": "다이얼 ← Today: 왼쪽에서", "win": "list", "run": "__e2e.key('.window', 'ArrowLeft'); __e2e.key('.window', 'ArrowLeft'); await new Promise(r => setTimeout(r, 40)); return [...new Set(document.getAnimations().map(x => x.animationName ?? x.transitionProperty))];" },
-  { "name": "빚기 화면 · 도구 카드 차례로", "win": "list", "main": "shape:*", "run": "await new Promise(r => setTimeout(r, 1200)); return true;", "until": "!__e2e.text().includes('Reading your tools')", "timeout": 20000 }
+  {
+    "name": "목록",
+    "win": "list",
+    "main": "openList",
+    "wait": 700
+  },
+  {
+    "name": "체크 · 시작 직후(80ms) 움직임",
+    "win": "list",
+    "run": "__e2e.key('.window', 'ArrowDown'); await new Promise(r => setTimeout(r, 300)); __e2e.key('.window', ' '); await new Promise(r => setTimeout(r, 40)); const a = document.getAnimations(); a.forEach(x => { x.pause(); x.currentTime = 150; }); return [...new Set(a.map(x => (x.animationName ?? x.transitionProperty) + ' ' + x.effect.getTiming().delay + '+' + x.effect.getTiming().duration))];",
+    "snap": true
+  },
+  {
+    "name": "체크 · 300ms (빛·밀려 나감)",
+    "win": "list",
+    "run": "document.getAnimations().forEach(x => { x.currentTime = 330; }); return true;",
+    "snap": true
+  },
+  {
+    "name": "체크 끝 → 아래 줄이 올라옴(FLIP)",
+    "win": "list",
+    "run": "document.getAnimations().forEach(x => x.play()); await new Promise(r => setTimeout(r, 450)); const a = document.getAnimations().filter(x => !x.animationName && !x.transitionProperty); return { flip: a.length, shellHeightTransition: document.getAnimations().some(x => x.transitionProperty === 'height') };"
+  },
+  {
+    "name": "다이얼 → Later: 목록이 오른쪽에서 + 카드 높이",
+    "win": "list",
+    "run": "await new Promise(r => setTimeout(r, 400)); const before = __e2e.$('.shell').getBoundingClientRect().height; __e2e.key('.window', 'ArrowRight'); __e2e.key('.window', 'ArrowRight'); await new Promise(r => setTimeout(r, 180)); const a = document.getAnimations(); const names = [...new Set(a.map(x => x.animationName ?? x.transitionProperty))]; a.forEach(x => { x.pause(); x.currentTime = 120; }); return { before, mid: __e2e.$('.shell').getBoundingClientRect().height, styleHeight: __e2e.$('.shell').style.height, names };",
+    "snap": true
+  },
+  {
+    "name": "다이얼 → 끝",
+    "win": "list",
+    "run": "document.getAnimations().forEach(x => x.play()); await new Promise(r => setTimeout(r, 400)); return { after: __e2e.$('.shell').getBoundingClientRect().height, styleHeight: __e2e.$('.shell').style.height || 'auto' };",
+    "snap": true
+  },
+  {
+    "name": "다이얼 ← Today: 왼쪽에서",
+    "win": "list",
+    "run": "__e2e.key('.window', 'ArrowLeft'); __e2e.key('.window', 'ArrowLeft'); await new Promise(r => setTimeout(r, 160)); return [...new Set(document.getAnimations().map(x => x.animationName ?? x.transitionProperty))];"
+  },
+  {
+    "name": "빚기 화면 · 도구 카드 차례로",
+    "win": "list",
+    "main": "shape:*",
+    "run": "await new Promise(r => setTimeout(r, 1200)); return true;",
+    "until": "!__e2e.text().includes('Reading your tools')",
+    "timeout": 20000
+  }
 ]
