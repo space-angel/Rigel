@@ -76,6 +76,11 @@ function GeneralTab({ data }: { data: AppData }) {
   const [info, setInfo] = useState<{ path: string | null; searched: string[]; version: string | null } | null>(null);
   const [path, setPath] = useState(data.settings.claudePath ?? "");
   const refresh = () => api.claudeInfo().then(setInfo);
+  // 규칙 파일을 고쳤는데 앱 기능 규칙이 빠졌으면 알린다. 되돌릴 때 고친 내용은 옆 파일로 남는다.
+  const [rules, setRules] = useState<{ customized: boolean; missing: string[] } | null>(null);
+  useEffect(() => {
+    api.rulesStatus().then(setRules);
+  }, []);
   useEffect(() => {
     refresh();
   }, [data.settings.claudePath]);
@@ -148,8 +153,19 @@ function GeneralTab({ data }: { data: AppData }) {
         <div className="setting">
           <div className="setting__text">
             <p>Rules</p>
-            <p className="setting__desc">CLAUDE.md — how tasks are split and shaped</p>
+            {rules && rules.missing.length > 0 ? (
+              <p className="setting__desc is-error">
+                Your edited CLAUDE.md is missing rules for {rules.missing.join(", ")}. Reading tools and shaping won't work until you reset it.
+              </p>
+            ) : (
+              <p className="setting__desc">CLAUDE.md — how tasks are split and shaped{rules?.customized ? " · edited by you" : ""}</p>
+            )}
           </div>
+          {rules && rules.missing.length > 0 && (
+            <button type="button" className="button button--primary button--sm" onClick={() => api.resetRules().then(setRules)}>
+              Reset to default
+            </button>
+          )}
           <button type="button" className="button button--secondary button--sm" onClick={() => api.openRules()}>
             Open
           </button>
@@ -270,6 +286,11 @@ function ToolsTab({ data }: { data: AppData }) {
 
   const save = (patch: Partial<typeof tools>) => api.act({ type: "setSettings", patch: { tools: { ...tools, ...patch } } });
   const on = [...LOCAL_SOURCES.filter((s) => tools.local[s]), ...MCP_SOURCES.filter((s) => tools.mcp[s])];
+  const [rules, setRules] = useState<{ customized: boolean; missing: string[] } | null>(null);
+  useEffect(() => {
+    api.rulesStatus().then(setRules);
+  }, []);
+  const rulesBroken = Boolean(rules && rules.missing.some((t) => t === "collect" || t === "whoami" || t === "collectMany"));
 
   // 어느 워크스페이스·계정에 연결됐는지 확인한다(메인이 저장). 켤 때 안 되면 다시 끄고 이유를 보여 준다.
   const inflight = useRef(new Set<McpSource>());
@@ -337,6 +358,17 @@ function ToolsTab({ data }: { data: AppData }) {
             {status === null ? "Checking…" : "Check again"}
           </button>
         </div>
+        {rulesBroken && (
+          <div className="guide">
+            <div className="guide__head">
+              <p className="guide__title">Your edited CLAUDE.md can't read these yet</p>
+              <button type="button" className="button button--primary button--sm" onClick={() => api.resetRules().then((r) => (setRules(r), check(true)))}>
+                Reset rules
+              </button>
+            </div>
+            <p className="setting__desc">It's missing rules for {rules!.missing.join(", ")}. Your edits are kept in a separate file next to it.</p>
+          </div>
+        )}
         <p className="group__desc">
           Claude Code reads these with your Claude sign-in, one workspace per service. Each read takes about 10 seconds and uses your Claude plan. Notion
           search matches keywords, not meaning, unless your Notion plan includes AI search.

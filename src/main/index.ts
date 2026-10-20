@@ -16,7 +16,7 @@ import { safeServiceUrl, type McpSource } from "@shared/mcp";
 import type { ShapeInput, ToolItem } from "@shared/shape";
 import { openShortcut } from "./shortcutOpener";
 import { runE2E } from "./e2e";
-import { claudeVersion, ensureWorkDir, findClaude } from "./claude/setup";
+import { claudeVersion, ensureWorkDir, findClaude, resetRules, rulesStatus } from "./claude/setup";
 
 app.setName("todoBAN");
 // 개발 중 확인용: 실제 데이터 대신 다른 폴더를 쓰고, 실행하자마자 목록이나 빠른 입력창을 띄운다.
@@ -521,6 +521,11 @@ function showWelcome(): void {
   ipcMain.handle("settings:claudeInfo", async () => {
     const found = await findClaude(data.settings.claudePath);
     return { ...found, version: found.path ? await claudeVersion(found.path) : null };
+  });
+  ipcMain.handle("settings:rulesStatus", () => rulesStatus());
+  ipcMain.handle("settings:resetRules", () => {
+    resetRules();
+    return rulesStatus();
   });
   ipcMain.on("settings:openRules", () => openOutside("CLAUDE.md", () => shell.openPath(join(ensureWorkDir(), "CLAUDE.md"))));
   // 단축키를 녹화하는 동안에는 지금 단축키가 눌려도 입력창이 뜨지 않게 잠시 풀어 둔다.
