@@ -15,6 +15,7 @@ import { Presence } from "./components/Presence";
 import { useFlip } from "./components/useFlip";
 import { dueBadge, dueLabel } from "@shared/due";
 import { currentLang, loc, t } from "./i18n";
+import { msg } from "@shared/i18n";
 
 // 마감 배지. 줄에서는 짧게(D-3), 지금 할 일 카드에서는 말로(3 days left).
 function Due({ item, long }: { item: TodoItem; long?: boolean }) {
@@ -283,6 +284,26 @@ function Row({
           <MoreButton onMenu={edit.onMenu} />
         </>
       )}
+    </div>
+  );
+}
+
+// 묶음이 비었을 때 보여 줄 말. 모든 묶음이 같은 빈 화면 모양을 써서 다이얼을 돌려도 창 높이가 그대로다.
+const EMPTY_TEXT: Record<Exclude<DialView, "today">, { title: string; sub: string }> = {
+  done: { title: msg("Nothing done yet today"), sub: msg("Tasks you check off show up here.") },
+  overdue: { title: msg("Nothing overdue"), sub: msg("You're on schedule.") },
+  tomorrow: { title: msg("Nothing for tomorrow yet"), sub: msg("Write “tomorrow …” to plan it here.") },
+  later: { title: msg("Nothing set aside"), sub: msg("Tasks you move to later wait here.") },
+};
+
+function EmptyState({ title, sub }: { title: string; sub: string }) {
+  return (
+    <div className="empty motion-rise">
+      <span className="empty__mark">
+        <CheckIcon size={18} />
+      </span>
+      <p className="empty__title">{title}</p>
+      <p className="empty__sub">{sub}</p>
     </div>
   );
 }
@@ -657,12 +678,15 @@ export function TodayList() {
         </div>
 
         <div className="scroll" ref={scrollRef}>
-          {dial !== "today" ? (
+          {dial !== "today" && buckets[dial].length === 0 ? (
+            <div className={dialDir ? `swap--${dialDir}` : undefined} key={dial}>
+              <EmptyState title={t(EMPTY_TEXT[dial].title)} sub={t(EMPTY_TEXT[dial].sub)} />
+            </div>
+          ) : dial !== "today" ? (
             <section className={`section section--view${dialDir ? ` swap--${dialDir}` : ""}`} key={dial}>
               <h2 className="section__label">
                 {t(DIAL_LABEL[dial])} · {buckets[dial].length}
               </h2>
-              {buckets[dial].length === 0 && <p className="section__empty">{t("Nothing here.")}</p>}
               {buckets[dial].map((item, i) => (
                 <Row
                   key={item.id}
@@ -723,13 +747,10 @@ export function TodayList() {
           )}
 
           {open.length === 0 && carry.length === 0 && (
-            <div className="empty motion-rise">
-              <span className="empty__mark">
-                <CheckIcon size={18} />
-              </span>
-              <p className="empty__title">{done.length ? t("All clear for today") : t("Nothing for today yet")}</p>
-              <p className="empty__sub">{done.length ? t("{n} done. Capture the next thought below.", { n: done.length }) : t("Write what's on your mind below.")}</p>
-            </div>
+            <EmptyState
+              title={done.length ? t("All clear for today") : t("Nothing for today yet")}
+              sub={done.length ? t("{n} done. Capture the next thought below.", { n: done.length }) : t("Write what's on your mind below.")}
+            />
           )}
 
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={() => (dragging.current = true)} onDragEnd={onDragEnd} onDragCancel={() => (dragging.current = false)}>
