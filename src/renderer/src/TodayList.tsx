@@ -9,6 +9,9 @@ import type { FirstStepState } from "@shared/firstStep";
 import { AiSparkle, ArrowRightIcon, CalendarIcon, CheckIcon, ChevronRightIcon, FigmaMark, PlayIcon, PlusIcon, SettingsIcon } from "./components/icons";
 import { FirstStepCard } from "./FirstStepCard";
 import { ShapePanel } from "./Shape";
+import { FanDial } from "./components/FanDial";
+import { RatioBar } from "./components/RatioBar";
+import { DIAL_LABEL, DIAL_VIEWS, dialBuckets, dialRatio, type DialView } from "@shared/dial";
 
 const api = window.todoban;
 
@@ -147,6 +150,10 @@ function Row({
   );
 }
 
+function shortDate(date: string): string {
+  return new Date(`${date}T00:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase();
+}
+
 function SortableItem({ id, children }: { id: string; children: React.ReactNode }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   return (
@@ -166,7 +173,8 @@ function SortableItem({ id, children }: { id: string; children: React.ReactNode 
 export function TodayList() {
   const [data, setData] = useState<AppData | null>(null);
   const [draft, setDraft] = useState("");
-  const [laterOpen, setLaterOpen] = useState(false);
+  // 머리 다이얼로 고른 묶음. 목록을 열 때마다 Today로 돌아온다.
+  const [dial, setDial] = useState<DialView>("today");
   const [selected, setSelected] = useState(0);
   const [firstSteps, setFirstSteps] = useState<FirstStepState[]>([]);
   // 빚기(C1, C2)를 열어 둔 할 일. auto면 바로 Shape it을 누른다(화면 확인용).
@@ -182,6 +190,7 @@ export function TodayList() {
     const offFirst = api.onFirstSteps(setFirstSteps);
     const offOpen = api.onListOpened(() => {
       setSelected(0);
+      setDial("today");
       rootRef.current?.focus();
     });
     const offShape = api.onShapeOpen((id, auto) => setShaping({ id, auto }));
@@ -205,11 +214,18 @@ export function TodayList() {
 
   const carry = useMemo(() => (data ? pendingCarryOver(data, localDate()) : []), [data]);
   const view = useMemo(() => (data ? todayView(data.todos, localDate(), carry) : null), [data, carry]);
+  const buckets = useMemo(() => (data ? dialBuckets(data.todos, localDate(), carry) : null), [data, carry]);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
-  if (!data || !view) return null;
+  if (!data || !view || !buckets) return null;
   const { open, done, later, unclearCount } = view;
   const [now, ...rest] = open;
+  // 키보드로 고르는 줄: Today는 오늘 목록, 다른 묶음은 그 묶음의 할 일
+  const rows = dial === "today" ? open : buckets[dial];
+  const turnDial = (v: DialView) => {
+    setDial(v);
+    setSelected(0);
+  };
 
   const act = (a: Parameters<typeof api.act>[0]) => api.act(a).then(setData);
   const stepOf = (id: string) => firstSteps.find((f) => f.todoId === id);
@@ -237,11 +253,14 @@ export function TodayList() {
       if (e.key === "Escape") setShaping(null);
       return;
     }
-    const current = open[selected];
-    if (e.key === "ArrowDown") setSelected((s) => Math.min(s + 1, open.length - 1));
+    const current = rows[selected];
+    const di = DIAL_VIEWS.indexOf(dial);
+    if (e.key === "ArrowDown") setSelected((s) => Math.min(s + 1, rows.length - 1));
     else if (e.key === "ArrowUp") setSelected((s) => Math.max(s - 1, 0));
+    else if (e.key === "ArrowLeft" && di > 0) turnDial(DIAL_VIEWS[di - 1]!);
+    else if (e.key === "ArrowRight" && di < DIAL_VIEWS.length - 1) turnDial(DIAL_VIEWS[di + 1]!);
     else if (e.key === " " && current) act({ type: "toggle", id: current.id });
-    else if (e.key === "Enter" && current && !current.isClear) askFirstStep(current);
+    else if (e.key === "Enter" && current && !current.isClear && !current.completedAt) (dial === "today" ? askFirstStep(current) : shape(current));
     else if (e.key === "Enter" && current && shortcutOf(current)) api.openShortcut(current.shortcutId!);
     else if (e.key === "," && e.metaKey) api.openSettings();
     else if (e.key === "Backspace" && e.metaKey && current) act({ type: "remove", id: current.id });
@@ -298,7 +317,59 @@ export function TodayList() {
           </button>
         </header>
 
+        <div className="overview">
+          <FanDial
+            variant="bare"
+            label="Which tasks to show"
+            items={DIAL_VIEWS.map((v) => ({ key: v, label: DIAL_LABEL[v], muted: v !== "today" && buckets[v].length === 0 }))}
+            value={dial}
+            onChange={turnDial}
+          />
+          <RatioBar view={dial} parts={dialRatio(dial, buckets)} />
+        </div>
+
         <div className="scroll">
+          {dial !== "today" ? (
+            <section className="section section--view">
+              <h2 className="section__label">
+                {DIAL_LABEL[dial]} · {buckets[dial].length}
+              </h2>
+              {buckets[dial].length === 0 && <p className="section__empty">Nothing here.</p>}
+              {buckets[dial].map((t, i) => (
+                <Row
+                  key={t.id}
+                  item={t}
+                  shortcut={shortcutOf(t)}
+                  selected={selected === i}
+                  done={dial === "done"}
+                  onToggle={() => act({ type: "toggle", id: t.id })}
+                  onFirstStep={() => shape(t)}
+                  trailing={
+                    dial !== "done" && (
+                      <>
+                        {t.plannedDate && <span className="row__date">{shortDate(t.plannedDate)}</span>}
+                        <button
+                          type="button"
+                          className="small-button"
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            act({ type: "moveToToday", id: t.id });
+                          }}
+                        >
+                          → Today
+                        </button>
+                      </>
+                    )
+                  }
+                />
+              ))}
+              <button type="button" className="section__toggle" onClick={() => turnDial("today")}>
+                Back to Today <ChevronRightIcon size={12} />
+              </button>
+            </section>
+          ) : (
+            <>
           {carry.length > 0 && (
             <div className="carry">
               <div className="carry__top">
@@ -351,35 +422,18 @@ export function TodayList() {
             </SortableContext>
           </DndContext>
 
-          {done.length > 0 && (
-            <section className="section">
-              <h2 className="section__label">Done {done.length}</h2>
-              {done.map((t) => (
-                <Row key={t.id} item={t} done onToggle={() => act({ type: "toggle", id: t.id })} />
-              ))}
-            </section>
-          )}
-
-          {later.length > 0 && (
-            <section className="section">
-              <button type="button" className="section__toggle" onClick={() => setLaterOpen((v) => !v)} aria-expanded={laterOpen}>
-                Later <span className="section__count">{later.length}</span>
-                <ChevronRightIcon size={12} className={laterOpen ? "is-open" : ""} />
-              </button>
-              {laterOpen &&
-                later.map((t) => (
-                  <Row
-                    key={t.id}
-                    item={t}
-                    onToggle={() => act({ type: "toggle", id: t.id })}
-                    trailing={
-                      <button type="button" className="small-button" onClick={() => act({ type: "moveToToday", id: t.id })}>
-                        Today
-                      </button>
-                    }
-                  />
+          {(done.length > 0 || later.length > 0) && (
+            <nav className="quiet-links">
+              {(["done", "tomorrow", "later"] as const)
+                .filter((v) => buckets[v].length > 0)
+                .map((v) => (
+                  <button type="button" key={v} className="section__toggle" onClick={() => turnDial(v)}>
+                    {DIAL_LABEL[v]} <span className="section__count">{buckets[v].length}</span> <ChevronRightIcon size={12} />
+                  </button>
                 ))}
-            </section>
+            </nav>
+          )}
+            </>
           )}
         </div>
 

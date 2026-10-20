@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ReviewDraft, ReviewState } from "@shared/review";
 import type { Shortcut } from "@shared/types";
 import { localDate } from "@shared/todos";
-import { AiSparkle, ChevronDownIcon, CloseIcon, PlusIcon, RefreshIcon, Spinner, TerminalIcon, WarningIcon } from "./components/icons";
+import { AiSparkle, ChevronDownIcon, CloseIcon, PlusIcon, RefreshIcon, TerminalIcon, WarningIcon } from "./components/icons";
 
 const api = window.todoban;
 const SLOW_AFTER_MS = 10_000;
@@ -159,18 +159,19 @@ export function Review() {
         </button>
 
         {state.status === "loading" && (
-          <>
-            <div className="loading">
-              <Spinner size={16} />
-              <span>{slow ? "Taking a little longer…" : "Claude is splitting your thought…"}</span>
+          // B2: 나누는 동안 할 일 카드가 될 빈 글래스 카드들이 흩어져 떠 있다.
+          <div className="splitting">
+            <div className="splitting__pill">
+              <AiSparkle size={12} /> {slow ? "Taking a little longer…" : "Splitting into tasks…"}
             </div>
-            {[0.8, 0.6, 0.7].map((w, i) => (
-              <div className="skeleton" key={i}>
-                <span style={{ width: `${w * 100}%` }} />
+            {[0, 1, 2, 3].map((i) => (
+              <div className={`ghost ghost--${i}`} key={i} aria-hidden="true">
+                <span />
+                <span />
                 <span />
               </div>
             ))}
-          </>
+          </div>
         )}
 
         {state.status === "error" && err?.kind === "timeout" && (

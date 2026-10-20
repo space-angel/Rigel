@@ -484,12 +484,13 @@ scripts/claude-probe.ts    // 0단계 측정 스크립트
 
 | 시안 | 내용 | 언제 |
 |---|---|---|
-| A1 머리 | Done/Today/Later 부채꼴 다이얼과 비율 막대(완료·오늘·첫 행동 대기) | 7장 작업 뒤 일주일 사용 중 필요하면 |
+| A1 머리 | Done/Overdue/Today/Tomorrow/Later 부채꼴 다이얼과 비율 막대 | ✅ 만듦. 끌기·트랙패드 옆으로 밀기·라벨 클릭·←→·아래 링크로 돌림. 위아래 스크롤에는 반응하지 않음. 비율은 Today = 끝냄/바로 시작/첫 행동, 다른 묶음 = 정리됨/첫 행동 |
 | B3 | Today/Later를 알약 토글로, “Shape a first step after adding?” 알약, 3칸 비율 막대 | 7-b |
 | C1, C2 | 첫 행동 빚기 전체 | 7-b, 7-c |
 | D1 | “Split long thoughts with Claude”, “Ask about yesterday's tasks” 스위치. 모델 부채꼴 다이얼(지금은 세 칸 선택 버튼) | 설정 값이 없어서 보류 |
 | D2 | 도구 탭 | 7-b, 7-c |
-| D4 | 시작하기 창 | 7-d |
+| D4 | 시작하기 창 | ✅ 7-d |
+| B2 | 나누는 중: 기울어진 빈 글래스 카드 4장 | ✅ 만듦 (시안의 자리·기울기·흐림 그대로, 천천히 떠 있음) |
 | 설정 Theme 탭 | 테마 고르기 | 11장 |
 
 ## 10. Claude 호출부터 확인하고, 화면은 그다음에 만듭니다

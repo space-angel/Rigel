@@ -1,0 +1,40 @@
+[
+  {
+    "name": "다이얼 끌기 · 왼쪽으로 두 칸 끌면 Later",
+    "win": "list",
+    "ok": true,
+    "ms": 835,
+    "value": true,
+    "snap": "01-list.png"
+  },
+  {
+    "name": "다이얼 · 옆으로 밀기 (트랙패드) 한 칸 → Tomorrow",
+    "win": "list",
+    "ok": true,
+    "ms": 502,
+    "value": true
+  },
+  {
+    "name": "다이얼 · 위아래 스크롤에는 반응하지 않는다",
+    "win": "list",
+    "ok": true,
+    "ms": 403,
+    "value": true
+  },
+  {
+    "name": "다이얼 · 라벨 클릭 → Today",
+    "win": "list",
+    "ok": true,
+    "ms": 851,
+    "value": true,
+    "snap": "04-list.png"
+  },
+  {
+    "name": "아래 링크 Tomorrow ›",
+    "win": "list",
+    "ok": true,
+    "ms": 833,
+    "value": true,
+    "snap": "05-list.png"
+  }
+]

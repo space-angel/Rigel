@@ -1,0 +1,55 @@
+[
+  {
+    "name": "목록 · Today 다이얼과 비율",
+    "win": "list",
+    "ok": true,
+    "ms": 1169,
+    "snap": "01-list.png"
+  },
+  {
+    "name": "다이얼 → Tomorrow (→ 키)",
+    "win": "list",
+    "ok": true,
+    "ms": 834,
+    "value": true,
+    "snap": "02-list.png"
+  },
+  {
+    "name": "다이얼 → Later",
+    "win": "list",
+    "ok": true,
+    "ms": 844,
+    "value": true,
+    "snap": "03-list.png"
+  },
+  {
+    "name": "다이얼 → Done (라벨 클릭)",
+    "win": "list",
+    "ok": true,
+    "ms": 833,
+    "value": true,
+    "snap": "04-list.png"
+  },
+  {
+    "name": "Back to Today",
+    "win": "list",
+    "ok": true,
+    "ms": 839,
+    "value": true,
+    "snap": "05-list.png"
+  },
+  {
+    "name": "확인 창 · 나누는 중 (B2)",
+    "win": "quick",
+    "ok": true,
+    "ms": 327,
+    "value": true
+  },
+  {
+    "name": "확인 창 · 흩어진 카드",
+    "win": "review",
+    "ok": true,
+    "ms": 1862,
+    "snap": "07-review.png"
+  }
+]

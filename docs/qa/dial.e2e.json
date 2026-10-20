@@ -1,0 +1,9 @@
+[
+  { "name": "목록 · Today 다이얼과 비율", "win": "list", "main": "openList", "wait": 800, "snap": true, "expect": "__e2e.$('.ratio__seg--ready') && __e2e.$('.dial__label.is-active').textContent === 'Today'" },
+  { "name": "다이얼 → Tomorrow (→ 키)", "win": "list", "run": "__e2e.key('.window', 'ArrowRight'); return true;", "wait": 500, "snap": true, "expect": "__e2e.text().includes('Tomorrow · 1')" },
+  { "name": "다이얼 → Later", "win": "list", "run": "__e2e.key('.window', 'ArrowRight'); return true;", "wait": 500, "snap": true, "expect": "__e2e.$('.ratio__seg--planned') && __e2e.$('.ratio__seg--step')" },
+  { "name": "다이얼 → Done (라벨 클릭)", "win": "list", "run": "__e2e.all('.dial__label').find(l => l.textContent === 'Done').dispatchEvent(new MouseEvent('click', { bubbles: true })); return true;", "wait": 500, "snap": true, "expect": "__e2e.$('.ratio__seg--done')" },
+  { "name": "Back to Today", "win": "list", "run": "__e2e.click(__e2e.byText('Back to Today')); return true;", "wait": 500, "snap": true, "expect": "__e2e.$('.now-card')" },
+  { "name": "확인 창 · 나누는 중 (B2)", "win": "quick", "run": "__e2e.type('textarea', '내일 포폴 올리브영 장표 지표 문장 고치고 사일로 발표 자료 봐야 함. 면접 준비도 해야 되고'); __e2e.key('textarea', 'Enter'); return true;", "wait": 300 },
+  { "name": "확인 창 · 흩어진 카드", "win": "review", "until": "__e2e.$('.splitting')", "wait": 1200, "snap": true }
+]

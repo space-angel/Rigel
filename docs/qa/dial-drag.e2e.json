@@ -1,0 +1,16 @@
+[
+  { "name": "다이얼 끌기 · 왼쪽으로 두 칸 끌면 Later", "win": "list", "main": "openList",
+    "run": "const d = __e2e.$('.dial'); const r = d.getBoundingClientRect(); const y = r.top + 40, x0 = r.left + r.width / 2; const ev = (t, x) => d.dispatchEvent(new PointerEvent(t, { bubbles: true, clientX: x, clientY: y, pointerId: 1 })); ev('pointerdown', x0); for (let i = 1; i <= 10; i++) ev('pointermove', x0 - i * 9); ev('pointerup', x0 - 90); return true;",
+    "wait": 500, "snap": true, "expect": "__e2e.$('.dial__label.is-active').textContent === 'Later'" },
+  { "name": "다이얼 · 옆으로 밀기 (트랙패드) 한 칸 → Tomorrow", "win": "list",
+    "run": "__e2e.$('.dial').dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaX: -50, deltaY: 2 })); return true;",
+    "wait": 500, "expect": "__e2e.$('.dial__label.is-active').textContent === 'Tomorrow'" },
+  { "name": "다이얼 · 위아래 스크롤에는 반응하지 않는다", "win": "list",
+    "run": "__e2e.$('.dial').dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaX: 0, deltaY: 120 })); return true;",
+    "wait": 400, "expect": "__e2e.$('.dial__label.is-active').textContent === 'Tomorrow'" },
+  { "name": "다이얼 · 라벨 클릭 → Today", "win": "list",
+    "run": "__e2e.all('.dial__label').find(l => l.textContent === 'Today').dispatchEvent(new MouseEvent('click', { bubbles: true })); return true;",
+    "wait": 500, "snap": true, "expect": "__e2e.$('.now-card')" },
+  { "name": "아래 링크 Tomorrow ›", "win": "list", "run": "__e2e.click(__e2e.byText('Tomorrow', '.quiet-links button')); return true;",
+    "wait": 500, "snap": true, "expect": "__e2e.$('.dial__label.is-active').textContent === 'Tomorrow'" }
+]
