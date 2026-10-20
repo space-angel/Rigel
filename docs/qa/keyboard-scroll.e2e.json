@@ -1,0 +1,15 @@
+[
+  { "name": "목록을 연다", "win": "list", "main": "openList", "wait": 600 },
+  { "name": "↓ 12번 · 고른 줄이 보이도록 따라 내려간다", "win": "list",
+    "run": "for (let i = 0; i < 12; i++) { __e2e.key('.window', 'ArrowDown'); await new Promise(r => setTimeout(r, 60)); } return true;",
+    "wait": 700, "snap": true,
+    "expect": "(() => { const s = __e2e.$('.scroll').getBoundingClientRect(), r = __e2e.$('.is-selected').getBoundingClientRect(); return __e2e.$('.scroll').scrollTop > 0 && r.top >= s.top && r.bottom <= s.bottom; })()" },
+  { "name": "↓ 끝까지 · 마지막 줄도 보인다", "win": "list",
+    "run": "for (let i = 0; i < 10; i++) { __e2e.key('.window', 'ArrowDown'); await new Promise(r => setTimeout(r, 60)); } return __e2e.$('.is-selected .row__title')?.textContent;",
+    "wait": 700, "snap": true,
+    "expect": "(() => { const s = __e2e.$('.scroll').getBoundingClientRect(), r = __e2e.$('.is-selected').getBoundingClientRect(); return r.top >= s.top && r.bottom <= s.bottom; })()" },
+  { "name": "↑ 맨 위까지 · 다시 따라 올라간다", "win": "list",
+    "run": "for (let i = 0; i < 20; i++) { __e2e.key('.window', 'ArrowUp'); await new Promise(r => setTimeout(r, 40)); } return true;",
+    "wait": 700, "snap": true,
+    "expect": "__e2e.$('.scroll').scrollTop === 0 && __e2e.$('.now-card.is-selected')" }
+]

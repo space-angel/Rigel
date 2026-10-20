@@ -1,0 +1,32 @@
+[
+  {
+    "name": "목록을 연다",
+    "win": "list",
+    "ok": true,
+    "ms": 602
+  },
+  {
+    "name": "↓ 12번 · 고른 줄이 보이도록 따라 내려간다",
+    "win": "list",
+    "ok": true,
+    "ms": 1798,
+    "value": true,
+    "snap": "02-list.png"
+  },
+  {
+    "name": "↓ 끝까지 · 마지막 줄도 보인다",
+    "win": "list",
+    "ok": true,
+    "ms": 1664,
+    "value": "할 일 16 키보드 스크롤 확인",
+    "snap": "03-list.png"
+  },
+  {
+    "name": "↑ 맨 위까지 · 다시 따라 올라간다",
+    "win": "list",
+    "ok": true,
+    "ms": 1885,
+    "value": true,
+    "snap": "04-list.png"
+  }
+]

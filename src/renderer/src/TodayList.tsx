@@ -182,6 +182,7 @@ export function TodayList() {
   const shellRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const captureRef = useRef<HTMLInputElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     api.getData().then(setData);
@@ -211,6 +212,14 @@ export function TodayList() {
     ro.observe(el);
     return () => ro.disconnect();
   }, [hasData]);
+
+  // 키보드로 고른 줄이 목록 영역 밖으로 나가면 그 줄이 보이도록 스크롤한다.
+  useEffect(() => {
+    const el = scrollRef.current?.querySelector(".is-selected");
+    if (!el) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollIntoView({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
+  }, [selected, dial]);
 
   const carry = useMemo(() => (data ? pendingCarryOver(data, localDate()) : []), [data]);
   const view = useMemo(() => (data ? todayView(data.todos, localDate(), carry) : null), [data, carry]);
@@ -328,7 +337,7 @@ export function TodayList() {
           <RatioBar view={dial} parts={dialRatio(dial, buckets)} />
         </div>
 
-        <div className="scroll">
+        <div className="scroll" ref={scrollRef}>
           {dial !== "today" ? (
             <section className="section section--view">
               <h2 className="section__label">
