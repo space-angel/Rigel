@@ -105,3 +105,4 @@ export const UserIcon = make(["M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM6 8a6 6 0 1 1 
 export const NoteIcon = make(["M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5H5zm3 3h8a1 1 0 1 1 0 2H8a1 1 0 1 1 0-2zm0 4h8a1 1 0 1 1 0 2H8a1 1 0 1 1 0-2z"], "NoteIcon");
 export const IssueIcon = make(["M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12zm10-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"], "IssueIcon");
 export const MoreIcon = make(["M5 10a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm7 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm7 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"], "MoreIcon");
+export const PinIcon = make(["M9 2a1 1 0 0 0 0 2h.5v5.586l-2.207 2.207A1 1 0 0 0 7 12.5V14a1 1 0 0 0 1 1h3v6a1 1 0 1 0 2 0v-6h3a1 1 0 0 0 1-1v-1.5a1 1 0 0 0-.293-.707L14.5 9.586V4H15a1 1 0 1 0 0-2H9zm2.5 2h1v6a1 1 0 0 0 .293.707L15 12.914V13H9v-.086l2.207-2.207A1 1 0 0 0 11.5 10V4z"], "PinIcon");

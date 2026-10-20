@@ -1,0 +1,87 @@
+[
+  {
+    "name": "빚기 열기 · 면접 준비",
+    "win": "list",
+    "ok": true,
+    "ms": 12112
+  },
+  {
+    "name": "C1 · 찾은 자료 목록",
+    "win": "list",
+    "ok": true,
+    "ms": 647,
+    "value": [
+      "모의면접 1회차 (멘토 장수지)"
+    ],
+    "snap": "02-list.png"
+  },
+  {
+    "name": "C1 · 펼치기",
+    "win": "list",
+    "ok": true,
+    "ms": 659,
+    "value": true,
+    "snap": "03-list.png"
+  },
+  {
+    "name": "C1 · 펼친 내용",
+    "win": "list",
+    "ok": true,
+    "ms": 0,
+    "value": {
+      "where": "Notion · Wozz / @/recruit / 면접 회고",
+      "quote": "질문 대신 내가 준비한 이야기를 했습니다. 강점 질문을 \"검증에 대해 어떻게 생각하나?\"로 받아들였고, 질문을 다시 확인하지 않았습니다.",
+      "match": "Matched: 면접 · 준비"
+    }
+  },
+  {
+    "name": "Shape it",
+    "win": "list",
+    "ok": true,
+    "ms": 4023,
+    "value": true
+  },
+  {
+    "name": "C2 · 근거 펼치기",
+    "win": "list",
+    "ok": true,
+    "ms": 656,
+    "value": "모의면접 질문 다시 확인하는 답변 연습",
+    "snap": "06-list.png"
+  },
+  {
+    "name": "C2 · 첫 행동과 근거",
+    "win": "list",
+    "ok": true,
+    "ms": 1,
+    "value": {
+      "step": "모의면접 질문 다시 확인하는 답변 연습",
+      "where": "Notion · Wozz / @/recruit / 면접 회고",
+      "quote": "질문 대신 내가 준비한 이야기를 했습니다. 강점 질문을 \"검증에 대해 어떻게 생각하나?\"로 받아들였고, 질문을 다시 확인하지 않았습니다.",
+      "match": "Matched: 면접 · 준비",
+      "actions": [
+        "Open in Notion",
+        "Leave this out and reshape"
+      ]
+    }
+  },
+  {
+    "name": "Leave this out → 다시 빚기",
+    "win": "list",
+    "ok": true,
+    "ms": 8125,
+    "value": true,
+    "snap": "08-list.png"
+  },
+  {
+    "name": "다시 빚은 결과",
+    "win": "list",
+    "ok": true,
+    "ms": 1,
+    "value": {
+      "step": "예상 면접 질문 5개 적기",
+      "from": [],
+      "hint": "Made from general knowledge only — nothing in your tools matched these words. Try picking other words."
+    }
+  }
+]

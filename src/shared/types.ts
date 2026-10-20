@@ -11,6 +11,7 @@ export const ContextNote = z.object({
   date: z.string().nullable().default(null),
   url: z.string().nullable().default(null), // Notion·Linear 페이지, 피그마 프레임 링크
   path: z.string().nullable().default(null), // 맥 안의 파일 (Files 도구)
+  where: z.string().nullable().default(null), // 어디서 왔는지 (노션 경로 등)
   workspace: z.string().nullable().default(null),
 });
 export type ContextNote = z.infer<typeof ContextNote>;
@@ -68,6 +69,8 @@ export const Settings = z.object({
   tools: ToolSettings.default(DEFAULT_TOOLS),
   // 시작하기 창(D4)을 마쳤는지. 이 필드가 없던 파일은 이미 쓰던 사람이라 true로 읽는다.
   welcomed: z.boolean().default(true),
+  // 목록 고정: 다른 앱을 눌러도 닫히지 않는 떠 있는 창. 옮긴 위치를 기억한다.
+  listPin: z.object({ pinned: z.boolean(), x: z.number().nullable(), y: z.number().nullable() }).default({ pinned: false, x: null, y: null }),
 });
 export type Settings = z.infer<typeof Settings>;
 
@@ -89,6 +92,7 @@ export const DEFAULT_SETTINGS: Settings = {
   lastCarryOverCheck: null,
   tools: DEFAULT_TOOLS,
   welcomed: false,
+  listPin: { pinned: false, x: null, y: null },
 };
 
 export function emptyData(): AppData {

@@ -203,7 +203,7 @@ test("이름 바꾸기: 앞뒤 공백을 빼고, 빈 이름은 무시한다", ()
 test("자료 붙이기: 같은 출처는 바꾸고 다른 출처는 더한다", () => {
   let d = applyAction(emptyData(), { type: "add", title: "면접 준비" }, now);
   const id = d.todos[0]!.id;
-  const note = (source: string, label: string) => ({ source, label, text: "", date: null, url: null, path: null, workspace: null });
+  const note = (source: string, label: string) => ({ source, label, text: "", date: null, url: null, path: null, where: null, workspace: null });
   d = applyAction(d, { type: "attach", id, notes: [note("notion", "a"), note("files", "자기소개서.pdf")] }, now);
   d = applyAction(d, { type: "attach", id, notes: [note("notion", "b")] }, now);
   assert.deepEqual(d.todos[0]!.context.map((n) => `${n.source}:${n.label}`), ["files:자기소개서.pdf", "notion:b"]);

@@ -1,0 +1,46 @@
+[
+  {
+    "name": "목록 · 고정 버튼",
+    "win": "list",
+    "ok": true,
+    "ms": 949,
+    "snap": "01-list.png"
+  },
+  {
+    "name": "고정",
+    "win": "list",
+    "ok": true,
+    "ms": 958,
+    "value": true,
+    "snap": "02-list.png"
+  },
+  {
+    "name": "고정 상태 저장",
+    "win": "list",
+    "ok": true,
+    "ms": 1,
+    "value": {
+      "pinned": true,
+      "x": 780,
+      "y": 300
+    }
+  },
+  {
+    "name": "고정 중 Esc는 닫지 않음",
+    "win": "list",
+    "ok": true,
+    "ms": -1731,
+    "value": true
+  },
+  {
+    "name": "고정 풀기",
+    "win": "list",
+    "ok": true,
+    "ms": 406,
+    "value": {
+      "pinned": false,
+      "x": null,
+      "y": null
+    }
+  }
+]

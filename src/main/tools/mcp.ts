@@ -143,6 +143,7 @@ async function collectOnce(source: McpSource, todo: TodoItem, words: string[], d
       source,
       label: item.label.slice(0, 80),
       text: item.text.slice(0, 400),
+      ...(item.where && { where: item.where.slice(0, 80) }),
       date: item.date && /^\d{4}-\d{2}-\d{2}$/.test(item.date) ? item.date : null,
       // 피그마 프레임은 읽은 바로가기 링크를 피그마 앱으로 연다.
       open: shortcut ? { kind: "figma", url: shortcut.url } : url ? { kind: "url", source, url } : null,
@@ -197,6 +198,7 @@ export async function collectManyMcp(
       date: item.date && /^\d{4}-\d{2}-\d{2}$/.test(item.date) ? item.date : null,
       url: source === "frame" ? (frameUrl[item.key] ?? null) : safeServiceUrl(source, item.url),
       path: null,
+      where: item.where?.slice(0, 80) ?? null,
       workspace,
     };
   }

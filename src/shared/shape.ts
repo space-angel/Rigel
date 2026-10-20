@@ -11,7 +11,8 @@ export type SourceId = ToolSource | "claude";
 export interface ToolItem {
   source: ToolSource;
   label: string;
-  text?: string; // MCP 도구가 읽은 요약 (400자 이내). LOCAL 도구는 없음
+  text?: string; // MCP 도구가 읽은 근거 문장 (150자 이내). LOCAL 도구는 없음
+  where?: string; // 어디서 왔는지 (노션 경로, 리니어 팀·상태, 피그마 페이지)
   workspace?: string; // MCP 도구가 읽은 워크스페이스 이름
   date: string | null; // 일정이나 끝낸 날짜 (YYYY-MM-DD)
   open:
@@ -190,6 +191,7 @@ export function toNote(item: ToolItem, shortcutUrl?: (id: string) => string | un
     date: item.date,
     url: open?.kind === "url" || open?.kind === "figma" ? open.url : open?.kind === "shortcut" ? (shortcutUrl?.(open.id) ?? null) : null,
     path: open?.kind === "file" ? open.path : null,
+    where: item.where ?? null,
     workspace: item.workspace ?? null,
   };
 }

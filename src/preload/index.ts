@@ -38,6 +38,7 @@ const api = {
   },
   resizeList: (height: number) => ipcRenderer.send("list:resize", height),
   hideList: () => ipcRenderer.send("list:hide"),
+  pinList: (pinned: boolean) => ipcRenderer.send("list:pin", pinned),
   onQuickOpened: (fn: () => void) => {
     const listener = () => fn();
     ipcRenderer.on("quick:opened", listener);

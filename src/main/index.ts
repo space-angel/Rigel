@@ -121,6 +121,8 @@ function createPopupWindow(view: "list" | "quick", width: number, height: number
   win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   win.setAlwaysOnTop(true, view === "quick" ? "pop-up-menu" : "floating");
   win.on("blur", () => {
+    // 고정한 목록은 다른 앱을 눌러도 닫지 않는다.
+    if (view === "list" && listPinned()) return;
     if (!KEEP_OPEN && !win.webContents.isDevToolsOpened()) win.hide();
   });
   loadView(win, view);
@@ -135,6 +137,27 @@ function fitHeight(win: BrowserWindow | null, height: number, max: number): void
   win.setBounds({ ...b, height: h });
   // 투명 창의 그림자는 모양이 바뀌면 다시 계산해야 이전 크기의 그림자가 남지 않는다.
   win.invalidateShadow();
+}
+
+const listPinned = () => Boolean(data?.settings.listPin.pinned);
+
+// 다른 창(빠른 입력, 설정, 피그마·노션 열기)을 띄울 때 목록을 닫는다. 고정했으면 그대로 둔다.
+function hideLooseList(): void {
+  if (!listPinned()) listWindow?.hide();
+}
+
+// 고정하면 창을 옮길 수 있고, 옮긴 자리를 기억한다. 풀면 다시 메뉴바 아래로.
+function applyListPin(): void {
+  if (!listWindow) return;
+  const pin = data.settings.listPin;
+  listWindow.setMovable(pin.pinned);
+  if (pin.pinned && pin.x !== null && pin.y !== null) {
+    const b = listWindow.getBounds();
+    // 저장한 자리가 지금 연결된 화면 밖이면 메뉴바 아래로
+    const onScreen = screen.getAllDisplays().some((d) => pin.x! >= d.bounds.x && pin.x! < d.bounds.x + d.bounds.width && pin.y! >= d.bounds.y && pin.y! < d.bounds.y + d.bounds.height);
+    if (onScreen) listWindow.setBounds({ ...b, x: pin.x, y: pin.y });
+    else positionListWindow();
+  } else positionListWindow();
 }
 
 function positionListWindow(): void {
@@ -154,7 +177,7 @@ function toggleListWindow(): void {
     return;
   }
   quickWindow?.hide();
-  positionListWindow();
+  applyListPin();
   listWindow.show();
   listWindow.invalidateShadow();
   listWindow.focus();
@@ -168,7 +191,7 @@ function showQuickWindow(): void {
     quickWindow.hide();
     return;
   }
-  listWindow?.hide();
+  hideLooseList();
   const area = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea;
   const { width } = quickWindow.getBounds();
   quickWindow.setPosition(Math.round(area.x + (area.width - width) / 2), Math.round(area.y + area.height * 0.22));
@@ -246,7 +269,7 @@ function cancelReview(): void {
 }
 
 function showSettings(tab: "general" | "tools" | "shortcuts" | "shortcuts-new" = "general"): void {
-  listWindow?.hide();
+  hideLooseList();
   if (!settingsWindow || settingsWindow.isDestroyed()) {
     settingsWindow = new BrowserWindow({
       width: 560,
@@ -325,7 +348,7 @@ function addAndReveal(action: TodoAction): void {
   if (!added.length || !listWindow) return;
   if (!listWindow.isVisible() && !HEADLESS) {
     quickWindow?.hide();
-    positionListWindow();
+    applyListPin();
     listWindow.show();
     listWindow.invalidateShadow();
     listWindow.focus();
@@ -415,59 +438,18 @@ app.whenReady().then(() => {
 
   // 렌더러가 내용 높이를 알려 주면 창 높이를 맞춘다. 창 밖의 투명한 영역이 클릭을 가로채지 않게 하려는 것.
   ipcMain.on("list:resize", (_e, height: number) => fitHeight(listWindow, height, LIST_MAX_HEIGHT));
-  ipcMain.on("list:hide", () => listWindow?.hide());
+  // Esc: 고정했으면 닫지 않고 그대로 둔다(닫기는 메뉴바 아이콘이나 고정 풀기로).
+  ipcMain.on("list:hide", () => hideLooseList());
+  ipcMain.on("list:pin", (_e, pinned: boolean) => {
+    const b = listWindow?.getBounds();
+    act({ type: "setSettings", patch: { listPin: { pinned, x: pinned ? (b?.x ?? null) : null, y: pinned ? (b?.y ?? null) : null } } });
+    applyListPin();
+    listWindow?.invalidateShadow();
+  });
   ipcMain.on("quick:resize", (_e, height: number) => fitHeight(quickWindow, height, QUICK_MAX_HEIGHT));
   ipcMain.on("quick:hide", () => quickWindow?.hide());
 
-  // 처음 실행하면 시작하기 창(D4)을 연다. Claude Code, 단축키, 도구를 한 장에서 확인한다.
-function showWelcome(): void {
-  if (welcomeWindow && !welcomeWindow.isDestroyed()) {
-    if (!HEADLESS) welcomeWindow.show();
-    return;
-  }
-  welcomeWindow = new BrowserWindow({
-    width: 480,
-    height: 560,
-    useContentSize: true,
-    show: false,
-    title: "Welcome",
-    titleBarStyle: "hiddenInset",
-    trafficLightPosition: { x: 16, y: 16 },
-    resizable: false,
-    minimizable: false,
-    maximizable: false,
-    fullscreenable: false,
-    backgroundColor: "#15181d",
-    webPreferences: { preload: join(__dirname, "../preload/index.js"), sandbox: true },
-  });
-  loadView(welcomeWindow, "welcome");
-  welcomeWindow.once("ready-to-show", () => {
-    if (HEADLESS) return;
-    app.focus({ steal: true });
-    welcomeWindow?.show();
-  });
-  welcomeWindow.on("focus", () => welcomeWindow?.webContents.send("settings:focus"));
-  welcomeWindow.on("closed", () => (welcomeWindow = null));
-}
-
-// 할 일을 넣으면 메뉴바 목록을 열어 방금 넣은 할 일을 보여 준다(잠깐 빛나고, 그 줄로 스크롤).
-// 목록이 이미 열려 있으면(아래 입력 바로 넣은 경우) 표시만 한다.
-function addAndReveal(action: TodoAction): void {
-  const before = new Set(data.todos.map((t) => t.id));
-  act(action);
-  const added = data.todos.filter((t) => !before.has(t.id)).map((t) => t.id);
-  if (!added.length || !listWindow) return;
-  if (!listWindow.isVisible() && !HEADLESS) {
-    quickWindow?.hide();
-    positionListWindow();
-    listWindow.show();
-    listWindow.invalidateShadow();
-    listWindow.focus();
-  }
-  listWindow.webContents.send("list:opened", { highlight: added });
-}
-
-// 한 줄 30자 이하는 그대로 넣고, 긴 입력은 확인 창을 열어 Claude에게 나눠 달라고 한다.
+  // 한 줄 30자 이하는 그대로 넣고, 긴 입력은 확인 창을 열어 Claude에게 나눠 달라고 한다.
   ipcMain.handle("quick:submit", (_e, text: string) => submitQuick(text));
 
   firstSteps = new FirstStepManager(
@@ -536,7 +518,7 @@ function addAndReveal(action: TodoAction): void {
   );
   ipcMain.on("tools:open", (_e, open: ToolItem["open"]) => {
     if (!open) return;
-    listWindow?.hide();
+    hideLooseList();
     if (open.kind === "url") {
       const url = safeServiceUrl(open.source, open.url);
       if (url) openOutside(url, () => shell.openExternal(url));
@@ -595,7 +577,7 @@ function addAndReveal(action: TodoAction): void {
   ipcMain.handle("shortcut:open", async (_e, id: string) => {
     const s = data.shortcuts.find((x) => x.id === id);
     if (!s) return null;
-    listWindow?.hide();
+    hideLooseList();
     if (E2E) return void openOutside(s.url, () => {});
     return openShortcut(s);
   });
@@ -636,6 +618,12 @@ function addAndReveal(action: TodoAction): void {
   }
 
   listWindow = createPopupWindow("list", LIST_WIDTH, 480);
+  // 고정한 창을 옮기면 그 자리를 기억한다.
+  listWindow.on("moved", () => {
+    if (!listPinned() || !listWindow) return;
+    const { x, y } = listWindow.getBounds();
+    act({ type: "setSettings", patch: { listPin: { pinned: true, x, y } } });
+  });
   quickWindow = createPopupWindow("quick", QUICK_WIDTH, 160);
   reviewWindow = createReviewWindow();
   registerHotkey();

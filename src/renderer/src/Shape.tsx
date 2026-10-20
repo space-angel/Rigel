@@ -9,6 +9,7 @@ import { SizeDial } from "./components/SizeDial";
 import { MixBar } from "./components/MixBar";
 import { SOURCE_NAME, SourceIcon } from "./components/SourceIcon";
 import { FirstStepCard } from "./FirstStepCard";
+import { Evidence } from "./components/Evidence";
 
 const api = window.todoban;
 
@@ -42,7 +43,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
     return {
       source: s,
       status: "ok",
-      item: { source: s, label: n.label, text: n.text, date: n.date, open: noteOpen(n), ...(n.workspace && { workspace: n.workspace }) },
+      item: { source: s, label: n.label, text: n.text, date: n.date, open: noteOpen(n), ...(n.workspace && { workspace: n.workspace }), ...(n.where && { where: n.where }) },
     };
   };
   const [mcp, setMcp] = useState<Partial<Record<McpSource, ToolResult>>>(() =>
@@ -120,6 +121,22 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
     };
   };
   const send = () => api.requestFirstStep(todo.id, { shape: shape() });
+  // 근거 하나를 빼고 다시 빚는다. 고른 도구가 바뀐 뒤 비율이 다시 계산되면 보낸다.
+  const [reshapeWithout, setReshapeWithout] = useState<ToolSource | null>(null);
+  const leaveOut = (s: ToolSource) => {
+    setPicked((p) => {
+      const next = new Set(p ?? (tools ?? []).map((r) => r.source));
+      next.delete(s);
+      return next;
+    });
+    setReshapeWithout(s);
+  };
+  useEffect(() => {
+    if (reshapeWithout && !selected.includes(reshapeWithout) && mixFits) {
+      setReshapeWithout(null);
+      send();
+    }
+  }, [reshapeWithout, selectedKey, mixFits]);
   // MCP가 아직 읽는 중이면 끝날 때까지 기다렸다가 보낸다. 15초가 지나면 그 도구를 빼고 보낼 수 있다.
   const shapeIt = () => {
     if (waiting.length) setWaitingSince(Date.now());
@@ -202,19 +219,23 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
                   {state.sources
                     .filter((s) => s.source !== "claude")
                     .map((s) => (
-                      <div className="made__row" key={`${s.source}-${s.label}`}>
-                        <span className="made__icon">
-                          <SourceIcon source={s.source} size={12} />
-                        </span>
-                        <span className="made__label">{s.label}</span>
-                        <span className="made__pct">{s.weight}%</span>
-                      </div>
+                      <Evidence
+                        key={`${s.source}-${s.label}`}
+                        source={s.source}
+                        label={s.label}
+                        weight={s.weight}
+                        item={found.find((r) => r.source === s.source)?.item ?? undefined}
+                        words={state.shape!.words}
+                        onLeaveOut={() => leaveOut(s.source as ToolSource)}
+                      />
                     ))}
                 </div>
               </>
             )}
             {state.sources.every((s) => s.source === "claude") &&
-              (state.shape.context.length === 0 && (tools ?? []).length > 0 ? (
+              (state.shape.context.length === 0 && found.length > 0 ? (
+                <p className="result__hint">Made from general knowledge only — you left your material out.</p>
+              ) : state.shape.context.length === 0 && (tools ?? []).length > 0 ? (
                 <p className="result__hint">Made from general knowledge only — nothing in your tools matched these words. Try picking other words.</p>
               ) : (
                 <p className="result__hint">
@@ -354,6 +375,16 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
                   </button>
                 );
               })}
+            </div>
+          )}
+          {found.some((r) => r.item?.text) && (
+            <div className="found">
+              <span className="eyebrow">What we found · tap to check</span>
+              {found
+                .filter((r) => r.item?.text)
+                .map((r) => (
+                  <Evidence key={r.source} source={r.source} label={r.item!.label} item={r.item!} words={onWords} />
+                ))}
             </div>
           )}
         </section>

@@ -82,6 +82,7 @@ export const CollectResult = z.object({
     z.object({
       label: z.string().min(1),
       text: z.string().default(""),
+      where: z.string().nullable().optional(), // 어디서 왔는지: 노션 경로, 리니어 팀·상태, 피그마 페이지
       date: z.string().nullable().optional(),
       url: z.string().nullable().optional(),
     }),
@@ -114,6 +115,7 @@ export const CollectManyResult = z.object({
       key: z.string(),
       label: z.string().min(1),
       text: z.string().default(""),
+      where: z.string().nullable().optional(), // 어디서 왔는지: 노션 경로, 리니어 팀·상태, 피그마 페이지
       date: z.string().nullable().optional(),
       url: z.string().nullable().optional(),
     }),

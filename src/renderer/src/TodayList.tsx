@@ -6,7 +6,7 @@ import type { AppData, Shortcut, TodoItem } from "@shared/types";
 import { localDate, pendingCarryOver, todayView } from "@shared/todos";
 import { displayAccelerator } from "@shared/hotkey";
 import type { FirstStepState } from "@shared/firstStep";
-import { AiSparkle, ArrowRightIcon, CalendarIcon, CheckIcon, ChevronRightIcon, FigmaMark, MoreIcon, PlayIcon, PlusIcon, SettingsIcon } from "./components/icons";
+import { AiSparkle, ArrowRightIcon, CalendarIcon, CheckIcon, ChevronRightIcon, FigmaMark, MoreIcon, PinIcon, PlayIcon, PlusIcon, SettingsIcon } from "./components/icons";
 import { FirstStepCard } from "./FirstStepCard";
 import { ShapePanel } from "./Shape";
 import { Attachments } from "./components/Attachments";
@@ -482,7 +482,7 @@ export function TodayList() {
   if (shapingTodo)
     return (
       <div className="window" ref={rootRef} tabIndex={0} onKeyDown={onKeyDown}>
-        <div className="shell" ref={shellRef}>
+        <div className={`shell${data.settings.listPin.pinned ? " is-pinned" : ""}`} ref={shellRef}>
           <ShapePanel
             key={shapingTodo.id}
             todo={shapingTodo}
@@ -500,7 +500,7 @@ export function TodayList() {
 
   return (
     <div className="window" ref={rootRef} tabIndex={0} onKeyDown={onKeyDown}>
-      <div className="shell" ref={shellRef}>
+      <div className={`shell${data.settings.listPin.pinned ? " is-pinned" : ""}`} ref={shellRef}>
         <header className="header">
           <div className="header__title">
             <h1>Today</h1>
@@ -512,6 +512,16 @@ export function TodayList() {
           </div>
           <button type="button" className="icon-button" aria-label="Add task" onClick={() => captureRef.current?.focus()}>
             <PlusIcon size={14} />
+          </button>
+          <button
+            type="button"
+            className={`icon-button${data.settings.listPin.pinned ? " is-on" : ""}`}
+            aria-label={data.settings.listPin.pinned ? "Unpin list" : "Pin list"}
+            aria-pressed={data.settings.listPin.pinned}
+            title={data.settings.listPin.pinned ? "Unpin — closes when you click elsewhere" : "Pin — stays open while you use other apps"}
+            onClick={() => api.pinList(!data.settings.listPin.pinned)}
+          >
+            <PinIcon size={14} />
           </button>
           <button type="button" className="icon-button" aria-label="Settings" onClick={() => api.openSettings()}>
             <SettingsIcon size={14} />

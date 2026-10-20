@@ -1,0 +1,61 @@
+[
+  {
+    "name": "빚기 열기 · 면접 준비",
+    "win": "list",
+    "main": "shape:면접 준비",
+    "until": "__e2e.$('.shape') && !__e2e.text().includes('Reading')",
+    "timeout": 60000
+  },
+  {
+    "name": "C1 · 찾은 자료 목록",
+    "win": "list",
+    "wait": 300,
+    "snap": true,
+    "run": "return __e2e.all('.found .evidence').map(e => e.textContent.trim());"
+  },
+  {
+    "name": "C1 · 펼치기",
+    "win": "list",
+    "run": "const b = __e2e.$('.found .evidence__row'); if (b) __e2e.click(b); return Boolean(b);",
+    "wait": 300,
+    "snap": true
+  },
+  {
+    "name": "C1 · 펼친 내용",
+    "win": "list",
+    "run": "const e = __e2e.$('.found .evidence.is-open'); return e ? { where: e.querySelector('.evidence__where')?.textContent, quote: e.querySelector('.evidence__quote')?.textContent, match: e.querySelector('.evidence__match')?.textContent } : null;"
+  },
+  {
+    "name": "Shape it",
+    "win": "list",
+    "run": "__e2e.click('.shape__foot .button--primary'); return true;",
+    "until": "__e2e.$('.result') || __e2e.$('.fs-card')",
+    "timeout": 90000
+  },
+  {
+    "name": "C2 · 근거 펼치기",
+    "win": "list",
+    "run": "const b = __e2e.$('.made .evidence__row'); if (b) __e2e.click(b); return __e2e.$('.result__title')?.textContent;",
+    "wait": 300,
+    "snap": true
+  },
+  {
+    "name": "C2 · 첫 행동과 근거",
+    "win": "list",
+    "run": "const e = __e2e.$('.made .evidence.is-open'); return { step: __e2e.$('.result__title')?.textContent, where: e?.querySelector('.evidence__where')?.textContent, quote: e?.querySelector('.evidence__quote')?.textContent, match: e?.querySelector('.evidence__match')?.textContent, actions: [...(e?.querySelectorAll('.evidence__actions button') ?? [])].map(b => b.textContent) };"
+  },
+  {
+    "name": "Leave this out → 다시 빚기",
+    "win": "list",
+    "run": "__e2e.click(__e2e.byText('Leave this out')); await new Promise(r => setTimeout(r, 1500)); return true;",
+    "until": "__e2e.$('.result') && !__e2e.$('.shape__section')",
+    "timeout": 90000,
+    "wait": 500,
+    "snap": true
+  },
+  {
+    "name": "다시 빚은 결과",
+    "win": "list",
+    "run": "return { step: __e2e.$('.result__title')?.textContent, from: __e2e.all('.made .made__label').map(l => l.textContent), hint: __e2e.$('.result__hint')?.textContent ?? null };"
+  }
+]

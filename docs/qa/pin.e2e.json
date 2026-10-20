@@ -1,0 +1,8 @@
+[
+  { "name": "목록 · 고정 버튼", "win": "list", "main": "openList", "wait": 600, "snap": true, "expect": "__e2e.$('[aria-label=\"Pin list\"]')" },
+  { "name": "고정", "win": "list", "run": "__e2e.click('[aria-label=\"Pin list\"]'); return true;", "wait": 600, "snap": true,
+    "expect": "__e2e.$('.shell.is-pinned') && __e2e.$('[aria-label=\"Unpin list\"]')" },
+  { "name": "고정 상태 저장", "win": "list", "run": "const d = await window.todoban.getData(); return d.settings.listPin;", "expect": "true" },
+  { "name": "고정 중 Esc는 닫지 않음", "win": "list", "run": "__e2e.key('.window', 'Escape'); await new Promise(r => setTimeout(r, 300)); return true;" },
+  { "name": "고정 풀기", "win": "list", "run": "__e2e.click('[aria-label=\"Unpin list\"]'); await new Promise(r => setTimeout(r, 400)); const d = await window.todoban.getData(); return d.settings.listPin;", "expect": "!__e2e.$('.shell.is-pinned')" }
+]

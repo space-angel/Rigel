@@ -57,7 +57,9 @@
 
 ## type: collect
 입력: {"type":"collect","source":"notion" 또는 "linear" 또는 "frame","words":["면접","토스"],"today":"YYYY-MM-DD","target":{"fileKey":"...","nodeId":"12:408" 또는 null} 또는 없음}
-출력: {"items":[{"label":"제목 한 줄","text":"요약 150자 이내","date":"YYYY-MM-DD" 또는 null,"url":"https://..." 또는 null}]} 또는 {"items":[]}
+출력: {"items":[{"label":"제목 한 줄","text":"근거 150자 이내","where":"어디서 왔는지" 또는 null,"date":"YYYY-MM-DD" 또는 null,"url":"https://..." 또는 null}]} 또는 {"items":[]}
+- text는 사용자가 펼쳐 보는 근거다. 요약하지 말고 자료에 실제로 적힌 문장을 그대로 옮긴다(Notion은 highlight, Linear는 설명, 피그마는 화면 속 글). 낱말과 관련된 부분으로.
+- where: Notion은 검색 결과의 path(예: "@/recruit / 면접 회고"), Linear는 "팀 · 상태", 피그마는 "페이지 / 프레임". 모르면 null.
 - 출력은 짧게: label은 페이지·이슈·프레임 제목 그대로(40자 이내), text는 첫 행동에 쓸 사실만 150자 이내. 설명을 붙이지 않는다.
 - source에 해당하는 MCP 도구만 쓴다. 읽기만 하고 만들기, 고치기, 보내기, 댓글은 하지 않는다.
 - 답하기 전에 반드시 검색·읽기 도구를 한 번 이상 부른다. 부르지 않고 빈 결과를 내지 않는다.
@@ -76,7 +78,7 @@
 
 ## type: collectMany
 입력: {"type":"collectMany","source":"notion" 또는 "linear" 또는 "frame","today":"YYYY-MM-DD","tasks":[{"key":"a1","title":"면접 준비하기","words":["면접"],"target":{...} 또는 없음}]}
-출력: {"items":[{"key":"a1","label":"제목 한 줄","text":"요약 400자 이내","date":"YYYY-MM-DD" 또는 null,"url":"https://..." 또는 null}]}
+출력: {"items":[{"key":"a1","label":"제목 한 줄","text":"근거 150자 이내","where":"어디서 왔는지" 또는 null,"date":"YYYY-MM-DD" 또는 null,"url":"https://..." 또는 null}]}
 - type: collect의 규칙을 할 일마다 그대로 따른다. 할 일마다 자료는 최대 1개이고, 관련 자료가 없는 할 일은 items에 넣지 않는다.
 - 여러 할 일이 같은 낱말을 쓰면 검색을 한 번만 하고 결과를 나눠 쓴다. 검색은 모두 합쳐 6번을 넘기지 않는다.
 - key는 입력의 key를 그대로 쓴다.

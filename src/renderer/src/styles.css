@@ -2475,3 +2475,112 @@ body::-webkit-scrollbar-thumb {
   align-items: center;
   gap: 6px;
 }
+
+/* 근거 펼쳐 보기: 첫 행동이 어디서 왔는지 */
+.evidence {
+  border-radius: var(--radius-r2-5);
+  border: 1px solid var(--white-08);
+  background: rgb(0 0 0 / 18%);
+}
+.evidence.is-open {
+  border-color: rgb(111 166 255 / 40%);
+}
+.evidence__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px 7px 8px;
+  font-size: 12px;
+  text-align: left;
+}
+.evidence__chev {
+  flex: none;
+  color: var(--color-text-tertiary);
+  transition: transform 120ms ease;
+}
+.evidence.is-open .evidence__chev {
+  transform: rotate(180deg);
+}
+.evidence__weak {
+  flex: none;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgb(255 106 42 / 14%);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--orange-200);
+}
+.evidence__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 12px 12px 38px;
+}
+.evidence__where {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  color: var(--color-text-tertiary);
+  overflow-wrap: anywhere;
+}
+.evidence__quote {
+  margin: 0;
+  padding: 8px 10px;
+  border-left: 2px solid rgb(111 166 255 / 60%);
+  border-radius: 0 6px 6px 0;
+  background: var(--white-06);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--white-90);
+  user-select: text;
+}
+.evidence__quote mark {
+  padding: 0 2px;
+  border-radius: 3px;
+  background: rgb(94 152 254 / 30%);
+  color: #fff;
+}
+.evidence__note {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+.evidence__match {
+  font-size: 11px;
+  color: var(--green-200);
+}
+.evidence__match.is-weak {
+  color: var(--orange-200);
+}
+.evidence__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.found {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+.found > .eyebrow {
+  padding: 0 4px;
+}
+
+/* 목록 고정: 머리를 잡고 옮긴다(버튼은 누를 수 있게). 고정 버튼은 켜지면 파랗게. */
+.shell.is-pinned .header,
+.shell.is-pinned .shape__head {
+  -webkit-app-region: drag;
+}
+.shell.is-pinned .header button,
+.shell.is-pinned .shape__head button {
+  -webkit-app-region: no-drag;
+}
+.icon-button.is-on {
+  border-color: rgb(111 166 255 / 55%);
+  background: rgb(94 152 254 / 18%);
+  color: var(--blue-300);
+}
