@@ -3054,11 +3054,11 @@ html[lang="ko"] :is(.eyebrow,
   position: absolute;
   left: -10%;
   top: -50px;
-  width: 70%;
-  height: 100px;
+  width: 60%;
+  height: 110px;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(110 160 255 / 22%), rgb(110 160 255 / 0%));
-  opacity: 0.6;
+  background: radial-gradient(closest-side, rgb(120 168 255 / 36%), rgb(120 168 255 / 0%));
+  opacity: 0.85;
   animation: glow-flow 14s ease-in-out infinite alternate;
   transition: opacity var(--dur-m) var(--ease-out);
 }
