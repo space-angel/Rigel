@@ -54,3 +54,10 @@ test("비율: 다른 묶음은 정리됨/첫 행동, 빈 칸과 빈 묶음은 �
 test("날짜 더하기는 월을 넘긴다", () => {
   assert.equal(addDays("2026-10-31", 1), "2026-11-01");
 });
+
+test("완료 칸 비율: 오늘 할 일 중 끝낸 몫과 남은 몫", () => {
+  const today = "2026-10-21";
+  const mk = (id: string, done: boolean): TodoItem => ({ id, title: id, plannedDate: today, dueDate: null, order: 0, completedAt: done ? `${today}T03:00:00.000Z` : null, createdAt: `${today}T01:00:00.000Z`, rawText: id, isClear: true, shortcutId: null, context: [] });
+  const r = dialRatio("done", dialBuckets([mk("a", true), mk("b", true), mk("c", false), mk("d", false), mk("e", false)], today));
+  assert.deepEqual(r.map((p) => [p.key, p.count, p.pct]), [["done", 2, 40], ["left", 3, 60]]);
+});

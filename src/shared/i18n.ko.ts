@@ -28,6 +28,9 @@ export const KO: Record<string, string> = {
   Settings: "설정",
   "Which tasks to show": "볼 할 일",
   "Nothing done yet today": "오늘 끝낸 일이 아직 없어요",
+  "Finish just one?": "하나만 끝내 볼까요? ·",
+  "{n} done today": "오늘 {n}개 끝냈어요",
+  "Yesterday you finished {n}": "어제는 {n}개 끝냈어요",
   "Tasks you check off show up here.": "할 일을 체크하면 여기에 모여요.",
   "Nothing overdue": "지난 할 일이 없어요",
   "You're on schedule.": "밀린 일 없이 잘 하고 있어요.",
@@ -54,6 +57,7 @@ export const KO: Record<string, string> = {
   "Open {name}": "{name} 열기",
   "Due {date}": "{date}까지",
   Ready: "바로 시작",
+  Left: "남음",
   Step: "첫 행동 필요",
 
   // 마감

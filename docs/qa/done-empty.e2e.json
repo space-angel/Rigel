@@ -1,0 +1,38 @@
+[
+  {
+    "name": "열기",
+    "win": "list",
+    "main": "openList",
+    "until": "__e2e.$('.now-card')",
+    "wait": 500,
+    "note": "seed.py list에서 끝낸 할 일을 뺀 데이터, TODOBAN_LANG=ko"
+  },
+  {
+    "name": "완료 · 비었을 때",
+    "win": "list",
+    "run": "__e2e.all('.dial__label').find(l => l.textContent === '완료').dispatchEvent(new MouseEvent('click', { bubbles: true })); await new Promise(r => setTimeout(r, 700)); return { h: Math.round(__e2e.$('.shell').getBoundingClientRect().height), title: __e2e.$('.empty__title')?.textContent, cta: __e2e.$('.empty__cta')?.textContent };",
+    "snap": true,
+    "expect": "__e2e.$('.empty__cta')",
+    "note": "seed.py list에서 끝낸 할 일을 뺀 데이터, TODOBAN_LANG=ko"
+  },
+  {
+    "name": "내일과 높이 비교용 · 나중",
+    "win": "list",
+    "run": "__e2e.all('.dial__label').find(l => l.textContent === '나중').dispatchEvent(new MouseEvent('click', { bubbles: true })); await new Promise(r => setTimeout(r, 700)); return { h: Math.round(__e2e.$('.shell').getBoundingClientRect().height), rows: __e2e.all('.row').length };",
+    "note": "seed.py list에서 끝낸 할 일을 뺀 데이터, TODOBAN_LANG=ko"
+  },
+  {
+    "name": "완료로 다시",
+    "win": "list",
+    "run": "__e2e.all('.dial__label').find(l => l.textContent === '완료').dispatchEvent(new MouseEvent('click', { bubbles: true })); await new Promise(r => setTimeout(r, 700)); return Math.round(__e2e.$('.shell').getBoundingClientRect().height);",
+    "note": "seed.py list에서 끝낸 할 일을 뺀 데이터, TODOBAN_LANG=ko"
+  },
+  {
+    "name": "버튼 누르면 오늘로 가서 그 할 일을 고른다",
+    "win": "list",
+    "run": "__e2e.click('.empty__cta'); await new Promise(r => setTimeout(r, 700)); return { dial: __e2e.$('.dial__label.is-active').textContent, selected: __e2e.$('.is-selected .now-card__title, .is-selected .row__title, .now-card.is-selected .now-card__title')?.textContent, isNew: !!__e2e.$('.now-card.is-new') };",
+    "snap": true,
+    "expect": "__e2e.$('.dial__label.is-active').textContent === '오늘' && __e2e.$('.now-card.is-selected')",
+    "note": "seed.py list에서 끝낸 할 일을 뺀 데이터, TODOBAN_LANG=ko"
+  }
+]

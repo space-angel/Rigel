@@ -1,0 +1,18 @@
+[
+  {
+    "name": "열기",
+    "win": "list",
+    "main": "openList",
+    "until": "__e2e.$('.now-card')",
+    "wait": 500,
+    "note": "seed.py list + 어제 끝낸 3개 + 오늘 끝낸 1개 더, TODOBAN_LANG=ko"
+  },
+  {
+    "name": "완료 · 끝낸 일이 있을 때",
+    "win": "list",
+    "run": "__e2e.all('.dial__label').find(l => l.textContent === '완료').dispatchEvent(new MouseEvent('click', { bubbles: true })); await new Promise(r => setTimeout(r, 700)); return { head: __e2e.$('.done-head')?.textContent, rows: __e2e.all('.row').map(r => r.querySelector('.row__title').textContent + ' ' + (r.querySelector('.row__date')?.textContent ?? '')), yesterday: __e2e.$('.done-yesterday')?.textContent };",
+    "snap": true,
+    "expect": "__e2e.$('.done-head') && __e2e.$('.done-yesterday') && __e2e.all('.row .row__date').length === 2",
+    "note": "seed.py list + 어제 끝낸 3개 + 오늘 끝낸 1개 더, TODOBAN_LANG=ko"
+  }
+]

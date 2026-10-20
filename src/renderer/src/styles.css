@@ -456,7 +456,52 @@ kbd {
 }
 .empty__sub {
   font-size: 12px;
+  line-height: 18px;
   color: var(--color-text-secondary);
+}
+/* 빈 완료 칸: 설명 한 줄 자리에 오늘 맨 위 할 일로 가는 버튼 */
+.empty__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  font-size: 12px;
+  line-height: 18px;
+  height: 18px;
+  padding: 0;
+  color: var(--color-text-secondary);
+}
+.empty__cta-lead {
+  flex: none;
+}
+.empty__cta-task {
+  min-width: 0;
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--blue-300);
+}
+.empty__cta svg {
+  flex: none;
+  color: var(--blue-300);
+  transition: transform var(--dur-s) var(--ease-out);
+}
+.empty__cta:hover svg {
+  transform: translateX(2px);
+}
+/* 완료 칸 머리: 오늘 끝낸 개수 하나만 크게 */
+.done-head {
+  padding: 2px 4px 6px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+.done-yesterday {
+  padding: 6px 4px 0;
+  font-size: 12px;
+  color: var(--color-text-tertiary);
 }
 
 .section {
@@ -2107,6 +2152,17 @@ body::-webkit-scrollbar-thumb {
 .ratio__seg--planned {
   background: var(--gradient-blue);
   color: #fff;
+}
+/* 완료 칸: 끝낸 몫이 주인공(파랑), 남은 몫은 회색 */
+.ratio--done .ratio__seg--done {
+  border-color: transparent;
+  background: var(--gradient-blue);
+  color: #fff;
+}
+.ratio__seg--left {
+  border: 1px solid var(--white-10);
+  background: var(--white-06);
+  color: var(--white-55);
 }
 .ratio__seg--step {
   border: 1px dashed var(--white-16);

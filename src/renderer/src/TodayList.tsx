@@ -30,7 +30,7 @@ function Due({ item, long }: { item: TodoItem; long?: boolean }) {
 }
 import { FanDial } from "./components/FanDial";
 import { RatioBar } from "./components/RatioBar";
-import { DIAL_LABEL, DIAL_VIEWS, dialBuckets, dialRatio, type DialView } from "@shared/dial";
+import { DIAL_LABEL, DIAL_VIEWS, addDays, dialBuckets, dialRatio, type DialView } from "@shared/dial";
 
 const api = window.todoban;
 
@@ -296,16 +296,30 @@ const EMPTY_TEXT: Record<Exclude<DialView, "today">, { title: string; sub: strin
   later: { title: msg("Nothing set aside"), sub: msg("Tasks you move to later wait here.") },
 };
 
-function EmptyState({ title, sub }: { title: string; sub: string }) {
+// sub 자리에 action을 두면 설명 대신 한 줄짜리 버튼이 들어간다(높이는 같다).
+function EmptyState({ title, sub, action }: { title: string; sub: string; action?: { label: string; onClick: () => void } }) {
   return (
     <div className="empty motion-rise">
       <span className="empty__mark">
         <CheckIcon size={18} />
       </span>
       <p className="empty__title">{title}</p>
-      <p className="empty__sub">{sub}</p>
+      {action ? (
+        <button type="button" className="empty__cta" onClick={action.onClick}>
+          <span className="empty__cta-lead">{sub}</span>
+          <span className="empty__cta-task">{action.label}</span>
+          <ArrowRightIcon size={11} />
+        </button>
+      ) : (
+        <p className="empty__sub">{sub}</p>
+      )}
     </div>
   );
+}
+
+// 완료 칸 줄 끝의 끝낸 시각 (오전 9:42)
+function doneTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString(loc(), { hour: "numeric", minute: "2-digit" });
 }
 
 function shortDate(date: string): string {
@@ -515,6 +529,12 @@ export function TodayList() {
   const carry = useMemo(() => (data ? pendingCarryOver(data, localDate()) : []), [data]);
   const view = useMemo(() => (data ? todayView(data.todos, localDate(), carry) : null), [data, carry]);
   const buckets = useMemo(() => (data ? dialBuckets(data.todos, localDate(), carry) : null), [data, carry]);
+  // 어제 끝낸 개수. 완료 칸 맨 아래에 한 줄로만 보여 준다(비교하거나 이어 가라고 하지 않는다).
+  const yesterdayDone = useMemo(() => {
+    if (!data) return 0;
+    const y = addDays(localDate(), -1);
+    return data.todos.filter((t) => t.completedAt && localDate(new Date(t.completedAt)) === y).length;
+  }, [data]);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
   if (!data || !view || !buckets) return null;
@@ -680,13 +700,34 @@ export function TodayList() {
         <div className="scroll" ref={scrollRef}>
           {dial !== "today" && buckets[dial].length === 0 ? (
             <div className={dialDir ? `swap--${dialDir}` : undefined} key={dial}>
-              <EmptyState title={t(EMPTY_TEXT[dial].title)} sub={t(EMPTY_TEXT[dial].sub)} />
+              {/* 완료 칸이 비었으면 끝내 볼 오늘 맨 위 할 일을 가리킨다. 누르면 오늘로 돌아가 그 할 일을 고른다. */}
+              {dial === "done" && now ? (
+                <EmptyState
+                  title={t(EMPTY_TEXT.done.title)}
+                  sub={t("Finish just one?")}
+                  action={{
+                    label: now.title,
+                    onClick: () => {
+                      turnDial("today");
+                      setSelected(0);
+                      setHighlight([now.id]);
+                    },
+                  }}
+                />
+              ) : (
+                <EmptyState title={t(EMPTY_TEXT[dial].title)} sub={t(EMPTY_TEXT[dial].sub)} />
+              )}
             </div>
           ) : dial !== "today" ? (
             <section className={`section section--view${dialDir ? ` swap--${dialDir}` : ""}`} key={dial}>
-              <h2 className="section__label">
-                {t(DIAL_LABEL[dial])} · {buckets[dial].length}
-              </h2>
+              {/* 완료 칸은 오늘 한 일을 큰 숫자 하나로 보여 준다. 다른 칸은 이름표만. */}
+              {dial === "done" ? (
+                <h2 className="done-head">{t("{n} done today", { n: buckets.done.length })}</h2>
+              ) : (
+                <h2 className="section__label">
+                  {t(DIAL_LABEL[dial])} · {buckets[dial].length}
+                </h2>
+              )}
               {buckets[dial].map((item, i) => (
                 <Row
                   key={item.id}
@@ -700,7 +741,9 @@ export function TodayList() {
                   edit={edit(item)}
                   isNew={highlight.includes(item.id)}
                   trailing={
-                    dial !== "done" && (
+                    dial === "done" ? (
+                      item.completedAt && <span className="row__date">{doneTime(item.completedAt)}</span>
+                    ) : (
                       <>
                         {item.plannedDate && item.plannedDate !== item.dueDate && <span className="row__date">{shortDate(item.plannedDate)}</span>}
                         <button
@@ -719,6 +762,7 @@ export function TodayList() {
                   }
                 />
               ))}
+              {dial === "done" && yesterdayDone > 0 && <p className="done-yesterday">{t("Yesterday you finished {n}", { n: yesterdayDone })}</p>}
               <button type="button" className="section__toggle" onClick={() => turnDial("today")}>
                 {t("Back to Today")} <ChevronRightIcon size={12} />
               </button>

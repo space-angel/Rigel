@@ -41,12 +41,12 @@ export function dialBuckets(todos: TodoItem[], today: string, hidden: TodoItem[]
 }
 
 export interface RatioPart {
-  key: "done" | "ready" | "step" | "planned";
+  key: "done" | "ready" | "step" | "planned" | "left";
   count: number;
   pct: number;
 }
 
-// 비율 막대. 오늘은 끝냄 / 바로 시작 / 첫 행동 필요, 다른 묶음은 정리됨 / 첫 행동 필요.
+// 비율 막대. 오늘은 끝냄 / 바로 시작 / 첫 행동 필요, 완료는 오늘 할 일 중 끝냄 / 남음, 다른 묶음은 정리됨 / 첫 행동 필요.
 // 퍼센트는 합이 100이 되도록 가장 큰 칸에서 반올림 오차를 맞춘다. 빈 칸은 뺀다.
 export function dialRatio(view: DialView, b: DialBuckets): RatioPart[] {
   const parts: Omit<RatioPart, "pct">[] =
@@ -57,7 +57,13 @@ export function dialRatio(view: DialView, b: DialBuckets): RatioPart[] {
           { key: "step", count: b.today.filter((t) => !t.isClear).length },
         ]
       : view === "done"
-        ? [{ key: "done", count: b.done.length }]
+        ? // 아직 끝낸 게 없으면 막대를 그리지 않는다(빈 화면이 같은 말을 한다).
+          b.done.length === 0
+          ? []
+          : [
+            { key: "done", count: b.done.length },
+            { key: "left", count: b.today.length },
+          ]
         : [
             { key: "planned", count: b[view].filter((t) => t.isClear).length },
             { key: "step", count: b[view].filter((t) => !t.isClear).length },
