@@ -57,7 +57,7 @@ export class FirstStepManager {
     this.onChange(this.all());
 
     try {
-      const body = firstStepRequest({ title: todo.title, rawText: todo.rawText, answer, previous, shape }, localDate(), data.shortcuts);
+      const body = firstStepRequest({ title: todo.title, rawText: todo.rawText, answer, previous, shape, dueDate: todo.dueDate }, localDate(), data.shortcuts);
       const r = await runClaude(body, FirstStepResult, {
         configuredPath: data.settings.claudePath,
         model: data.settings.model,

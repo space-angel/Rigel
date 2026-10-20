@@ -7,6 +7,7 @@ export interface ReviewDraft {
   key: string;
   title: string;
   plannedDate: string | null;
+  dueDate?: string | null; // 마감·행사 날
   isClear: boolean;
   shortcutId: string | null;
   context?: ContextNote[]; // 넣을 때 할 일에 붙일 자료

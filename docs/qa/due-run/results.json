@@ -1,0 +1,128 @@
+[
+  {
+    "name": "긴 생각 (화요일)",
+    "win": "quick",
+    "ok": true,
+    "ms": 29,
+    "value": true
+  },
+  {
+    "name": "확인 창 결과",
+    "win": "review",
+    "ok": true,
+    "ms": 9722,
+    "snap": "02-review.png"
+  },
+  {
+    "name": "확인 창 · 할 날짜와 마감",
+    "win": "review",
+    "ok": true,
+    "ms": 1,
+    "value": [
+      "토스 PO 면접 자기소개 다시 쓰기 | do Today | 3 days left",
+      "포트폴리오 피드백 반영하기 | do Today | 3 days left"
+    ]
+  },
+  {
+    "name": "Add",
+    "win": "review",
+    "ok": true,
+    "ms": 4,
+    "value": true
+  },
+  {
+    "name": "목록 · 오늘에 들어오고 D-3",
+    "win": "list",
+    "ok": true,
+    "ms": 1123,
+    "snap": "05-list.png"
+  },
+  {
+    "name": "목록 값",
+    "win": "list",
+    "ok": true,
+    "ms": 2,
+    "value": {
+      "dial": "Today",
+      "newRows": [
+        "토스 PO 면접 자기소개 다시 쓰기 D-3",
+        "포트폴리오 피드백 반영하기 D-3"
+      ]
+    }
+  },
+  {
+    "name": "빚기 · 크기 다이얼이 마감을 안다",
+    "win": "list",
+    "ok": false,
+    "ms": 60412,
+    "value": true,
+    "error": "기다림 초과: __e2e.$('.shape') && !__e2e.text().includes('Reading')",
+    "snap": "07-list.png"
+  },
+  {
+    "name": "빚기 값",
+    "win": "list",
+    "ok": false,
+    "ms": 345,
+    "value": {
+      "size": "Today",
+      "hint": ""
+    },
+    "error": "기대와 다름: __e2e.text().includes('Due · 3 days left') · 화면: TodayTUE · OCT 20· 7 open2 unclearDoneOverdueTodayTomorrowLater13%62%Ready25%Now포폴 올리브영 장표 지표 문장 고치기 포폴우테크 과제 README 마무리하기사일로 발표 자료 3~5번 장표 검토하기사일로면접 준비 Shape이력서 PDF 다시 내보내기토스 PO 면접 자기소개 다시 쓰기D-3포트폴리오 피드백 반영하기D-3 Shape포폴 To pick up a draggable item, press the space bar. While dragging, use the arrow",
+    "snap": "08-list.png"
+  },
+  {
+    "name": "Shape it",
+    "win": "list",
+    "ok": false,
+    "ms": 351,
+    "error": "못 찾음: .shape__foot .button--primary",
+    "snap": "09-list.png"
+  },
+  {
+    "name": "결과 배지",
+    "win": "list",
+    "ok": false,
+    "ms": 352,
+    "value": "null | null",
+    "error": "Cannot read properties of null (reading 'includes')",
+    "snap": "10-list.png"
+  },
+  {
+    "name": "돌아가기",
+    "win": "list",
+    "ok": false,
+    "ms": 360,
+    "error": "못 찾음: .back",
+    "snap": "11-list.png"
+  },
+  {
+    "name": "짧은 입력 · 금요일까지",
+    "win": "quick",
+    "ok": true,
+    "ms": 10,
+    "value": true
+  },
+  {
+    "name": "짧은 입력 · 오늘 + D-3",
+    "win": "list",
+    "ok": true,
+    "ms": 664,
+    "value": true,
+    "snap": "13-list.png"
+  },
+  {
+    "name": "짧은 입력 · 내일 운동",
+    "win": "quick",
+    "ok": true,
+    "ms": 205,
+    "value": true
+  },
+  {
+    "name": "짧은 입력 · Tomorrow로",
+    "win": "list",
+    "ok": true,
+    "ms": 845,
+    "snap": "15-list.png"
+  }
+]

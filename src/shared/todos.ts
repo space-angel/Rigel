@@ -62,12 +62,16 @@ export function applyAction(data: AppData, action: TodoAction, now: Date = new D
     case "add": {
       const title = action.title.trim();
       if (!title) return data;
-      // 새 할 일은 오늘 목록 맨 아래에 들어간다.
-      const last = todayView(todos, today).open.at(-1);
+      // 새 할 일은 그 묶음(보통 오늘) 맨 아래에 들어간다. 짧은 입력의 “내일 …”은 내일로.
+      const plannedDate = action.plannedDate === undefined ? today : action.plannedDate;
+      const forToday = plannedDate !== null && plannedDate <= today;
+      const v = todayView(todos, today);
+      const last = (forToday ? v.open : v.later).at(-1);
       todos.push({
         id: newId(),
         title,
-        plannedDate: today,
+        plannedDate,
+        dueDate: action.dueDate ?? null,
         order: orderBetween(last?.order ?? null, null),
         completedAt: null,
         createdAt: now.toISOString(),
@@ -94,6 +98,7 @@ export function applyAction(data: AppData, action: TodoAction, now: Date = new D
           id: newId(),
           title,
           plannedDate: item.plannedDate,
+          dueDate: item.dueDate ?? null,
           order,
           completedAt: null,
           createdAt: now.toISOString(),
@@ -138,6 +143,12 @@ export function applyAction(data: AppData, action: TodoAction, now: Date = new D
       if (action.plannedDate !== null && action.plannedDate <= today) return applyAction(data, { type: "moveToToday", id: action.id }, now);
       t.plannedDate = action.plannedDate;
       t.order = orderBetween(Math.max(...todos.map((x) => x.order)), null);
+      break;
+    }
+    case "setDue": {
+      const t = find(action.id);
+      if (!t) return data;
+      t.dueDate = action.dueDate;
       break;
     }
     case "attach": {

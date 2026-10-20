@@ -18,7 +18,8 @@ export type ContextNote = z.infer<typeof ContextNote>;
 export const TodoItem = z.object({
   id: z.string(),
   title: z.string(),
-  plannedDate: DateString.nullable(),
+  plannedDate: DateString.nullable(), // 언제 할지
+  dueDate: DateString.nullable().default(null), // 언제까지인지(마감·행사 날). 준비 할 일은 보통 마감 전에 한다
   order: z.number(),
   completedAt: z.string().nullable(),
   createdAt: z.string(),
@@ -96,11 +97,11 @@ export function emptyData(): AppData {
 
 // 렌더러가 메인 프로세스에 보내는 변경 요청. 메인이 적용하고 새 상태를 돌려준다.
 export type TodoAction =
-  | { type: "add"; title: string; rawText?: string; shortcutId?: string | null }
+  | { type: "add"; title: string; rawText?: string; shortcutId?: string | null; plannedDate?: string | null; dueDate?: string | null }
   | {
       type: "addMany";
       rawText: string;
-      items: { title: string; plannedDate: string | null; isClear: boolean; shortcutId: string | null; context?: ContextNote[] }[];
+      items: { title: string; plannedDate: string | null; dueDate?: string | null; isClear: boolean; shortcutId: string | null; context?: ContextNote[] }[];
     }
   | { type: "applyFirstStep"; id: string; title: string; shortcutId: string | null; toToday?: boolean }
   | { type: "toggle"; id: string }
@@ -110,6 +111,7 @@ export type TodoAction =
   | { type: "schedule"; id: string; plannedDate: string | null }
   | { type: "restore"; item: TodoItem }
   | { type: "attach"; id: string; notes: ContextNote[] }
+  | { type: "setDue"; id: string; dueDate: string | null }
   | { type: "reorder"; id: string; beforeId: string | null; afterId: string | null }
   | { type: "setShortcut"; id: string; shortcutId: string | null }
   | { type: "saveShortcut"; shortcut: ShortcutInput & { id?: string } }

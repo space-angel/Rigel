@@ -1,0 +1,101 @@
+[
+  {
+    "name": "긴 생각 (화요일)",
+    "win": "quick",
+    "run": "__e2e.type('textarea', '이번 주 금요일 토스 PO 면접이라 자기소개 다시 쓰고 포트폴리오 피드백도 반영해야 함'); __e2e.key('textarea', 'Enter'); return true;"
+  },
+  {
+    "name": "확인 창 결과",
+    "win": "review",
+    "until": "__e2e.all('.draft').length > 0",
+    "timeout": 60000,
+    "wait": 300,
+    "snap": true
+  },
+  {
+    "name": "확인 창 · 할 날짜와 마감",
+    "win": "review",
+    "run": "return __e2e.all('.draft').map(d => d.querySelector('.draft__title').value + ' | do ' + d.querySelector('.pill').textContent.trim() + ' | ' + (d.querySelector('.due-chip')?.textContent.trim() ?? 'no due'));",
+    "expect": "__e2e.all('.draft').every(d => d.querySelector('.pill').textContent.includes('Today') && d.querySelector('.due-chip'))"
+  },
+  {
+    "name": "Add",
+    "win": "review",
+    "run": "__e2e.click('.review__footer .button--primary'); return true;"
+  },
+  {
+    "name": "목록 · 오늘에 들어오고 D-3",
+    "win": "list",
+    "until": "__e2e.$('.is-new')",
+    "wait": 500,
+    "snap": true
+  },
+  {
+    "name": "목록 값",
+    "win": "list",
+    "run": "return { dial: __e2e.$('.dial__label.is-active').textContent, newRows: __e2e.all('.is-new').map(r => r.querySelector('.row__title, .now-card__title').textContent + ' ' + (r.querySelector('.due-badge')?.textContent ?? '')) };",
+    "expect": "__e2e.$('.dial__label.is-active').textContent === 'Today' && __e2e.all('.is-new .due-badge').length >= 2"
+  },
+  {
+    "name": "빚기 · 크기 다이얼이 마감을 안다",
+    "win": "list",
+    "until": "__e2e.$('.shape') && !__e2e.text().includes('Reading')",
+    "timeout": 60000,
+    "snap": true,
+    "main": "shape:포트폴리오 피드백 반영하기"
+  },
+  {
+    "name": "빚기 값",
+    "win": "list",
+    "run": "return { size: __e2e.$('.dial__label.is-active').textContent, hint: __e2e.all('.shape__label-row .eyebrow').map(e => e.textContent).join(' / ') };",
+    "expect": "__e2e.text().includes('Due · 3 days left')"
+  },
+  {
+    "name": "Shape it",
+    "win": "list",
+    "run": "__e2e.click('.shape__foot .button--primary'); return true;",
+    "until": "__e2e.$('.result') || __e2e.$('.fs-card')",
+    "timeout": 90000,
+    "snap": true
+  },
+  {
+    "name": "결과 배지",
+    "win": "list",
+    "run": "return __e2e.text('.result__top') + ' | ' + __e2e.text('.result__title');",
+    "expect": "__e2e.text('.result__top').toUpperCase().includes('BEFORE FRI')"
+  },
+  {
+    "name": "돌아가기",
+    "win": "list",
+    "run": "__e2e.click('.back'); return true;",
+    "wait": 300
+  },
+  {
+    "name": "짧은 입력 · 금요일까지",
+    "win": "quick",
+    "run": "__e2e.type('textarea', '금요일까지 자소서 쓰기'); __e2e.key('textarea', 'Enter'); return true;"
+  },
+  {
+    "name": "짧은 입력 · 오늘 + D-3",
+    "win": "list",
+    "until": "__e2e.$('.is-new')",
+    "wait": 300,
+    "snap": true,
+    "run": "return true;",
+    "expect": "__e2e.$('.dial__label.is-active').textContent === 'Today' && __e2e.$('.is-new .due-badge')?.textContent === 'D-3'"
+  },
+  {
+    "name": "짧은 입력 · 내일 운동",
+    "win": "quick",
+    "run": "__e2e.type('textarea', '내일 운동'); __e2e.key('textarea', 'Enter'); return true;",
+    "wait": 200
+  },
+  {
+    "name": "짧은 입력 · Tomorrow로",
+    "win": "list",
+    "until": "__e2e.$('.is-new')",
+    "wait": 500,
+    "snap": true,
+    "expect": "__e2e.$('.dial__label.is-active').textContent === 'Tomorrow' && !__e2e.$('.is-new .due-badge')"
+  }
+]

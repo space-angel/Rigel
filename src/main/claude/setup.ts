@@ -56,6 +56,7 @@ const PREVIOUS_BUNDLED = new Set([
   "633916a1e84a85558155038156b3002909c2bb17545b2d9cc8e60b254108fe41", // 69d3816 7-c
   "67bdf26c67bdad70e8e26393cbae37e028f613e071c026c81c8ab925f202cd65", // 1baa55d MCP 매칭
   "89e33fe5d067f01b31cbfd6d57026f8d1abf08ebbd430069c7b74934798511aa", // 18a5af4 collectMany
+  "cba61489de09ed312e1de21981092a77510729ff98cb38eb28abe59d16d48109", // c79a2b7 Notion 최적화
 ]);
 
 // 앱 기능이 기대하는 요청 종류. 사용자가 고친 CLAUDE.md에 이 중 하나라도 없으면 그 기능이 동작하지 않는다.

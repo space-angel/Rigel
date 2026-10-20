@@ -3,6 +3,7 @@ import type { ReviewDraft, ReviewState } from "@shared/review";
 import type { ContextNote, Shortcut } from "@shared/types";
 import { MCP_SERVICES, type McpSource } from "@shared/mcp";
 import { noteOpen } from "@shared/shape";
+import { dueLabel } from "@shared/due";
 import { SourceIcon } from "./components/SourceIcon";
 import { Spinner } from "./components/icons";
 import { localDate } from "@shared/todos";
@@ -86,9 +87,17 @@ function DraftRow({
         </button>
       </div>
       <div className="draft__meta">
-        <button type="button" className="pill" onClick={cycleDay}>
+        <button type="button" className="pill" onClick={cycleDay} title="When you'll do it">
           {dayLabel(draft.plannedDate, today)} <ChevronDownIcon size={12} />
         </button>
+        {draft.dueDate && (
+          <span className={`due-chip due-badge--${dueLabel(draft.dueDate, today).tone}`} title={`Due ${draft.dueDate}`}>
+            {dueLabel(draft.dueDate, today).text}
+            <button type="button" aria-label="Remove deadline" onClick={() => onChange({ dueDate: null })}>
+              <CloseIcon size={10} />
+            </button>
+          </span>
+        )}
         {shortcuts.length > 0 && (
           <label className="pill pill--select">
             ▶︎{" "}

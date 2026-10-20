@@ -107,7 +107,7 @@
 
 1. 사용자가 단축키를 누르면 화면 가운데에 빠른 입력창이 열립니다. (B1)
 2. 사용자가 생각을 적고 Enter를 누릅니다.
-3. 입력이 한 줄이고 30자 이하면, 앱은 AI를 호출하지 않고 그대로 할 일 하나로 오늘 목록에 넣습니다. 이 할 일은 `isClear = false`로 저장합니다. 부르는 말이 들어 있으면 바로가기를 앱이 직접 연결합니다.
+3. 입력이 한 줄이고 30자 이하면, 앱은 AI를 호출하지 않고 그대로 할 일 하나로 넣습니다. 이 할 일은 `isClear = false`로 저장합니다. 부르는 말이 들어 있으면 바로가기를 앱이 직접 연결합니다. 날짜 말도 앱이 읽습니다(`shared/due.ts`): “금요일까지 …”, “금요일 면접 준비”는 마감 금요일·할 날짜 오늘, “내일 운동”은 할 날짜 내일.
 4. 그 외에는 확인 창이 열리고 “Claude is splitting your thought…”와 원래 문장을 표시합니다. 앱은 Claude Code를 호출합니다. (B2)
 5. 응답이 오면 확인 창에 할 일 목록을 표시합니다. 각 할 일에는 제목, Today/Later/날짜, 연결된 바로가기, Clear/Unclear가 보입니다. 첫 번째 Unclear 할 일이 주인공 카드입니다. (B3)
 6. 사용자는 제목을 고치거나, 할 일을 빼거나, 날짜와 바로가기를 바꿉니다.
@@ -142,7 +142,8 @@
 |---|---|---|---|
 | id | string (UUID) | 앱 | 구분용 값입니다 |
 | title | string | AI 제안, 사용자 수정 | “대상 + 동사” 형태의 한 줄입니다 |
-| plannedDate | string \| null (YYYY-MM-DD) | AI 제안, 사용자 수정 | 할 날짜입니다. 비어 있으면 나중입니다 |
+| plannedDate | string \| null (YYYY-MM-DD) | AI 제안, 사용자 수정 | 할 날짜(언제 할지)입니다. 비어 있으면 나중입니다 |
+| dueDate | string \| null (YYYY-MM-DD) | AI 제안, 짧은 입력은 앱이 읽음, 사용자 지우기 | 마감(언제까지인지, 행사 날). 준비 할 일은 마감 전 보통 오늘 합니다. 목록에 D-3 배지, 빚기 크기 다이얼 기본값과 결과의 “before FRI”에 씁니다 |
 | order | number | 사용자(끌기) | 목록 순서입니다. 작을수록 위에 표시합니다. 우선순위 필드를 대신합니다 |
 | completedAt | string \| null (ISO) | 앱(체크할 때) | 비어 있으면 끝나지 않은 할 일입니다 |
 | createdAt | string (ISO) | 앱 | 만든 시각입니다 |
@@ -226,8 +227,10 @@ CLAUDE.md 초안:
   예: "포폴 손보기" false, "포폴 3번 장표 지표 문장 고치기" true
 
 ## 날짜 규칙
-- "오늘", "내일", "금요일까지" 같은 말이 있으면 today 기준으로 plannedDate를 YYYY-MM-DD로 쓴다.
-- 날짜 말이 없으면 plannedDate는 오늘이다. "언젠가", "나중에"면 null이다.
+- plannedDate(언제 할지)와 dueDate(언제까지, 행사 날)를 나눈다.
+- 행사·마감을 준비하는 일은 dueDate = 그 날, plannedDate = 오늘. 행사 그 자체는 둘 다 그 날.
+- "내일 운동"처럼 할 날을 말하면 plannedDate = 그 날, dueDate = null. 날짜 말이 없으면 plannedDate는 오늘.
+  (예전 규칙은 “금요일까지”를 plannedDate로 써서 준비 할 일이 마감 날로 밀렸다. 2026-10-20 고침)
 
 ## 바로가기 규칙
 - 요청 본문의 shortcuts 중 keywords와 뜻이 맞는 것이 있으면 그 name을 shortcut에 쓴다. 없으면 null이다.

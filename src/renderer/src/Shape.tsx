@@ -93,7 +93,10 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
   const foundKey = found.map((r) => `${r.source}:${r.item?.label}`).join("|");
   const selected = found.filter((r) => wanted(r.source)).map((r) => r.source);
   const selectedKey = selected.join(",");
-  const deadline = found.find((r) => r.source === "calendar" && selected.includes("calendar"))?.item?.date ?? null;
+  // 크기 기본값은 가까운 마감으로 정한다: 할 일의 마감, 또는 캘린더에서 찾은 일정.
+  const calendarDate = found.find((r) => r.source === "calendar" && selected.includes("calendar"))?.item?.date ?? null;
+  const deadline = [todo.dueDate, calendarDate].filter((d): d is string => Boolean(d)).sort()[0] ?? null;
+  const deadlineFrom = deadline && deadline === todo.dueDate ? "Due" : "From calendar";
   const dial = defaultMinutes(deadline, today);
 
   // 고른 도구가 바뀌면 비율을 기본값에서 다시 나눈다.
@@ -177,7 +180,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
       .sort((a, b) => b.weight - a.weight)
       .map((s) => found.find((r) => r.source === s.source)?.item)
       .find((item) => item?.open);
-    const due = state.shape.context.find((c) => c.source === "calendar")?.date;
+    const due = todo.dueDate ?? state.shape.context.find((c) => c.source === "calendar")?.date;
     return (
       <div className="shape">
         {header("Your first step")}
@@ -360,7 +363,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
             <h2 className="eyebrow">03 · How big?</h2>
             {dial.daysLeft !== null && minutes === null && (
               <span className="eyebrow">
-                From calendar · {dial.daysLeft} {dial.daysLeft === 1 ? "day" : "days"} left
+                {deadlineFrom} · {dial.daysLeft === 0 ? "today" : `${dial.daysLeft} ${dial.daysLeft === 1 ? "day" : "days"} left`}
               </span>
             )}
           </div>

@@ -2376,3 +2376,55 @@ body::-webkit-scrollbar-thumb {
   .row.is-new, .now-card.is-new { animation-duration: 0.01s; }
   .row.is-new { box-shadow: inset 0 0 0 1px rgb(111 166 255 / 85%); }
 }
+
+/* 마감 배지: 지남(주황 진하게) · 오늘·내일(주황) · 여유(흐리게) */
+.due-badge {
+  flex: none;
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.due-badge--calm {
+  background: var(--white-06);
+  color: var(--white-55);
+}
+.due-badge--soon {
+  background: rgb(255 106 42 / 14%);
+  color: var(--orange-200);
+}
+.due-badge--late {
+  background: rgb(255 106 42 / 26%);
+  color: #ffd2bd;
+}
+.now-card__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.due-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 4px 0 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 500;
+}
+.due-chip button {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: inherit;
+  opacity: 0.7;
+}
+.due-chip button:hover {
+  opacity: 1;
+  background: var(--white-10);
+}

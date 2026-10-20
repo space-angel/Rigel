@@ -7,6 +7,8 @@ import { DateString, type Shortcut } from "./types.ts";
 export const SplitTask = z.object({
   title: z.string().min(1),
   plannedDate: DateString.nullable(),
+  // 마감·행사 날. 예전 규칙 파일이나 모델이 빼먹어도 읽히도록 없으면 null.
+  dueDate: DateString.nullable().optional().transform((v) => v ?? null),
   isClear: z.boolean(),
   shortcut: z.string().nullable(),
 });
@@ -88,6 +90,7 @@ export interface FirstStepInput {
   answer: string | null;
   previous: string[]; // 이미 제안했던 첫 행동. "다른 제안"을 눌렀을 때 같은 걸 다시 내지 않게 한다.
   shape?: ShapeInput | null; // C1에서 고른 낱말, 크기, 자료
+  dueDate?: string | null; // 마감. 그 전에 끝낼 수 있는 첫 행동을 고르게 한다
 }
 
 export function firstStepRequest(input: FirstStepInput, today: string, shortcuts: Shortcut[]): string {
@@ -98,6 +101,7 @@ export function firstStepRequest(input: FirstStepInput, today: string, shortcuts
     rawText: input.rawText,
     answer: input.answer,
     previous: input.previous,
+    ...(input.dueDate && { dueDate: input.dueDate }),
     shortcuts: shortcutHints(shortcuts),
     ...(input.shape && {
       words: input.shape.words,

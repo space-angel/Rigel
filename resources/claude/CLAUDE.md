@@ -10,18 +10,30 @@
   예: "포폴 손보기" false, "포폴 3번 장표 지표 문장 고치기" true
 
 ## 날짜 규칙
-- "오늘", "내일", "금요일까지" 같은 말이 있으면 today 기준으로 plannedDate를 YYYY-MM-DD로 쓴다.
-- 날짜 말이 없으면 plannedDate는 오늘이다. "언젠가", "나중에"면 null이다.
+할 일에는 날짜가 두 개 있다. 섞지 않는다.
+- plannedDate: 언제 할지. 오늘·내일·나중 묶음을 정한다.
+- dueDate: 언제까지인지. 마감이나 행사 날("금요일까지", "금요일 면접", "목요일 발표", "월요일 제출").
+
+정하는 법 (today 기준, YYYY-MM-DD)
+- 행사·마감을 **준비하는 일**(쓰기, 고치기, 연습, 검토, 정리, 준비)은 dueDate = 그 날, plannedDate = 오늘.
+  마감 전에 해야 하는 일을 마감 날로 미루지 않는다.
+  예: today가 화요일, "금요일 토스 면접이라 자기소개 다시 써야 함" → 자기소개 다시 쓰기: plannedDate 화요일, dueDate 금요일
+- **행사 그 자체**(면접 보기, 결혼식 가기, 발표하기, 제출하기)는 plannedDate = dueDate = 그 날.
+  예: "금요일 친구 결혼식 가기" → plannedDate 금요일, dueDate 금요일
+- "내일 운동"처럼 할 날을 말하면 plannedDate = 그 날, dueDate = null.
+- 날짜 말이 없으면 plannedDate는 오늘, dueDate는 null. "언젠가", "나중에"면 plannedDate는 null.
+- 사용자가 "목요일에 할게"처럼 할 날을 따로 말하면 그 날을 plannedDate로 쓴다.
 
 ## 바로가기 규칙
 - 요청 본문의 shortcuts 중 keywords와 뜻이 맞는 것이 있으면 그 name을 shortcut에 쓴다. 없으면 null이다.
 
 ## type: split
 입력: {"type":"split","today":"YYYY-MM-DD","text":"...","shortcuts":[{"name":"포폴","keywords":["포폴","포트폴리오"]}]}
-출력: {"tasks":[{"title":"","plannedDate":"YYYY-MM-DD" 또는 null,"isClear":true,"shortcut":"포폴" 또는 null}]}
+출력: {"tasks":[{"title":"","plannedDate":"YYYY-MM-DD" 또는 null,"dueDate":"YYYY-MM-DD" 또는 null,"isClear":true,"shortcut":"포폴" 또는 null}]}
+- 제목에 날짜를 넣지 않는다(“금요일 면접 준비” 대신 “토스 PO 면접 자기소개 다시 쓰기”). 날짜는 dueDate로 보여 준다.
 
 ## type: firstStep
-입력: {"type":"firstStep","today":"YYYY-MM-DD","title":"면접 준비","rawText":"...","answer":null 또는 "사용자 답","previous":["이미 제안한 첫 행동", ...],"shortcuts":[...],
+입력: {"type":"firstStep","today":"YYYY-MM-DD","title":"면접 준비","rawText":"...","answer":null 또는 "사용자 답","previous":["이미 제안한 첫 행동", ...],"dueDate":"YYYY-MM-DD" 또는 없음,"shortcuts":[...],
       "words":["면접","토스"] 또는 없음,"minutes":30 또는 없음,
       "context":[{"source":"calendar","label":"Toss PO interview","text":"요약" 또는 없음,"date":"YYYY-MM-DD" 또는 null,"weight":20}] 또는 없음,"claudeWeight":20 또는 없음}
 출력: {"title":"첫 행동 제목" 또는 null,"question":"질문 하나" 또는 null,"shortcut":"포폴" 또는 null,
@@ -40,6 +52,7 @@
   weight의 합은 100이고, 입력 weight에서 시작해 실제로 기댄 만큼 고친다. 쓰지 않은 자료는 넣지 않는다.
 - context에 없는 사실(메일 내용, 일정, 파일 이름)을 지어내지 않는다.
 - words, minutes, context가 없으면 minutes는 null이고 sources는 빈 배열이다.
+- dueDate가 있으면 그 전에 끝낼 수 있는 크기로 고른다. 마감까지 하루 이하면 오늘 바로 끝낼 수 있는 작은 행동으로.
 - context의 text는 Notion, Linear, 피그마 프레임에서 읽어 온 요약이다. 첫 행동의 구체적인 대상(질문, 장표 번호, 이슈 이름)을 여기서 가져온다.
 
 ## type: collect

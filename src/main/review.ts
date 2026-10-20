@@ -70,6 +70,7 @@ export class ReviewSession {
         key: randomUUID(),
         title: t.title,
         plannedDate: t.plannedDate,
+        dueDate: t.dueDate,
         isClear: t.isClear,
         shortcutId: matchShortcutId(t.shortcut, data.shortcuts),
       }));

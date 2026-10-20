@@ -10,6 +10,19 @@ import { AiSparkle, ArrowRightIcon, CalendarIcon, CheckIcon, ChevronRightIcon, F
 import { FirstStepCard } from "./FirstStepCard";
 import { ShapePanel } from "./Shape";
 import { Attachments } from "./components/Attachments";
+import { dueBadge, dueLabel } from "@shared/due";
+
+// 마감 배지. 줄에서는 짧게(D-3), 지금 할 일 카드에서는 말로(3 days left).
+function Due({ item, long }: { item: TodoItem; long?: boolean }) {
+  if (!item.dueDate || item.completedAt) return null;
+  const today = localDate();
+  const b = long ? dueLabel(item.dueDate, today) : dueBadge(item.dueDate, today);
+  return (
+    <span className={`due-badge due-badge--${b.tone}`} title={`Due ${item.dueDate}`}>
+      {b.text}
+    </span>
+  );
+}
 import { FanDial } from "./components/FanDial";
 import { RatioBar } from "./components/RatioBar";
 import { DIAL_LABEL, DIAL_VIEWS, dialBuckets, dialRatio, type DialView } from "@shared/dial";
@@ -165,7 +178,10 @@ function NowCard({
       }}
     >
       <div className="now-card__top">
-        <span className="eyebrow">Now</span>
+        <span className="now-card__eyebrow">
+          <span className="eyebrow">Now</span>
+          <Due item={item} long />
+        </span>
         <span className="now-card__tools">
           <MoreButton onMenu={edit.onMenu} />
           <Checkbox checked={false} onToggle={onToggle} variant="now" />
@@ -238,6 +254,7 @@ function Row({
       <Title item={item} className="row__title" {...edit} />
       {!edit.editing && (
         <>
+          <Due item={item} />
           {unclear && onFirstStep && (
             <span className="row__hint">
               <AiSparkle size={12} /> Shape
@@ -528,7 +545,7 @@ export function TodayList() {
                   trailing={
                     dial !== "done" && (
                       <>
-                        {t.plannedDate && <span className="row__date">{shortDate(t.plannedDate)}</span>}
+                        {t.plannedDate && t.plannedDate !== t.dueDate && <span className="row__date">{shortDate(t.plannedDate)}</span>}
                         <button
                           type="button"
                           className="small-button"

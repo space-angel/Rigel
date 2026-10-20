@@ -1,0 +1,36 @@
+[
+  {
+    "name": "빚기 · 크기 다이얼이 마감을 안다",
+    "win": "list",
+    "ok": true,
+    "ms": 14187,
+    "snap": "01-list.png"
+  },
+  {
+    "name": "빚기 값",
+    "win": "list",
+    "ok": true,
+    "ms": 1,
+    "value": {
+      "size": "30 min",
+      "hint": "02 · Your tools / 3 of 4 on / 03 · How big? / Due · 3 days left / 04 · Mix by source / Drag edges"
+    }
+  },
+  {
+    "name": "Shape it",
+    "win": "list",
+    "ok": true,
+    "ms": 9386,
+    "value": true,
+    "snap": "03-list.png"
+  },
+  {
+    "name": "결과 배지",
+    "win": "list",
+    "ok": false,
+    "ms": 332,
+    "value": "First step30 min · before FRI | 포폴 첫 장 개조식 키워드 2~3개 넣기",
+    "error": "기대와 다름: __e2e.text('.result__top').includes('BEFORE FRI') · 화면: TodayYour first step 포트폴리오 피드백 반영하기First step30 min · before FRI포폴 첫 장 개조식 키워드 2~3개 넣기Made from포트폴리오 피드백65%포폴 · frame 12-40815%+ Claude 20% Open in Notion ReshapeUse this step",
+    "snap": "04-list.png"
+  }
+]

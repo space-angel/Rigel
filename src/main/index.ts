@@ -5,6 +5,7 @@ import { execFile } from "node:child_process";
 import { FIGMA_BUNDLE_ID, type AppData, type TodoAction } from "@shared/types";
 import { applyAction, localDate, pendingCarryOver, todayView } from "@shared/todos";
 import { addDays } from "@shared/dial";
+import { readDates } from "@shared/due";
 import { classifyQuickInput, firstLine, matchShortcutByKeywords } from "@shared/quickInput";
 import { loadData, saveData } from "./store";
 import type { ReviewDraft } from "@shared/review";
@@ -337,7 +338,9 @@ function submitQuick(text: string): { ok: boolean; kind?: "short" | "long" } {
   const kind = classifyQuickInput(text);
   if (kind === "empty") return { ok: false };
   quickWindow?.hide();
-  if (kind === "short") addAndReveal({ type: "add", title: text.trim(), rawText: text, shortcutId: matchShortcutByKeywords(text, data.shortcuts) });
+  // 짧은 입력은 AI 없이 앱이 날짜 말을 읽는다: “금요일까지 …”는 마감, “내일 …”은 할 날짜.
+  if (kind === "short")
+    addAndReveal({ type: "add", title: text.trim(), rawText: text, shortcutId: matchShortcutByKeywords(text, data.shortcuts), ...readDates(text, localDate()) });
   else startReview(text);
   return { ok: true, kind };
 }
@@ -386,6 +389,7 @@ app.whenReady().then(() => {
       { label: "Move to Today", enabled: !t.completedAt && !(t.plannedDate !== null && t.plannedDate <= today), click: () => act({ type: "moveToToday", id }) },
       { label: "Move to Tomorrow", enabled: !t.completedAt && t.plannedDate !== tomorrow, click: () => act({ type: "schedule", id, plannedDate: tomorrow }) },
       { label: "Move to Later", enabled: !t.completedAt && t.plannedDate !== null, click: () => act({ type: "schedule", id, plannedDate: null }) },
+      ...(t.dueDate ? [{ label: "Clear deadline", click: () => act({ type: "setDue", id, dueDate: null }) }] : []),
       { type: "separator" },
       { label: "Delete", accelerator: "CommandOrControl+Backspace", registerAccelerator: false, click: () => send("todo:requestDelete") },
     ];
