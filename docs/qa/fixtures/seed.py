@@ -41,5 +41,5 @@ data = {
     "settings": {"hotkey": "Alt+Space", "claudePath": None, "model": "sonnet", "themeId": "default", "openAtLogin": False,
                  "lastCarryOverCheck": iso(today), "welcomed": True},
 }
-json.dump(data, open(os.path.join(out, "data.json"), "w"), ensure_ascii=False, indent=2)
+json.dump(data, open(os.path.join(out, "data.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
 print(f"{out}/data.json · {kind} · {len(todos)}개")

@@ -1,0 +1,56 @@
+# 배포 패키지 설정. 만들기: npm run dist:mac / npm run dist:win (먼저 npm run build)
+appId: com.todoban.app
+productName: todoBAN
+copyright: Copyright © 2026 todoBAN
+directories:
+  output: dist
+  buildResources: build
+# 빌드 결과(out)와 package.json만 넣는다. 소스·문서·점검 결과는 넣지 않는다.
+files:
+  - out/**
+  - package.json
+# 트레이 아이콘과 Claude 규칙 파일. 앱은 process.resourcesPath에서 읽는다(src/main/claude/setup.ts resourcePath).
+extraResources:
+  - from: resources
+    to: .
+    filter:
+      - "**/*"
+asar: true
+# 앱 안의 Chromium 언어 파일은 한국어·영어만(앱 크기를 줄인다)
+electronLanguages:
+  - ko
+  - en
+
+mac:
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+    - target: zip
+      arch: [arm64, x64]
+  category: public.app-category.productivity
+  icon: build/icon.png
+  # 메뉴바 앱: Dock에 뜨지 않는다
+  extendInfo:
+    LSUIElement: true
+    NSAppleEventsUsageDescription: 캘린더 도구를 켜면 다가오는 일정의 제목과 시간을 읽어 첫 행동의 크기를 정해요.
+  hardenedRuntime: true
+  # 서명·공증은 Apple Developer ID가 있을 때 CSC_LINK·APPLE_ID 등 환경 변수로 켠다(docs/release.md)
+  notarize: false
+dmg:
+  artifactName: ${productName}-${version}-mac-${arch}.${ext}
+  writeUpdateInfo: false
+
+win:
+  target:
+    - target: nsis
+      arch: [x64, arm64]
+  icon: build/icon.png
+  artifactName: ${productName}-${version}-win-${arch}-setup.${ext}
+nsis:
+  # 사용자 폴더에 설치(관리자 권한 없이). 설치 위치를 고를 수 있게 한다.
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createStartMenuShortcut: true
+  createDesktopShortcut: false
+  shortcutName: todoBAN

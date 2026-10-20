@@ -1,0 +1,83 @@
+# 맥·윈도우에서 검사하고 설치 파일을 만든다.
+# - 타입 검사, 단위 테스트, 빌드
+# - 화면 점검(E2E): 한국어 화면, 끌어서 순서 바꾸기, 가짜 claude로 첫 행동 미리 찾기
+#   (윈도우는 claude.cmd를 셸로 실행하는 경로를 실제로 탄다)
+# - 설치 파일(맥 dmg·zip, 윈도우 setup.exe)과 점검 결과·화면을 내려받을 수 있게 올린다
+name: ci
+on:
+  push:
+    branches: [main, "feat/**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      PY: ${{ matrix.os == 'windows-latest' && 'python' || 'python3' }}
+      FAKE_CLAUDE: ${{ matrix.os == 'windows-latest' && 'docs/qa/fixtures/fake-claude.cmd' || 'docs/qa/fixtures/fake-claude.sh' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run i18n:check
+      - run: npm run build
+
+      - name: 화면 점검 · 한국어 화면
+        shell: bash
+        run: |
+          $PY docs/qa/fixtures/seed.py "$RUNNER_TEMP/i18n" list
+          TODOBAN_LANG=ko TODOBAN_USER_DATA="$RUNNER_TEMP/i18n" TODOBAN_E2E=docs/qa/i18n.e2e.json TODOBAN_E2E_OUT="$RUNNER_TEMP/out/i18n" npx electron .
+      - name: 화면 점검 · 끌어서 순서 바꾸기
+        shell: bash
+        run: |
+          $PY docs/qa/fixtures/seed.py "$RUNNER_TEMP/drag" list
+          TODOBAN_LANG=ko TODOBAN_USER_DATA="$RUNNER_TEMP/drag" TODOBAN_E2E=docs/qa/drag.e2e.json TODOBAN_E2E_OUT="$RUNNER_TEMP/out/drag" npx electron .
+      - name: 화면 점검 · 가짜 claude로 첫 행동 미리 찾기
+        shell: bash
+        run: |
+          $PY docs/qa/fixtures/seed.py "$RUNNER_TEMP/prefetch" list
+          $PY docs/qa/fixtures/use-fake-claude.py "$RUNNER_TEMP/prefetch" "$FAKE_CLAUDE"
+          FAKE_LOG="$RUNNER_TEMP/claude-calls.log" FAKE_DELAY=3 TODOBAN_PREFETCH=1 TODOBAN_LANG=ko \
+            TODOBAN_USER_DATA="$RUNNER_TEMP/prefetch" TODOBAN_E2E=docs/qa/prefetch.e2e.json TODOBAN_E2E_OUT="$RUNNER_TEMP/out/prefetch" npx electron .
+          echo "claude가 받은 인자:"; cat "$RUNNER_TEMP/claude-calls.log"
+          # 빈 인자(--tools "")가 셸을 거쳐도 살아 있어야 한다
+          grep -q '"--tools",""' "$RUNNER_TEMP/claude-calls.log"
+      - name: 점검 결과 확인
+        shell: bash
+        run: |
+          node -e '
+            const fs = require("fs"), path = require("path");
+            const root = process.env.RUNNER_TEMP + "/out";
+            let bad = 0;
+            for (const d of fs.readdirSync(root)) {
+              const r = JSON.parse(fs.readFileSync(path.join(root, d, "results.json"), "utf8"));
+              for (const s of r) { console.log((s.ok ? "✓" : "✗"), d, "·", s.name, s.ok ? "" : "— " + s.error); if (!s.ok) bad++; }
+            }
+            process.exit(bad ? 1 : 0);'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-${{ matrix.os }}
+          path: ${{ runner.temp }}/out
+
+      - name: 설치 파일 만들기
+        run: npx electron-builder ${{ matrix.os == 'windows-latest' && '--win' || '--mac' }} --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer-${{ matrix.os }}
+          path: |
+            dist/*.exe
+            dist/*.dmg
+            dist/*.zip
