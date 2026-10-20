@@ -1,0 +1,196 @@
+[
+  {
+    "name": "J0 목록 처음 화면",
+    "win": "list",
+    "ok": true,
+    "ms": 1109,
+    "note": "screen",
+    "value": {
+      "controls": 15,
+      "primary": 1,
+      "chars": 169
+    },
+    "snap": "01-list.png"
+  },
+  {
+    "name": "J1-1 [행동] 막연한 생각 한 줄 입력",
+    "win": "quick",
+    "ok": true,
+    "ms": 571,
+    "note": "action",
+    "value": {
+      "controls": 1,
+      "primary": 0,
+      "chars": 49
+    },
+    "snap": "02-quick.png"
+  },
+  {
+    "name": "J1-2 [행동] Enter",
+    "win": "quick",
+    "ok": true,
+    "ms": 6,
+    "note": "action",
+    "value": true
+  },
+  {
+    "name": "J1-3 목록에 들어옴",
+    "win": "list",
+    "ok": true,
+    "ms": 722,
+    "note": "screen",
+    "value": {
+      "controls": 13,
+      "primary": 1,
+      "chars": 153
+    },
+    "snap": "04-list.png"
+  },
+  {
+    "name": "J1-4 [행동] 막연한 할 일을 누름",
+    "win": "list",
+    "ok": true,
+    "ms": 253,
+    "note": "action",
+    "value": true
+  },
+  {
+    "name": "J1-5 [대기] 도구 읽기",
+    "win": "list",
+    "ok": true,
+    "ms": 14731,
+    "note": "wait",
+    "value": {
+      "controls": 9,
+      "primary": 1,
+      "chars": 228
+    },
+    "snap": "06-list.png"
+  },
+  {
+    "name": "J1-5b 빚기 화면 부담",
+    "win": "list",
+    "ok": true,
+    "ms": 0,
+    "note": "screen",
+    "value": {
+      "controls": 9,
+      "primary": 1,
+      "chars": 261,
+      "words": 2,
+      "wordsOn": 2,
+      "tools": 4,
+      "scroll": 43
+    }
+  },
+  {
+    "name": "J1-6 [행동] Shape it",
+    "win": "list",
+    "ok": true,
+    "ms": 2,
+    "note": "action",
+    "value": true
+  },
+  {
+    "name": "J1-7 [대기] 첫 행동 만들기",
+    "win": "list",
+    "ok": true,
+    "ms": 4426,
+    "note": "wait",
+    "value": {
+      "controls": 9,
+      "primary": 1,
+      "chars": 262
+    },
+    "snap": "09-list.png"
+  },
+  {
+    "name": "J1-7b 결과",
+    "win": "list",
+    "ok": true,
+    "ms": 0,
+    "note": "screen",
+    "value": "First step30 min면접 답변 공통 규칙 D 항목 읽기Made from답변 공통 규칙70%면접+ Claude 30%"
+  },
+  {
+    "name": "J1-8 [행동] Use this step",
+    "win": "list",
+    "ok": true,
+    "ms": 1016,
+    "note": "action",
+    "value": true,
+    "snap": "11-list.png"
+  },
+  {
+    "name": "J2-1 [행동] 긴 생각 입력·Enter",
+    "win": "quick",
+    "ok": true,
+    "ms": 6,
+    "note": "action",
+    "value": true
+  },
+  {
+    "name": "J2-2 [대기] 나누기",
+    "win": "review",
+    "ok": true,
+    "ms": 9469,
+    "note": "wait",
+    "value": {
+      "controls": 3,
+      "primary": 1,
+      "chars": 102
+    },
+    "snap": "13-review.png"
+  },
+  {
+    "name": "J2-3 [대기] 자료 칩",
+    "win": "review",
+    "ok": true,
+    "ms": 14528,
+    "note": "wait",
+    "value": {
+      "controls": 19,
+      "primary": 1,
+      "chars": 226,
+      "drafts": 3,
+      "unclear": 2,
+      "chips": 0
+    },
+    "snap": "14-review.png"
+  },
+  {
+    "name": "J2-4 [행동] Add",
+    "win": "review",
+    "ok": true,
+    "ms": 3,
+    "note": "action",
+    "value": true
+  },
+  {
+    "name": "J2-5 목록",
+    "win": "list",
+    "ok": true,
+    "ms": 977,
+    "note": "screen",
+    "value": {
+      "controls": 15,
+      "primary": 1,
+      "chars": 162,
+      "unclearInToday": 1
+    },
+    "snap": "16-list.png"
+  },
+  {
+    "name": "J3 설정 Tools 부담",
+    "win": "settings",
+    "ok": true,
+    "ms": 22075,
+    "note": "screen",
+    "value": {
+      "controls": 8,
+      "primary": 0,
+      "chars": 650
+    },
+    "snap": "17-settings.png"
+  }
+]

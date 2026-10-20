@@ -59,6 +59,16 @@ window.__e2e = window.__e2e || {
     return true;
   },
   text(sel = "body") { const el = document.querySelector(sel); return el ? el.textContent.replace(/\\s+/g, " ").trim() : null; },
+  // 화면 부담 재기: 보이는 버튼·입력·토글 수, 보이는 글자 수, 강조(주 버튼) 수
+  audit() {
+    const vis = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight && getComputedStyle(el).visibility !== "hidden" && getComputedStyle(el).opacity !== "0"; };
+    const controls = [...document.querySelectorAll("button, input, textarea, select, [role=switch], [role=slider], [role=checkbox]")].filter(vis);
+    const primary = controls.filter((el) => el.classList.contains("button--primary") || el.classList.contains("capture__send")).length;
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    let chars = 0;
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) { const p = n.parentElement; if (p && vis(p)) chars += n.textContent.replace(/\\s+/g, "").length; }
+    return { controls: controls.length, primary, chars };
+  },
 };
 true;
 `;

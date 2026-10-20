@@ -1,0 +1,22 @@
+[
+  { "name": "J0 목록 처음 화면", "win": "list", "main": "openList", "wait": 700, "snap": true, "run": "return __e2e.audit();", "note": "screen" },
+
+  { "name": "J1-1 [행동] 막연한 생각 한 줄 입력", "win": "quick", "run": "__e2e.type('textarea', '면접 준비'); return __e2e.audit();", "wait": 200, "snap": true, "note": "action" },
+  { "name": "J1-2 [행동] Enter", "win": "quick", "run": "__e2e.key('textarea', 'Enter'); return true;", "note": "action" },
+  { "name": "J1-3 목록에 들어옴", "win": "list", "until": "__e2e.$('.is-new')", "wait": 300, "snap": true, "run": "return __e2e.audit();", "note": "screen" },
+  { "name": "J1-4 [행동] 막연한 할 일을 누름", "win": "list", "run": "__e2e.$('.is-new').dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 })); return true;", "until": "__e2e.$('.shape')", "note": "action" },
+  { "name": "J1-5 [대기] 도구 읽기", "win": "list", "until": "!__e2e.text().includes('Reading')", "timeout": 60000, "snap": true, "run": "return __e2e.audit();", "note": "wait" },
+  { "name": "J1-5b 빚기 화면 부담", "win": "list", "run": "return { ...__e2e.audit(), words: __e2e.all('.word').length, wordsOn: __e2e.all('.word.is-on').length, tools: __e2e.all('.tool').length, scroll: __e2e.$('.shape__body').scrollHeight - __e2e.$('.shape__body').clientHeight };", "note": "screen" },
+  { "name": "J1-6 [행동] Shape it", "win": "list", "run": "__e2e.click('.shape__foot .button--primary'); return true;", "note": "action" },
+  { "name": "J1-7 [대기] 첫 행동 만들기", "win": "list", "until": "__e2e.$('.result') || __e2e.$('.fs-card')", "timeout": 90000, "snap": true, "run": "return __e2e.audit();", "note": "wait" },
+  { "name": "J1-7b 결과", "win": "list", "run": "return __e2e.text('.result');", "note": "screen" },
+  { "name": "J1-8 [행동] Use this step", "win": "list", "run": "__e2e.click(__e2e.byText('Use this step')); return true;", "wait": 600, "snap": true, "note": "action" },
+
+  { "name": "J2-1 [행동] 긴 생각 입력·Enter", "win": "quick", "run": "__e2e.type('textarea', '이번 주 금요일 토스 PO 면접이라 자기소개 다시 쓰고 포트폴리오 피드백도 반영해야 하는데 이력서도 손봐야 하고 너무 많다'); __e2e.key('textarea', 'Enter'); return true;", "note": "action" },
+  { "name": "J2-2 [대기] 나누기", "win": "review", "until": "__e2e.all('.draft').length > 0 || __e2e.$('.notice')", "timeout": 60000, "snap": true, "run": "return __e2e.audit();", "note": "wait" },
+  { "name": "J2-3 [대기] 자료 칩", "win": "review", "until": "!__e2e.text().includes('Looking in')", "timeout": 90000, "snap": true, "run": "return { ...__e2e.audit(), drafts: __e2e.all('.draft').length, unclear: __e2e.all('.draft.is-unclear').length, chips: __e2e.all('.note-chip').length };", "note": "wait" },
+  { "name": "J2-4 [행동] Add", "win": "review", "run": "__e2e.click('.review__footer .button--primary'); return true;", "note": "action" },
+  { "name": "J2-5 목록", "win": "list", "until": "__e2e.$('.is-new')", "wait": 300, "snap": true, "run": "return { ...__e2e.audit(), unclearInToday: __e2e.all('.row.is-unclear').length + (__e2e.$('.now-card .pill-question') ? 1 : 0) };", "note": "screen" },
+
+  { "name": "J3 설정 Tools 부담", "win": "settings", "main": "openSettings:tools", "until": "!__e2e.text().includes('Checking')", "timeout": 60000, "snap": true, "run": "return __e2e.audit();", "note": "screen" }
+]
