@@ -4,7 +4,9 @@ import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } 
 import { CSS } from "@dnd-kit/utilities";
 import type { AppData, TodoItem } from "@shared/types";
 import { localDate, todayView } from "@shared/todos";
-import { BrandMark, CheckIcon, ChevronRightIcon, PlusIcon, SettingsIcon } from "./components/icons";
+import type { FirstStepState } from "@shared/firstStep";
+import { AiSparkle, BrandMark, CheckIcon, ChevronRightIcon, PlusIcon, SettingsIcon } from "./components/icons";
+import { FirstStepCard } from "./FirstStepCard";
 
 const api = window.todoban;
 
@@ -30,26 +32,54 @@ function Checkbox({ checked, onToggle, variant = "default" }: { checked: boolean
   );
 }
 
-function NowCard({ item, selected, onToggle }: { item: TodoItem; selected: boolean; onToggle: () => void }) {
+function NowCard({ item, selected, onToggle, onFirstStep }: { item: TodoItem; selected: boolean; onToggle: () => void; onFirstStep: () => void }) {
   return (
-    <div className={`now-card${selected ? " is-selected" : ""}`}>
+    <div className={`now-card${selected ? " is-selected" : ""}`} onClick={item.isClear ? undefined : onFirstStep}>
       <div className="now-card__top">
         <span className="now-card__pill">지금 할 일</span>
         <Checkbox checked={false} onToggle={onToggle} variant="now" />
       </div>
       <p className="now-card__title">{item.title}</p>
-      {item.isClear ? <p className="now-card__sub">바로 시작할 수 있어요</p> : <p className="now-card__sub">아직 정리가 필요해요</p>}
+      {item.isClear ? (
+        <p className="now-card__sub">바로 시작할 수 있어요</p>
+      ) : (
+        <button type="button" className="now-card__cta">
+          <AiSparkle size={12} /> 첫 행동 받기
+        </button>
+      )}
     </div>
   );
 }
 
-function Row({ item, selected, done, trailing, onToggle }: { item: TodoItem; selected?: boolean; done?: boolean; trailing?: React.ReactNode; onToggle: () => void }) {
+function Row({
+  item,
+  selected,
+  done,
+  trailing,
+  onToggle,
+  onFirstStep,
+}: {
+  item: TodoItem;
+  selected?: boolean;
+  done?: boolean;
+  trailing?: React.ReactNode;
+  onToggle: () => void;
+  onFirstStep?: () => void;
+}) {
   const unclear = !item.isClear && !done;
   return (
-    <div className={`row${selected ? " is-selected" : ""}${done ? " is-done" : ""}${unclear ? " is-unclear" : ""}`}>
+    <div
+      className={`row${selected ? " is-selected" : ""}${done ? " is-done" : ""}${unclear ? " is-unclear" : ""}`}
+      onClick={unclear ? onFirstStep : undefined}
+    >
       <Checkbox checked={Boolean(done)} onToggle={onToggle} />
       {unclear && <span className="row__dot" aria-label="정리 필요" />}
       <span className="row__title">{item.title}</span>
+      {unclear && onFirstStep && (
+        <span className="row__hint">
+          <AiSparkle size={12} /> 첫 행동 받기
+        </span>
+      )}
       {trailing}
     </div>
   );
@@ -77,12 +107,15 @@ export function TodayList() {
   const [draft, setDraft] = useState("");
   const [laterOpen, setLaterOpen] = useState(false);
   const [selected, setSelected] = useState(0);
+  const [firstSteps, setFirstSteps] = useState<FirstStepState[]>([]);
   const shellRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     api.getData().then(setData);
+    api.getFirstSteps().then(setFirstSteps);
     const offData = api.onData(setData);
+    const offFirst = api.onFirstSteps(setFirstSteps);
     const offOpen = api.onListOpened(() => {
       setSelected(0);
       rootRef.current?.focus();
@@ -90,6 +123,7 @@ export function TodayList() {
     return () => {
       offData();
       offOpen();
+      offFirst();
     };
   }, []);
 
@@ -111,6 +145,14 @@ export function TodayList() {
   const [now, ...rest] = open;
 
   const act = (a: Parameters<typeof api.act>[0]) => api.act(a).then(setData);
+  const stepOf = (id: string) => firstSteps.find((f) => f.todoId === id);
+  const askFirstStep = (t: TodoItem) => {
+    if (!stepOf(t.id)) api.requestFirstStep(t.id);
+  };
+  const stepCard = (t: TodoItem) => {
+    const st = stepOf(t.id);
+    return st && <FirstStepCard key={`${st.todoId}-${st.status}-${st.question ?? ""}`} state={st} originalTitle={t.title} />;
+  };
 
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return;
@@ -126,6 +168,7 @@ export function TodayList() {
     if (e.key === "ArrowDown") setSelected((s) => Math.min(s + 1, open.length - 1));
     else if (e.key === "ArrowUp") setSelected((s) => Math.max(s - 1, 0));
     else if (e.key === " " && current) act({ type: "toggle", id: current.id });
+    else if (e.key === "Enter" && current && !current.isClear) askFirstStep(current);
     else if (e.key === "Backspace" && e.metaKey && current) act({ type: "remove", id: current.id });
     else if (e.key === "n" && e.metaKey) setAdding(true);
     else if (e.key === "Escape") api.hideList();
@@ -195,13 +238,17 @@ export function TodayList() {
               <div className="list">
                 {now && (
                   <SortableItem id={now.id}>
-                    <NowCard item={now} selected={selected === 0} onToggle={() => act({ type: "toggle", id: now.id })} />
+                    <NowCard item={now} selected={selected === 0} onToggle={() => act({ type: "toggle", id: now.id })} onFirstStep={() => askFirstStep(now)} />
                   </SortableItem>
                 )}
+                {now && stepCard(now)}
                 {rest.map((t, i) => (
-                  <SortableItem key={t.id} id={t.id}>
-                    <Row item={t} selected={selected === i + 1} onToggle={() => act({ type: "toggle", id: t.id })} />
-                  </SortableItem>
+                  <div key={t.id}>
+                    <SortableItem id={t.id}>
+                      <Row item={t} selected={selected === i + 1} onToggle={() => act({ type: "toggle", id: t.id })} onFirstStep={() => askFirstStep(t)} />
+                    </SortableItem>
+                    {stepCard(t)}
+                  </div>
                 ))}
               </div>
             </SortableContext>
@@ -217,6 +264,8 @@ export function TodayList() {
           )}
         </div>
 
+        {later.length > 0 && (
+          <>
         <div className="divider" />
         <section className="section section--later">
           <button type="button" className="section__toggle" onClick={() => setLaterOpen((v) => !v)} aria-expanded={laterOpen}>
@@ -237,12 +286,14 @@ export function TodayList() {
               />
             ))}
         </section>
+          </>
+        )}
 
         <div className="divider" />
         <footer className="footer">
           <kbd>⌥ Space</kbd>
           <span>빠른 입력</span>
-          <span className="footer__hint">↑↓ 이동 · Space 체크 · ⌘N 추가</span>
+          <span className="footer__hint">↑↓ 이동 · Space 체크 · ↵ 첫 행동</span>
         </footer>
       </div>
     </div>

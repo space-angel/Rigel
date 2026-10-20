@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer } from "electron";
 import type { AppData, TodoAction } from "@shared/types";
 import type { ReviewDraft, ReviewState } from "@shared/review";
+import type { FirstStepState } from "@shared/firstStep";
 
 const api = {
   getData: (): Promise<AppData> => ipcRenderer.invoke("data:get"),
@@ -45,6 +46,17 @@ const api = {
   insertRawReview: () => ipcRenderer.send("review:insertRaw"),
   openTerminal: () => ipcRenderer.send("review:openTerminal"),
   resizeReview: (height: number) => ipcRenderer.send("review:resize", height),
+  getFirstSteps: (): Promise<FirstStepState[]> => ipcRenderer.invoke("firstStep:get"),
+  onFirstSteps: (fn: (all: FirstStepState[]) => void) => {
+    const listener = (_e: unknown, all: FirstStepState[]) => fn(all);
+    ipcRenderer.on("firstStep:states", listener);
+    return () => {
+      ipcRenderer.removeListener("firstStep:states", listener);
+    };
+  },
+  requestFirstStep: (id: string, opts: { answer?: string; again?: boolean } = {}) => ipcRenderer.send("firstStep:request", id, opts),
+  acceptFirstStep: (id: string) => ipcRenderer.send("firstStep:accept", id),
+  dismissFirstStep: (id: string) => ipcRenderer.send("firstStep:dismiss", id),
 };
 
 export type TodoBanApi = typeof api;

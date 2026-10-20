@@ -21,8 +21,10 @@
 출력: {"tasks":[{"title":"","plannedDate":"YYYY-MM-DD" 또는 null,"isClear":true,"shortcut":"포폴" 또는 null}]}
 
 ## type: firstStep
-입력: {"type":"firstStep","today":"YYYY-MM-DD","title":"면접 준비","rawText":"...","answer":null 또는 "사용자 답","shortcuts":[...]}
+입력: {"type":"firstStep","today":"YYYY-MM-DD","title":"면접 준비","rawText":"...","answer":null 또는 "사용자 답","previous":["이미 제안한 첫 행동", ...],"shortcuts":[...]}
 출력: {"title":"첫 행동 제목" 또는 null,"question":"질문 하나" 또는 null,"shortcut":"포폴" 또는 null}
 - 첫 행동을 정할 수 있으면 title을 쓰고 question은 null이다.
 - 정할 수 없으면 title은 null이고 question에 질문 하나만 쓴다.
 - 하위 할 일 목록을 만들지 않는다. 첫 행동은 항상 하나다.
+- previous에 있는 첫 행동과 같거나 거의 같은 것은 다시 제안하지 않는다.
+- answer가 있으면 질문하지 말고 첫 행동을 정한다.

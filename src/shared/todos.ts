@@ -91,6 +91,16 @@ export function applyAction(data: AppData, action: TodoAction, now: Date = new D
       }
       break;
     }
+    case "applyFirstStep": {
+      // 정리 안 된 할 일을 첫 행동으로 바꾼다. 바로가기는 새로 정해졌을 때만 바꾼다.
+      const t = find(action.id);
+      const title = action.title.trim();
+      if (!t || !title) return data;
+      t.title = title;
+      t.isClear = true;
+      if (action.shortcutId) t.shortcutId = action.shortcutId;
+      break;
+    }
     case "toggle": {
       const t = find(action.id);
       if (!t) return data;

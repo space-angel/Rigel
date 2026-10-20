@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { ClaudeError, SplitResult, matchShortcutId, parseClaudeOutput, splitRequest } from "./claude.ts";
+import { ClaudeError, FirstStepResult, SplitResult, firstStepRequest, matchShortcutId, parseClaudeOutput, splitRequest } from "./claude.ts";
 
 const ok = (result: string) => JSON.stringify({ type: "result", is_error: false, result });
 const task = { title: "포폴 장표 고치기", plannedDate: "2026-10-21", isClear: true, shortcut: "포폴" };
@@ -54,4 +54,19 @@ test("목록에 없는 바로가기 이름은 연결하지 않는다", () => {
   assert.equal(matchShortcutId("포폴", list), "a");
   assert.equal(matchShortcutId("사일로", list), null);
   assert.equal(matchShortcutId(null, list), null);
+});
+
+test("firstStep 결과: 첫 행동 또는 질문", () => {
+  const a = parseClaudeOutput(ok(JSON.stringify({ title: "공고 질문 답변 쓰기", question: null, shortcut: null })), "", FirstStepResult);
+  assert.equal(a.title, "공고 질문 답변 쓰기");
+  const q = parseClaudeOutput(ok(JSON.stringify({ title: null, question: "어느 회사 면접인가요?", shortcut: null })), "", FirstStepResult);
+  assert.equal(q.question, "어느 회사 면접인가요?");
+  assert.equal(kindOf(() => parseClaudeOutput(ok(JSON.stringify({ title: null, question: null })), "", FirstStepResult)), "parseFailed");
+});
+
+test("firstStep 요청 본문에 이전 제안과 답을 넣는다", () => {
+  const body = JSON.parse(firstStepRequest({ title: "면접 준비", rawText: "면접 준비", answer: "토스 PO", previous: ["a"] }, "2026-10-20", []));
+  assert.equal(body.type, "firstStep");
+  assert.equal(body.answer, "토스 PO");
+  assert.deepEqual(body.previous, ["a"]);
 });

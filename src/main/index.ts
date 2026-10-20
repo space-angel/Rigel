@@ -7,6 +7,7 @@ import { classifyQuickInput, firstLine } from "@shared/quickInput";
 import { loadData, saveData } from "./store";
 import type { ReviewDraft } from "@shared/review";
 import { ReviewSession, clearPending, loadPending, savePending } from "./review";
+import { FirstStepManager } from "./firstStep";
 
 app.setName("todoBAN");
 // 개발 중 확인용: 실제 데이터 대신 다른 폴더를 쓰고, 실행하자마자 목록이나 빠른 입력창을 띄운다.
@@ -15,6 +16,17 @@ const SHOW_ON_START = process.env.TODOBAN_SHOW_ON_START; // "list" | "quick"
 const KEEP_OPEN = process.env.TODOBAN_KEEP_OPEN === "1"; // 화면 확인용: 포커스를 잃어도 닫지 않는다
 // 화면 확인용: 확인 창을 띄우지 않고 결과 화면을 PNG로 저장한 뒤 종료한다. 사용 중인 화면을 방해하지 않는다.
 const SNAPSHOT = process.env.TODOBAN_SNAPSHOT;
+// 화면 확인용: 시작하자마자 이 제목의 할 일에 첫 행동을 요청하고, 질문이 오면 ANSWER로 답한 뒤 목록을 저장한다.
+const DEMO_FIRSTSTEP = process.env.TODOBAN_FIRSTSTEP_TITLE;
+const DEMO_ANSWER = process.env.TODOBAN_FIRSTSTEP_ANSWER;
+
+async function snapshotAndQuit(win: BrowserWindow | null): Promise<void> {
+  if (!SNAPSHOT || !win) return;
+  const img = await win.webContents.capturePage();
+  writeFileSync(SNAPSHOT, img.toPNG());
+  quitting = true;
+  app.quit();
+}
 
 // 투명한 창 안에 카드와 그림자를 CSS로 그리므로, 그림자 여백만큼 창이 카드보다 크다.
 const LIST_WIDTH = 380;
@@ -30,6 +42,7 @@ let quickWindow: BrowserWindow | null = null;
 let reviewWindow: BrowserWindow | null = null;
 let review: ReviewSession | null = null;
 let quitting = false;
+let firstSteps: FirstStepManager;
 let data: AppData;
 let hotkeyError: string | null = null;
 
@@ -162,12 +175,7 @@ function sendReview(): void {
   if (!review) return;
   reviewWindow?.webContents.send("review:state", review.state);
   if (SNAPSHOT && review.state.status !== "loading") {
-    setTimeout(async () => {
-      const img = await reviewWindow!.webContents.capturePage();
-      writeFileSync(SNAPSHOT, img.toPNG());
-      quitting = true;
-      app.quit();
-    }, 800);
+    setTimeout(() => snapshotAndQuit(reviewWindow), 800);
   }
 }
 
@@ -242,6 +250,25 @@ app.whenReady().then(() => {
     return { ok: true, kind };
   });
 
+  firstSteps = new FirstStepManager(
+    () => data,
+    (all) => {
+      listWindow?.webContents.send("firstStep:states", all);
+      const st = all[0];
+      if (!DEMO_FIRSTSTEP || !st || st.status === "loading") return;
+      if (st.status === "question" && DEMO_ANSWER && !st.answer) setTimeout(() => firstSteps.request(st.todoId, { answer: DEMO_ANSWER }), 1500);
+      else setTimeout(() => snapshotAndQuit(listWindow), 800);
+    },
+  );
+  ipcMain.handle("firstStep:get", () => firstSteps.all());
+  ipcMain.on("firstStep:request", (_e, id: string, opts: { answer?: string; again?: boolean }) => firstSteps.request(id, opts));
+  ipcMain.on("firstStep:dismiss", (_e, id: string) => firstSteps.dismiss(id));
+  ipcMain.on("firstStep:accept", (_e, id: string) => {
+    const st = firstSteps.all().find((s) => s.todoId === id);
+    if (st?.status === "suggestion" && st.title) act({ type: "applyFirstStep", id, title: st.title, shortcutId: st.shortcutId });
+    firstSteps.dismiss(id);
+  });
+
   ipcMain.handle("review:get", () => review?.state ?? null);
   ipcMain.on("review:retry", () => review?.split());
   ipcMain.on("review:cancel", () => cancelReview());
@@ -279,6 +306,11 @@ app.whenReady().then(() => {
 
   if (SHOW_ON_START === "list" || SHOW_ON_START === "1") listWindow.once("ready-to-show", toggleListWindow);
   if (SHOW_ON_START === "quick") quickWindow.once("ready-to-show", showQuickWindow);
+
+  if (DEMO_FIRSTSTEP) {
+    const t = data.todos.find((x) => x.title === DEMO_FIRSTSTEP);
+    if (t) listWindow.webContents.once("did-finish-load", () => setTimeout(() => firstSteps.request(t.id), 500));
+  }
 
   // 지난번에 넣거나 취소하지 못한 빠른 입력이 있으면 확인 창을 다시 연다.
   const pending = loadPending();

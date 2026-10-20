@@ -65,3 +65,31 @@ export function matchShortcutId(name: string | null, shortcuts: Shortcut[]): str
   if (!name) return null;
   return shortcuts.find((s) => s.name === name)?.id ?? null;
 }
+
+export const FirstStepResult = z
+  .object({
+    title: z.string().min(1).nullable(),
+    question: z.string().min(1).nullable(),
+    shortcut: z.string().nullable().optional(),
+  })
+  .refine((r) => r.title !== null || r.question !== null, "title이나 question 중 하나는 있어야 해요");
+export type FirstStepResult = z.infer<typeof FirstStepResult>;
+
+export interface FirstStepInput {
+  title: string;
+  rawText: string;
+  answer: string | null;
+  previous: string[]; // 이미 제안했던 첫 행동. "다른 제안"을 눌렀을 때 같은 걸 다시 내지 않게 한다.
+}
+
+export function firstStepRequest(input: FirstStepInput, today: string, shortcuts: Shortcut[]): string {
+  return JSON.stringify({
+    type: "firstStep",
+    today,
+    title: input.title,
+    rawText: input.rawText,
+    answer: input.answer,
+    previous: input.previous,
+    shortcuts: shortcutHints(shortcuts),
+  });
+}

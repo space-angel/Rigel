@@ -1,6 +1,7 @@
 import { app } from "electron";
 import { execFile } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
@@ -43,12 +44,25 @@ export async function findClaude(configured: string | null): Promise<ClaudeLooku
   return { path: viaShell, searched: [...CANDIDATES, 'zsh -lc "command -v claude"'] };
 }
 
+const sha = (s: string) => createHash("sha256").update(s).digest("hex");
+
 // 모든 호출은 이 폴더에서 실행해서, Claude Code가 매번 같은 CLAUDE.md 규칙을 읽게 한다.
-// 사용자가 고쳐 쓴 규칙을 덮어쓰지 않도록 파일이 없을 때만 만든다.
+// 앱에 든 규칙이 바뀌면 새 규칙으로 바꾸되, 사용자가 고쳐 쓴 파일은 덮어쓰지 않는다.
+// 마지막으로 복사한 내용의 해시를 옆에 적어 두고, 지금 파일이 그 해시와 같을 때만 바꾼다.
 export function ensureWorkDir(): string {
   const dir = join(app.getPath("userData"), "claude");
   mkdirSync(dir, { recursive: true });
   const rules = join(dir, "CLAUDE.md");
-  if (!existsSync(rules)) copyFileSync(resourcePath("claude", "CLAUDE.md"), rules);
+  const marker = join(dir, ".bundled-sha256");
+  const bundled = readFileSync(resourcePath("claude", "CLAUDE.md"), "utf8");
+  const current = existsSync(rules) ? readFileSync(rules, "utf8") : null;
+  const lastCopied = existsSync(marker) ? readFileSync(marker, "utf8").trim() : null;
+  const untouched = current === null || sha(current) === lastCopied;
+  if (untouched && current !== bundled) {
+    writeFileSync(rules, bundled);
+    writeFileSync(marker, sha(bundled));
+  } else if (current !== null && lastCopied === null && current === bundled) {
+    writeFileSync(marker, sha(bundled));
+  }
   return dir;
 }

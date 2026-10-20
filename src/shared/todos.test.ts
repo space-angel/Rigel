@@ -87,3 +87,14 @@ test("확인 창에서 넣은 할 일은 오늘과 나중 각각 맨 아래에 �
   assert.equal(v.open[2]!.shortcutId, "s");
   assert.equal(v.open[1]!.rawText, "원문");
 });
+
+test("첫 행동으로 바꾸면 제목이 바뀌고 정리된 할 일이 된다", () => {
+  let d = applyAction(emptyData(), { type: "add", title: "면접 준비" }, now);
+  const id = d.todos[0]!.id;
+  d = applyAction(d, { type: "applyFirstStep", id, title: "토스 PO 공고 질문 5개 답변 쓰기", shortcutId: null }, now);
+  assert.equal(d.todos[0]!.title, "토스 PO 공고 질문 5개 답변 쓰기");
+  assert.equal(d.todos[0]!.isClear, true);
+  assert.equal(d.todos[0]!.rawText, "면접 준비");
+  d = applyAction(d, { type: "applyFirstStep", id, title: "x", shortcutId: "s1" }, now);
+  assert.equal(d.todos[0]!.shortcutId, "s1");
+});

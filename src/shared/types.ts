@@ -64,6 +64,7 @@ export type TodoAction =
       rawText: string;
       items: { title: string; plannedDate: string | null; isClear: boolean; shortcutId: string | null }[];
     }
+  | { type: "applyFirstStep"; id: string; title: string; shortcutId: string | null }
   | { type: "toggle"; id: string }
   | { type: "remove"; id: string }
   | { type: "rename"; id: string; title: string }
