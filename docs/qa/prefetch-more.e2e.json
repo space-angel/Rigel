@@ -1,0 +1,38 @@
+[
+ {
+  "name": "첫 행동 만들기 화면 · 만드는 중 진행 카드와 도구 색 빛",
+  "win": "list",
+  "main": "shape:포폴 올리브영 장표 지표 문장 고치기",
+  "until": "__e2e.$('.mix')",
+  "timeout": 20000,
+  "run": "return true;"
+ },
+ {
+  "name": "만들기 누르기",
+  "win": "list",
+  "run": "__e2e.click('.shape__foot .button--primary'); await new Promise(r => setTimeout(r, 900)); const b = __e2e.$('.shape__body'); return { scrollable: b.scrollHeight > b.clientHeight, visible: (() => { const r = __e2e.$('.shape-progress')?.getBoundingClientRect(); const br = b.getBoundingClientRect(); return !!r && r.top >= br.top && r.bottom <= br.bottom + 1; })(), rows: [...document.querySelectorAll('.shape-progress .fs-progress__row')].map(r => r.textContent.trim()), colors: [...document.querySelectorAll('.shape-progress .hero-glow__src')].map(e => e.style.getPropertyValue('--src')) };",
+  "snap": true,
+  "expect": "(() => { const c = __e2e.$('.shape-progress'); const b = __e2e.$('.shape__body').getBoundingClientRect(); const r = c?.getBoundingClientRect(); return c && r.top >= b.top && r.bottom <= b.bottom + 1; })()"
+ },
+ {
+  "name": "결과가 오면 진행 카드는 사라진다",
+  "win": "list",
+  "until": "__e2e.$('.result')",
+  "timeout": 15000,
+  "run": "return true;",
+  "wait": 300,
+  "expect": "!__e2e.$('.shape-progress')"
+ },
+ {
+  "name": "미리 찾기 끄기",
+  "win": "list",
+  "run": "await window.todoban.act({ type: 'setSettings', patch: { prefetch: false } }); return true;"
+ },
+ {
+  "name": "끈 뒤 목록을 다시 열어도 부르지 않는다",
+  "win": "list",
+  "main": "openList",
+  "wait": 5000,
+  "run": "return true;"
+ }
+]

@@ -1,8 +1,10 @@
 import { msg } from "@shared/i18n";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FirstStepState } from "@shared/firstStep";
 import { AiSparkle, Spinner } from "./components/icons";
 import { t } from "./i18n";
+import { CheckIcon } from "./components/icons";
+import { sourceName } from "./components/SourceIcon";
 
 const api = window.todoban;
 
@@ -14,6 +16,39 @@ const ERROR_TEXT: Record<string, string> = {
   failed: msg("Couldn't get a first step."),
 };
 
+// 기다리는 동안 실제로 일어나는 일만 보여 준다(꾸민 단계를 만들지 않는다).
+// 1) 무엇을 보냈는지(할 일·답·낱말·자료) 2) 지금 고르는 중 · 최근 기록으로 본 “보통 몇 초”
+export function FirstStepProgress({ state }: { state: FirstStepState }) {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  const shape = state.shape;
+  const names = [...new Set((shape?.context ?? []).map((c) => sourceName(c.source)))].join(", ");
+  const sent = shape
+    ? names
+      ? t("Sent {n} words and your {names} notes", { n: shape.words.length, names })
+      : t("Sent {n} words", { n: shape.words.length })
+    : state.answer
+      ? t("Sent your answer too")
+      : t("Sent the task");
+  const elapsed = state.startedAt ? (now - state.startedAt) / 1000 : 0;
+  const expect = state.expectMs ? Math.max(1, Math.round(state.expectMs / 1000)) : null;
+  const meta = expect === null ? null : elapsed > expect * 1.6 + 3 ? t("Taking longer than usual") : t("Usually {s}s", { s: expect });
+  return (
+    <div className="fs-progress motion-fade" role="status">
+      <p className="fs-progress__row is-done">
+        <CheckIcon size={11} /> {sent}
+      </p>
+      <p className="fs-progress__row">
+        <Spinner size={11} /> {state.answer && !shape ? t("Shaping a step from your answer…") : t("Finding a first step…")}
+        {meta && <span className="fs-progress__meta">{meta}</span>}
+      </p>
+    </div>
+  );
+}
+
 // 정리 안 된 할 일 아래에 펼쳐지는 카드: 찾는 중(A3) · 제안(A4) · 질문(A5) · 오류
 export function FirstStepCard({ state, originalTitle }: { state: FirstStepState; originalTitle: string }) {
   const [answer, setAnswer] = useState(state.answer ?? "");
@@ -23,8 +58,8 @@ export function FirstStepCard({ state, originalTitle }: { state: FirstStepState;
 
   if (state.status === "loading") {
     return (
-      <div className="fs-status motion-fade" {...stop}>
-        <Spinner size={12} /> {state.answer ? t("Shaping a step from your answer…") : t("Finding a first step…")}
+      <div {...stop}>
+        <FirstStepProgress state={state} />
       </div>
     );
   }

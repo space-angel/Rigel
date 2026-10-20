@@ -15,4 +15,9 @@ export interface FirstStepState {
   shape: ShapeInput | null;
   minutes: number | null;
   sources: FirstStepSource[];
+  // 미리 찾기: 사용자가 묻기 전에 뒤에서 찾아 둔 것. 물어보면 그때 보인다(hidden → false).
+  hidden?: boolean;
+  forTitle?: string; // 찾을 때의 제목. 제목이 바뀌면 버린다
+  startedAt?: number;
+  expectMs?: number | null; // 최근 몇 번 걸린 시간의 가운데 값(“보통 7초”)
 }

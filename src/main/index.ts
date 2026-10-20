@@ -90,6 +90,19 @@ function broadcast(): void {
   updateTray();
 }
 
+// 미리 찾기: 오늘 맨 위의 할 일이 첫 행동이 필요하면 뒤에서 찾아 둔다. 물어보면 기다리지 않고 바로 보인다.
+// 하나만 찾는다(Claude 사용량). 자동 점검(E2E)에서는 TODOBAN_PREFETCH=1일 때만(점검마다 사용량을 쓰지 않게).
+let prefetchTimer: ReturnType<typeof setTimeout> | null = null;
+function maybePrefetch(): void {
+  if (!data.settings.prefetch || (E2E && process.env.TODOBAN_PREFETCH !== "1") || !firstSteps) return;
+  if (prefetchTimer) clearTimeout(prefetchTimer);
+  prefetchTimer = setTimeout(() => {
+    const today = localDate();
+    const top = todayView(data.todos, today, pendingCarryOver(data, today)).open[0];
+    if (top && !top.isClear) firstSteps.prefetch(top.id);
+  }, 600);
+}
+
 function act(action: TodoAction): AppData {
   const prevHotkey = data.settings.hotkey;
   const prevLogin = data.settings.openAtLogin;
@@ -98,6 +111,7 @@ function act(action: TodoAction): AppData {
   if (data.settings.hotkey !== prevHotkey) registerHotkey();
   if (data.settings.openAtLogin !== prevLogin) app.setLoginItemSettings({ openAtLogin: data.settings.openAtLogin });
   broadcast();
+  if (listWindow?.isVisible() || E2E) maybePrefetch();
   return data;
 }
 
@@ -195,6 +209,7 @@ function toggleListWindow(): void {
   listWindow.focus();
   listWindow.webContents.send("list:opened");
   settleShadow(listWindow);
+  maybePrefetch();
 }
 
 // 일반 창(설정·확인·시작하기)은 내용 높이가 바뀌면 macOS 기본 창 애니메이션으로 크기를 바꾼다.
@@ -765,7 +780,10 @@ app.whenReady().then(() => {
             const colon = action.indexOf(":");
             const kind = colon < 0 ? action : action.slice(0, colon);
             const arg = colon < 0 ? "" : action.slice(colon + 1);
-            if (kind === "openList") listWindow?.webContents.send("list:opened");
+            if (kind === "openList") {
+              listWindow?.webContents.send("list:opened");
+              maybePrefetch();
+            }
             else if (kind === "openSettings") {
               showSettings(arg as "general");
               // 설정 창이 처음 만들어지면 내용을 다 그릴 때까지 기다린다.

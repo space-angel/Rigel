@@ -1562,9 +1562,15 @@ body::-webkit-scrollbar-thumb {
   flex-direction: column;
   gap: 16px;
   padding: 4px 12px 12px;
+  /* 창(최대 602px)보다 길면 여기서 스크롤한다. flex 항목은 min-height가 내용 높이라 0으로 풀어 줘야 줄어든다. */
+  min-height: 0;
   overflow-y: auto;
   /* 도구 결과가 늦게 들어와도 보던 자리로 스크롤이 튀지 않게 한다 */
   overflow-anchor: none;
+}
+/* 안의 칸은 줄어들지 않는다. 넘치면 body가 스크롤한다. */
+.shape__body > * {
+  flex-shrink: 0;
 }
 .shape__body::-webkit-scrollbar {
   width: 0;
@@ -3128,5 +3134,74 @@ html[lang="ko"] :is(.eyebrow,
   .now-card {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* ===== 첫 행동을 만드는 동안 =====
+   보낸 것(✓)과 지금 하는 일(⋯)만 두 줄로. 실제 기록으로 본 “보통 몇 초”를 옆에 둔다. */
+.fs-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 12px 8px 40px;
+}
+.fs-progress__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+.fs-progress__row.is-done {
+  color: var(--color-text-tertiary);
+}
+.fs-progress__row.is-done svg {
+  color: var(--blue-300);
+}
+.fs-progress__meta {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+}
+/* 만드는 중 카드는 화면 아래(만들기 버튼 바로 위)에 붙어 있어 스크롤 위치와 상관없이 보인다 */
+.shape-progress {
+  flex: none;
+  position: sticky;
+  bottom: 8px;
+  z-index: 5;
+  box-shadow: 0 -8px 24px rgb(0 0 0 / 45%);
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: var(--radius-r4);
+  border: 1px solid var(--white-10);
+  background: var(--ink-3);
+}
+.shape-progress .fs-progress {
+  padding: 12px 14px;
+}
+/* 도구 색 빛: 쓰는 도구마다 빛 하나. 차례로 밝아졌다 어두워지며 좌우로 흘러 색이 섞인다(transform·opacity만). */
+.hero-glow__src {
+  position: absolute;
+  bottom: -60px;
+  left: 0;
+  width: 70%;
+  height: 130px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--src) 42%, transparent), transparent);
+  opacity: 0;
+  animation: glow-src calc(var(--n) * 1.4s + 1.2s) ease-in-out calc(var(--i) * 1.4s) infinite;
+}
+@keyframes glow-src {
+  0% { opacity: 0; transform: translate3d(-10%, 0, 0); }
+  35% { opacity: 0.9; }
+  70% { opacity: 0.5; }
+  100% { opacity: 0; transform: translate3d(60%, 0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-glow__src {
+    animation: none;
+    opacity: 0.5;
   }
 }

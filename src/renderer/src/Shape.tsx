@@ -5,12 +5,13 @@ import type { FirstStepState } from "@shared/firstStep";
 import { localDate } from "@shared/todos";
 import { defaultMinutes, noteOpen, normalizeMix, sizeLabel, splitWords, toNote, type ShapeInput, type ToolResult, type ToolSource, type WordChip } from "@shared/shape";
 import { MCP_SERVICES, MCP_SOURCES, type McpSource } from "@shared/mcp";
-import { AiSparkle, ChevronLeftIcon, RefreshIcon, Spinner } from "./components/icons";
+import { AiSparkle, CheckIcon, ChevronLeftIcon, RefreshIcon, Spinner } from "./components/icons";
 import { SizeDial } from "./components/SizeDial";
 import { MixBar } from "./components/MixBar";
 import { SourceIcon, sourceName } from "./components/SourceIcon";
 import { currentLang, loc, t } from "./i18n";
-import { FirstStepCard } from "./FirstStepCard";
+import { FirstStepCard, FirstStepProgress } from "./FirstStepCard";
+import { sourceColors } from "./components/sourceColors";
 import { Evidence } from "./components/Evidence";
 
 const api = window.todoban;
@@ -415,6 +416,30 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
         )}
 
         {state && state.status !== "loading" && <FirstStepCard state={state} originalTitle={todo.title} />}
+        {/* 만드는 중: 실제로 읽는 도구의 색이 빛에 섞이고, 무엇을 보냈는지·지금 무엇을 하는지만 보여 준다 */}
+        {(state?.status === "loading" || waitingSince !== null) && (
+          <div className="shape-progress motion-rise">
+            <span className="hero-glow" aria-hidden="true">
+              {sourceColors(waitingSince !== null ? waiting.map((r) => r.source) : (state?.shape?.context ?? []).map((c) => c.source)).map((c, i, all) => (
+                <span key={c} className="hero-glow__src" style={{ "--src": c, "--i": i, "--n": all.length } as React.CSSProperties} />
+              ))}
+            </span>
+            {waitingSince !== null ? (
+              <div className="fs-progress" role="status">
+                {found.filter((r) => selected.includes(r.source)).length > 0 && (
+                  <p className="fs-progress__row is-done">
+                    <CheckIcon size={11} /> {t("Found in {names}", { names: [...new Set(found.filter((r) => selected.includes(r.source)).map((r) => sourceName(r.source)))].join(", ") })}
+                  </p>
+                )}
+                <p className="fs-progress__row">
+                  <Spinner size={11} /> {t("Reading {names}…", { names: waiting.map((r) => sourceName(r.source)).join(", ") })}
+                </p>
+              </div>
+            ) : (
+              state && <FirstStepProgress state={state} />
+            )}
+          </div>
+        )}
       </div>
       <footer className="shape__foot">
         {waitingSince !== null && now - waitingSince > SKIP_AFTER_MS ? (

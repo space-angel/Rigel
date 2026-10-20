@@ -1,0 +1,13 @@
+[
+ {"name":"목록 열기 · 맨 위가 첫 행동 필요한 할 일","win":"list","main":"openList","until":"__e2e.$('.now-card')","wait":300,
+  "run":"return { now: __e2e.$('.now-card__title').textContent, pill: __e2e.$('.now-card .pill-question')?.textContent.trim(), visibleStep: !!__e2e.$('.fs-card, .fs-progress') };",
+  "expect":"!__e2e.$('.fs-card, .fs-progress')"},
+ {"name":"뒤에서 미리 찾는 동안에도 카드는 조용하다","win":"list","run":"await new Promise(r => setTimeout(r, 1500)); return { pill: __e2e.$('.now-card .pill-question')?.textContent.trim(), visibleStep: !!__e2e.$('.fs-card, .fs-progress'), thinking: !!__e2e.$('.now-card.is-thinking') };",
+  "expect":"!__e2e.$('.fs-card, .fs-progress') && !__e2e.$('.now-card.is-thinking')"},
+ {"name":"찾아 두면 버튼이 '첫 행동이 준비됐어요'로","win":"list","until":"__e2e.$('.now-card .pill-question')?.textContent.includes('준비됐어요')","timeout":12000,"snap":true,
+  "run":"return __e2e.$('.now-card .pill-question').textContent.trim();"},
+ {"name":"누르면 기다리지 않고 바로 보인다","win":"list","run":"const t0 = performance.now(); __e2e.click('.now-card .pill-question'); while (!__e2e.$('.fs-card__title')) { await new Promise(r => setTimeout(r, 10)); if (performance.now() - t0 > 5000) break; } return { ms: Math.round(performance.now() - t0), step: __e2e.$('.fs-card__title')?.textContent };","snap":true,
+  "expect":"__e2e.$('.fs-card__title')?.textContent.includes('면접')"},
+ {"name":"다시 만들기: 진행 상황에 보낸 것과 '보통 N초'","win":"list","run":"[...document.querySelectorAll('.fs-card button')].find(b => b.textContent.includes('다시 만들기')).click(); await new Promise(r => setTimeout(r, 400)); return [...document.querySelectorAll('.fs-progress__row')].map(r => r.textContent.trim());","snap":true,
+  "expect":"[...document.querySelectorAll('.fs-progress__row')].some(r => r.textContent.includes('보통'))"}
+]

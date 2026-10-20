@@ -17,6 +17,7 @@ import { dueBadge, dueLabel } from "@shared/due";
 import { currentLang, loc, t } from "./i18n";
 import { msg } from "@shared/i18n";
 import { takeHandoff } from "./glow";
+import { sourceColors } from "./components/sourceColors";
 
 // 마감 배지. 줄에서는 짧게(D-3), 지금 할 일 카드에서는 말로(3 days left).
 function Due({ item, long }: { item: TodoItem; long?: boolean }) {
@@ -177,6 +178,8 @@ function NowCard({
   completing,
   thinking,
   nudge,
+  ready,
+  thinkSources = [],
 }: {
   item: TodoItem;
   shortcut?: Shortcut;
@@ -189,6 +192,8 @@ function NowCard({
   completing?: boolean;
   thinking?: boolean;
   nudge?: boolean;
+  ready?: boolean; // 첫 행동을 미리 찾아 둠
+  thinkSources?: string[]; // 생각하는 동안 쓰는 도구(빛 색)
 }) {
   const click = useSingleClick(item.isClear || edit.editing ? undefined : onShape);
   const [handoff] = useState(() => takeHandoff(item.id));
@@ -231,6 +236,10 @@ function NowCard({
       {/* 움직이는 글로우 층. 요소 하나에 움직임 하나: blob은 순간의 빛(힌트·이어받기·생각 중·도착), press는 손끝 빛. */}
       <span className="hero-glow" aria-hidden="true">
         <span className="hero-glow__blob" />
+        {thinking &&
+          sourceColors(thinkSources).map((c, i, all) => (
+            <span key={c} className="hero-glow__src" style={{ "--src": c, "--i": i, "--n": all.length } as React.CSSProperties} />
+          ))}
         <span className="hero-glow__press" />
       </span>
       {handoff && (
@@ -271,7 +280,7 @@ function NowCard({
             onFirstStep();
           }}
         >
-          <AiSparkle size={12} /> {t("Let Claude find a first step")}
+          <AiSparkle size={12} /> {ready ? t("A first step is ready") : t("Let Claude find a first step")}
         </button>
       )}
     </div>
@@ -645,7 +654,9 @@ export function TodayList() {
   };
 
   const act = (a: Parameters<typeof api.act>[0]) => api.act(a).then(setData);
-  const stepOf = (id: string) => firstSteps.find((f) => f.todoId === id);
+  // 미리 찾아 둔 것(hidden)은 물어보기 전까지 보이지 않는다.
+  const stepOf = (id: string) => firstSteps.find((f) => f.todoId === id && !f.hidden);
+  const readyOf = (id: string) => firstSteps.some((f) => f.todoId === id && f.hidden && f.status !== "loading" && f.status !== "error");
   const shortcutOf = (t: TodoItem) => (t.shortcutId ? data.shortcuts.find((s) => s.id === t.shortcutId) : undefined);
   const askFirstStep = (t: TodoItem) => {
     if (!stepOf(t.id)) api.requestFirstStep(t.id);
@@ -910,7 +921,7 @@ export function TodayList() {
               <div className="list" ref={listRef}>
                 {now && (
                   <SortableItem key={now.id} id={now.id}>
-                    <NowCard item={now} shortcut={shortcutOf(now)} selected={selected === 0} onToggle={() => complete(now)} completing={completing.includes(now.id)} onFirstStep={() => askFirstStep(now)} onShape={() => shape(now)} edit={edit(now)} isNew={highlight.includes(now.id)} thinking={stepOf(now.id)?.status === "loading"} nudge={nudge} />
+                    <NowCard item={now} shortcut={shortcutOf(now)} selected={selected === 0} onToggle={() => complete(now)} completing={completing.includes(now.id)} onFirstStep={() => askFirstStep(now)} onShape={() => shape(now)} edit={edit(now)} isNew={highlight.includes(now.id)} thinking={stepOf(now.id)?.status === "loading"} nudge={nudge} ready={readyOf(now.id)} thinkSources={stepOf(now.id)?.shape?.context.map((c) => c.source) ?? []} />
                   </SortableItem>
                 )}
                 {now && stepCard(now)}

@@ -198,6 +198,13 @@ function GeneralTab({ data }: { data: AppData }) {
           </div>
         </div>
         <div className="setting">
+          <div className="setting__text">
+            <p>{t("Find first steps ahead")}</p>
+            <p className="setting__desc">{t("When the top task needs a first step, Claude finds one before you ask. Uses a little more of your Claude plan.")}</p>
+          </div>
+          <Toggle on={data.settings.prefetch} onChange={(v) => api.act({ type: "setSettings", patch: { prefetch: v } })} />
+        </div>
+        <div className="setting">
           <p className="setting__text">{t("Open at login")}</p>
           <Toggle on={data.settings.openAtLogin} onChange={(v) => api.act({ type: "setSettings", patch: { openAtLogin: v } })} />
         </div>
