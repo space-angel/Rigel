@@ -784,7 +784,7 @@ export function TodayList() {
                   {t("Bring to today")}
                 </button>
                 <button type="button" className="text-button" onClick={() => act({ type: "carryOver", to: "later" })}>
-                  {t("Later")}
+                  {t("Do it later")}
                 </button>
               </div>
             </div>
