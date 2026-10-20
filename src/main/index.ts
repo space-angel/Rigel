@@ -315,12 +315,29 @@ function showWelcome(): void {
   welcomeWindow.on("closed", () => (welcomeWindow = null));
 }
 
+// 할 일을 넣으면 메뉴바 목록을 열어 방금 넣은 할 일을 보여 준다(잠깐 빛나고, 그 줄로 스크롤).
+// 목록이 이미 열려 있으면(아래 입력 바로 넣은 경우) 표시만 한다.
+function addAndReveal(action: TodoAction): void {
+  const before = new Set(data.todos.map((t) => t.id));
+  act(action);
+  const added = data.todos.filter((t) => !before.has(t.id)).map((t) => t.id);
+  if (!added.length || !listWindow) return;
+  if (!listWindow.isVisible() && !HEADLESS) {
+    quickWindow?.hide();
+    positionListWindow();
+    listWindow.show();
+    listWindow.invalidateShadow();
+    listWindow.focus();
+  }
+  listWindow.webContents.send("list:opened", { highlight: added });
+}
+
 // 한 줄 30자 이하는 그대로 넣고(부르는 말이 있으면 바로가기 연결), 긴 입력은 확인 창에서 Claude에게 나눠 달라고 한다.
 function submitQuick(text: string): { ok: boolean; kind?: "short" | "long" } {
   const kind = classifyQuickInput(text);
   if (kind === "empty") return { ok: false };
   quickWindow?.hide();
-  if (kind === "short") act({ type: "add", title: text.trim(), rawText: text, shortcutId: matchShortcutByKeywords(text, data.shortcuts) });
+  if (kind === "short") addAndReveal({ type: "add", title: text.trim(), rawText: text, shortcutId: matchShortcutByKeywords(text, data.shortcuts) });
   else startReview(text);
   return { ok: true, kind };
 }
@@ -411,6 +428,23 @@ function showWelcome(): void {
   });
   welcomeWindow.on("focus", () => welcomeWindow?.webContents.send("settings:focus"));
   welcomeWindow.on("closed", () => (welcomeWindow = null));
+}
+
+// 할 일을 넣으면 메뉴바 목록을 열어 방금 넣은 할 일을 보여 준다(잠깐 빛나고, 그 줄로 스크롤).
+// 목록이 이미 열려 있으면(아래 입력 바로 넣은 경우) 표시만 한다.
+function addAndReveal(action: TodoAction): void {
+  const before = new Set(data.todos.map((t) => t.id));
+  act(action);
+  const added = data.todos.filter((t) => !before.has(t.id)).map((t) => t.id);
+  if (!added.length || !listWindow) return;
+  if (!listWindow.isVisible() && !HEADLESS) {
+    quickWindow?.hide();
+    positionListWindow();
+    listWindow.show();
+    listWindow.invalidateShadow();
+    listWindow.focus();
+  }
+  listWindow.webContents.send("list:opened", { highlight: added });
 }
 
 // 한 줄 30자 이하는 그대로 넣고, 긴 입력은 확인 창을 열어 Claude에게 나눠 달라고 한다.
@@ -557,14 +591,16 @@ function showWelcome(): void {
   });
   ipcMain.on("review:commit", (_e, drafts: ReviewDraft[]) => {
     if (!review) return;
-    act({ type: "addMany", rawText: review.state.rawText, items: drafts });
+    const rawText = review.state.rawText;
     endReview();
+    addAndReveal({ type: "addMany", rawText, items: drafts });
   });
   // 나누지 않고 원문 첫 줄을 제목으로 한 정리 안 된 할 일 하나로 넣는다.
   ipcMain.on("review:insertRaw", () => {
     if (!review) return;
-    act({ type: "add", title: firstLine(review.state.rawText), rawText: review.state.rawText });
+    const rawText = review.state.rawText;
     endReview();
+    addAndReveal({ type: "add", title: firstLine(rawText), rawText });
   });
   ipcMain.on("review:openTerminal", () => openOutside("Terminal", () => shell.openPath("/System/Applications/Utilities/Terminal.app")));
 

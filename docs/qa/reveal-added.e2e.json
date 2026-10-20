@@ -1,0 +1,11 @@
+[
+  { "name": "빠른 입력 · 짧은 할 일", "win": "quick", "run": "__e2e.type('textarea', '우유 사기'); __e2e.key('textarea', 'Enter'); return true;", "wait": 300 },
+  { "name": "목록이 열리고 방금 넣은 할 일이 빛난다", "win": "list", "until": "__e2e.$('.is-new')", "wait": 400, "snap": true,
+    "expect": "__e2e.$('.is-new').textContent.includes('우유 사기') && __e2e.$('.is-new.is-selected')" },
+  { "name": "2.4초 뒤 표시가 사라진다", "win": "list", "wait": 2600, "expect": "!__e2e.$('.is-new')" },
+  { "name": "긴 생각 → 확인 창", "win": "quick", "run": "__e2e.type('textarea', '내일 사일로 리허설 피드백 정리하고 발표 대본도 한 번 읽어 봐야 함'); __e2e.key('textarea', 'Enter'); return true;", "wait": 300 },
+  { "name": "확인 창 결과", "win": "review", "until": "__e2e.all('.draft').length > 0", "timeout": 30000 },
+  { "name": "Add → 목록이 열린다", "win": "review", "run": "__e2e.click('.review__footer .button--primary'); return true;", "wait": 300 },
+  { "name": "모두 내일이면 다이얼이 Tomorrow로 돌고 빛난다", "win": "list", "until": "__e2e.$('.is-new')", "wait": 500, "snap": true,
+    "expect": "__e2e.$('.dial__label.is-active').textContent === 'Tomorrow' && __e2e.all('.is-new').length === 2" }
+]

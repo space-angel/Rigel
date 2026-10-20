@@ -2355,3 +2355,24 @@ body::-webkit-scrollbar-thumb {
   border-color: rgb(111 166 255 / 55%);
   background: rgb(94 152 254 / 14%);
 }
+
+/* 방금 넣은 할 일: 파란 테두리가 잠깐 빛났다가 사라진다 */
+.row.is-new,
+.now-card.is-new {
+  animation: just-added 2.4s ease-out;
+}
+@keyframes just-added {
+  0%, 35% { box-shadow: inset 0 0 0 1px rgb(111 166 255 / 85%), 0 0 0 3px rgb(94 152 254 / 22%); }
+  100% { box-shadow: var(--shadow-row); }
+}
+.now-card.is-new {
+  animation-name: just-added-hero;
+}
+@keyframes just-added-hero {
+  0%, 35% { box-shadow: var(--shadow-hero), inset 0 0 0 1px rgb(111 166 255 / 85%), 0 0 0 3px rgb(94 152 254 / 22%); }
+  100% { box-shadow: var(--shadow-hero); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .row.is-new, .now-card.is-new { animation-duration: 0.01s; }
+  .row.is-new { box-shadow: inset 0 0 0 1px rgb(111 166 255 / 85%); }
+}

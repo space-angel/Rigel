@@ -143,6 +143,7 @@ function NowCard({
   onFirstStep,
   onShape,
   edit,
+  isNew,
 }: {
   item: TodoItem;
   shortcut?: Shortcut;
@@ -151,11 +152,12 @@ function NowCard({
   onFirstStep: () => void;
   onShape: () => void;
   edit: EditProps;
+  isNew?: boolean;
 }) {
   const click = useSingleClick(item.isClear || edit.editing ? undefined : onShape);
   return (
     <div
-      className={`now-card${selected ? " is-selected" : ""}`}
+      className={`now-card${selected ? " is-selected" : ""}${isNew ? " is-new" : ""}`}
       {...click}
       onContextMenu={(e) => {
         e.preventDefault();
@@ -208,6 +210,7 @@ function Row({
   onToggle,
   onFirstStep,
   edit,
+  isNew,
 }: {
   item: TodoItem;
   shortcut?: Shortcut;
@@ -217,12 +220,13 @@ function Row({
   onToggle: () => void;
   onFirstStep?: () => void;
   edit: EditProps;
+  isNew?: boolean;
 }) {
   const unclear = !item.isClear && !done;
   const click = useSingleClick(unclear && !edit.editing ? onFirstStep : undefined);
   return (
     <div
-      className={`row${selected ? " is-selected" : ""}${done ? " is-done" : ""}${unclear ? " is-unclear" : ""}${edit.editing ? " is-editing" : ""}`}
+      className={`row${selected ? " is-selected" : ""}${done ? " is-done" : ""}${unclear ? " is-unclear" : ""}${edit.editing ? " is-editing" : ""}${isNew ? " is-new" : ""}`}
       {...click}
       onContextMenu={(e) => {
         e.preventDefault();
@@ -285,6 +289,8 @@ export function TodayList() {
   // 제자리에서 고치는 중인 할 일, 방금 지워서 되살릴 수 있는 할 일
   const [editingId, setEditingId] = useState<string | null>(null);
   const [undo, setUndo] = useState<TodoItem | null>(null);
+  // 방금 넣은 할 일. 목록이 열릴 때 그 묶음으로 다이얼을 돌리고, 잠깐 빛나게 한다.
+  const [highlight, setHighlight] = useState<string[]>([]);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dataRef = useRef<AppData | null>(null);
   dataRef.current = data;
@@ -294,10 +300,12 @@ export function TodayList() {
     api.getFirstSteps().then(setFirstSteps);
     const offData = api.onData(setData);
     const offFirst = api.onFirstSteps(setFirstSteps);
-    const offOpen = api.onListOpened(() => {
+    const offOpen = api.onListOpened((opts) => {
       setSelected(0);
       setDial("today");
+      setShaping(null);
       rootRef.current?.focus();
+      if (opts?.highlight?.length) setHighlight(opts.highlight);
     });
     const offShape = api.onShapeOpen((id, auto) => setShaping({ id, auto }));
     // ⋯ 메뉴나 오른쪽 클릭 메뉴에서 고르면 메인이 알려 준다.
@@ -352,6 +360,19 @@ export function TodayList() {
     setUndo(null);
     if (undoTimer.current) clearTimeout(undoTimer.current);
   };
+
+  // 방금 넣은 할 일이 있는 묶음을 보여 주고 첫 줄을 고른다. 2.4초 뒤 표시를 지운다.
+  useEffect(() => {
+    if (!highlight.length || !data) return;
+    const b = dialBuckets(data.todos, localDate(), pendingCarryOver(data, localDate()));
+    const view = (["today", "tomorrow", "later", "overdue"] as const).find((v) => b[v].some((t) => highlight.includes(t.id)));
+    if (view) {
+      setDial(view);
+      setSelected(Math.max(0, b[view].findIndex((t) => highlight.includes(t.id))));
+    }
+    const timer = setTimeout(() => setHighlight([]), 2400);
+    return () => clearTimeout(timer);
+  }, [highlight, data !== null]);
 
   const carry = useMemo(() => (data ? pendingCarryOver(data, localDate()) : []), [data]);
   const view = useMemo(() => (data ? todayView(data.todos, localDate(), carry) : null), [data, carry]);
@@ -503,6 +524,7 @@ export function TodayList() {
                   onToggle={() => act({ type: "toggle", id: t.id })}
                   onFirstStep={() => shape(t)}
                   edit={edit(t)}
+                  isNew={highlight.includes(t.id)}
                   trailing={
                     dial !== "done" && (
                       <>
@@ -565,14 +587,14 @@ export function TodayList() {
               <div className="list">
                 {now && (
                   <SortableItem id={now.id}>
-                    <NowCard item={now} shortcut={shortcutOf(now)} selected={selected === 0} onToggle={() => act({ type: "toggle", id: now.id })} onFirstStep={() => askFirstStep(now)} onShape={() => shape(now)} edit={edit(now)} />
+                    <NowCard item={now} shortcut={shortcutOf(now)} selected={selected === 0} onToggle={() => act({ type: "toggle", id: now.id })} onFirstStep={() => askFirstStep(now)} onShape={() => shape(now)} edit={edit(now)} isNew={highlight.includes(now.id)} />
                   </SortableItem>
                 )}
                 {now && stepCard(now)}
                 {rest.map((t, i) => (
                   <div key={t.id}>
                     <SortableItem id={t.id}>
-                      <Row item={t} shortcut={shortcutOf(t)} selected={selected === i + 1} onToggle={() => act({ type: "toggle", id: t.id })} onFirstStep={() => shape(t)} edit={edit(t)} />
+                      <Row item={t} shortcut={shortcutOf(t)} selected={selected === i + 1} onToggle={() => act({ type: "toggle", id: t.id })} onFirstStep={() => shape(t)} edit={edit(t)} isNew={highlight.includes(t.id)} />
                     </SortableItem>
                     {stepCard(t)}
                   </div>

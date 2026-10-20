@@ -26,8 +26,8 @@ const api = {
       ipcRenderer.removeListener("data:changed", listener);
     };
   },
-  onListOpened: (fn: () => void) => {
-    const listener = () => fn();
+  onListOpened: (fn: (opts?: { highlight?: string[] }) => void) => {
+    const listener = (_e: unknown, opts?: { highlight?: string[] }) => fn(opts);
     ipcRenderer.on("list:opened", listener);
     return () => {
       ipcRenderer.removeListener("list:opened", listener);

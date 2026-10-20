@@ -1,0 +1,49 @@
+[
+  {
+    "name": "빠른 입력 · 짧은 할 일",
+    "win": "quick",
+    "ok": true,
+    "ms": 337,
+    "value": true
+  },
+  {
+    "name": "목록이 열리고 방금 넣은 할 일이 빛난다",
+    "win": "list",
+    "ok": true,
+    "ms": 780,
+    "snap": "02-list.png"
+  },
+  {
+    "name": "2.4초 뒤 표시가 사라진다",
+    "win": "list",
+    "ok": true,
+    "ms": 2601
+  },
+  {
+    "name": "긴 생각 → 확인 창",
+    "win": "quick",
+    "ok": true,
+    "ms": 311,
+    "value": true
+  },
+  {
+    "name": "확인 창 결과",
+    "win": "review",
+    "ok": true,
+    "ms": 1
+  },
+  {
+    "name": "Add → 목록이 열린다",
+    "win": "review",
+    "ok": true,
+    "ms": 304,
+    "value": true
+  },
+  {
+    "name": "모두 내일이면 다이얼이 Tomorrow로 돌고 빛난다",
+    "win": "list",
+    "ok": true,
+    "ms": 848,
+    "snap": "07-list.png"
+  }
+]
