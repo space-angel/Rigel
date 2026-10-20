@@ -1,40 +1,60 @@
-/* 기본 테마. 값은 Figma Foundations(uLkrdQtbosV1DMYSYHsYeB)의 변수와 이름을 맞춘다.
-   그레이·간격·모서리·그림자는 SEED 구조, 민트 그라데이션은 부각할 곳에만. */
+/* 기본 테마: 다크 글래스. 값은 Figma "todoBAN · Full flow"(uLkrdQtbosV1DMYSYHsYeB)와 맞춘다.
+   글로우 위계 — L0 창: 글로우 없음 · L1 주인공 카드: 화면에 하나만 파란 안쪽 글로우 ·
+   L2 주요 동작: 파란 테두리 · L3 나머지: 흰 글래스 행. */
 :root {
-  --gray-00: #ffffff;
-  --gray-100: #f7f8f9;
-  --gray-200: #f3f4f5;
-  --gray-300: #eeeff1;
-  --gray-400: #dcdee3;
-  --gray-500: #d1d3d8;
-  --gray-600: #b0b3ba;
-  --gray-700: #868b94;
-  --gray-800: #555d6d;
-  --gray-900: #2a3038;
-  --gray-1000: #1a1c20;
+  color-scheme: dark;
 
-  --color-text-primary: var(--gray-1000);
-  --color-text-secondary: var(--gray-800);
-  --color-text-unclear: var(--gray-700);
-  --color-text-done: var(--gray-600);
-  --color-text-on-accent: #ffffff;
-  --color-surface-window: var(--gray-00);
-  --color-surface-hover: var(--gray-100);
-  --color-surface-subtle: var(--gray-200);
-  --color-border-window: rgb(0 0 0 / 8%);
-  --color-border-card: rgb(0 0 0 / 6%);
-  --color-border-divider: var(--gray-300);
-  --color-border-control: var(--gray-600);
-  --color-unclear-dot: #34c08a;
-  --color-summer-ink: #2e8b5a;
-  --color-summer-ink-soft: #4daa79;
+  --ink-0: #07080a;
+  --ink-1: #0b0d11;
+  --ink-2: #15181d;
+  --ink-3: #1a1e25;
 
-  --gradient-summer: linear-gradient(180deg, #8edfb7 0%, #cdefdd 60%, #e9f8f1 100%);
-  --gradient-mint-soft: linear-gradient(180deg, #dff4e9, #f2faf6);
-  --gradient-ink: linear-gradient(180deg, #2a3038, #1a1c20);
-  --gradient-gray-soft: linear-gradient(180deg, #f7f8f9, #f3f4f5);
-  --gradient-brand: linear-gradient(135deg, #4ccb92, #22a56a);
-  --gradient-ai: linear-gradient(135deg, #3cc488, #3fa6d8);
+  --white-90: rgb(255 255 255 / 90%);
+  --white-55: rgb(255 255 255 / 55%);
+  --white-45: rgb(255 255 255 / 45%);
+  --white-35: rgb(255 255 255 / 35%);
+  --white-16: rgb(255 255 255 / 16%);
+  --white-14: rgb(255 255 255 / 14%);
+  --white-10: rgb(255 255 255 / 10%);
+  --white-08: rgb(255 255 255 / 8%);
+  --white-06: rgb(255 255 255 / 6%);
+
+  --color-text-primary: #ffffff;
+  --color-text-secondary: var(--white-55);
+  --color-text-tertiary: var(--white-45);
+  --color-text-unclear: var(--white-55);
+  --color-text-done: var(--white-35);
+  --color-text-on-white: var(--ink-1);
+
+  --blue-500: #2f6bff;
+  --blue-300: #6fa6ff;
+  --blue-glow: rgb(94 152 254 / 32%);
+  --orange-500: #ff6a2a;
+  --orange-200: #ffb08a;
+  --green-500: #34c08a;
+  --green-200: #7fe0b5;
+  --red-400: #ff6b6b;
+
+  --gradient-blue: linear-gradient(90deg, var(--blue-500), var(--blue-300));
+  --gradient-blue-soft: linear-gradient(90deg, rgb(94 152 254 / 42%), rgb(94 152 254 / 22%));
+
+  /* L0 창 */
+  --surface-window: linear-gradient(160deg, rgb(42 47 57 / 96%) 0%, rgb(23 26 32 / 97%) 45%, rgb(26 34 51 / 98%) 100%);
+  --border-window: var(--white-16);
+  --shadow-window: inset 0 1px 0 rgb(255 255 255 / 10%), 0 20px 50px rgb(0 0 0 / 50%);
+  /* L1 주인공 카드 */
+  --surface-hero: linear-gradient(160deg, rgb(42 47 57 / 78%) 0%, rgb(23 26 32 / 86%) 45%, rgb(26 34 51 / 90%) 100%);
+  --border-hero: linear-gradient(180deg, rgb(255 255 255 / 22%), rgb(255 255 255 / 7%) 50%, rgb(156 192 255 / 35%));
+  --shadow-hero: inset 0 1px 0 rgb(255 255 255 / 12%), inset 0 -18px 42px var(--blue-glow);
+  --shadow-hero-sm: inset 0 1px 0 rgb(255 255 255 / 12%), inset 0 -12px 26px var(--blue-glow);
+  /* L2 주요 동작 */
+  --border-action: linear-gradient(90deg, rgb(111 166 255 / 60%), rgb(47 107 255 / 20%));
+  /* L3 글래스 행 */
+  --surface-row: linear-gradient(180deg, rgb(255 255 255 / 7%), rgb(255 255 255 / 3%));
+  --border-row: var(--white-10);
+  --shadow-row: inset 0 1px 0 rgb(255 255 255 / 8%);
+  --surface-field: rgb(0 0 0 / 25%);
+  --surface-hover: var(--white-06);
 
   --dimension-x0-5: 2px;
   --dimension-x1: 4px;
@@ -46,10 +66,6 @@
   --dimension-x4: 16px;
   --dimension-x5: 20px;
   --dimension-x6: 24px;
-  --spacing-global-gutter: var(--dimension-x4);
-  --spacing-component-default: var(--dimension-x3);
-  --spacing-between-text: var(--dimension-x1-5);
-  --spacing-between-chips: var(--dimension-x2);
 
   --radius-r1-5: 6px;
   --radius-r2: 8px;
@@ -57,12 +73,9 @@
   --radius-r3: 12px;
   --radius-r3-5: 14px;
   --radius-r4: 16px;
+  --radius-r5: 20px;
   --radius-full: 9999px;
 
-  --shadow-s1: 0 1px 4px rgb(0 0 0 / 8%);
-  --shadow-s2: 0 2px 10px rgb(0 0 0 / 10%);
-  --shadow-s3: 0 4px 16px rgb(0 0 0 / 12%), 0 12px 40px rgb(0 0 0 / 10%);
-  --shadow-now-card: 0 6px 18px rgb(46 139 90 / 12%);
-
-  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Pretendard Variable", Pretendard, system-ui, sans-serif;
+  --font-mono: "Geist Mono", "SF Mono", ui-monospace, Menlo, monospace;
 }

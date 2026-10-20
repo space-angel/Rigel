@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
 import { charCount, classifyQuickInput } from "@shared/quickInput";
-import { AiSparkle, SunIcon } from "./components/icons";
+import { AiSparkle, ArrowRightIcon } from "./components/icons";
 
 const api = window.todoban;
 
@@ -62,7 +62,7 @@ export function QuickInput() {
             autoFocus
             rows={1}
             value={text}
-            placeholder="떠오르는 생각을 그대로 적어 보세요"
+            placeholder="What's on your mind?"
             onChange={(e) => setText(e.target.value)}
             onKeyDown={onKeyDown}
           />
@@ -70,16 +70,16 @@ export function QuickInput() {
         <div className="quick__hint">
           {kind === "short" && (
             <span className="quick__kind">
-              <SunIcon size={14} /> {count}자 · 바로 오늘에 넣어요
+              <ArrowRightIcon size={12} /> {count} chars · straight into today
             </span>
           )}
           {kind === "long" && (
             <span className="quick__kind quick__kind--ai">
-              <AiSparkle size={14} /> {count}자 · Claude가 할 일로 나눠요
+              <AiSparkle size={12} /> {count} chars · Claude splits it into tasks
             </span>
           )}
           <span className="quick__keys">
-            <kbd>Esc</kbd> 닫기 <kbd>Enter</kbd> {kind === "long" ? "나누기" : "넣기"} <kbd>⇧ Enter</kbd> 줄바꿈
+            <kbd>esc</kbd> close <kbd>↵</kbd> {kind === "long" ? "split" : "add"} <kbd>⇧↵</kbd> new line
           </span>
         </div>
       </div>

@@ -8,8 +8,8 @@ const api = window.todoban;
 const SLOW_AFTER_MS = 10_000;
 
 function dayLabel(date: string | null, today: string): string {
-  if (date === null) return "나중";
-  if (date <= today) return "오늘";
+  if (date === null) return "Later";
+  if (date <= today) return "Today";
   const [, m, d] = date.split("-");
   return `${Number(m)}/${Number(d)}`;
 }
@@ -39,10 +39,10 @@ function DraftRow({
         <input
           className="draft__title"
           value={draft.title}
-          placeholder="할 일 제목"
+          placeholder="Task title"
           onChange={(e) => onChange({ title: e.target.value })}
         />
-        <button type="button" className="draft__remove" aria-label="빼기" onClick={onRemove}>
+        <button type="button" className="draft__remove" aria-label="Remove" onClick={onRemove}>
           <CloseIcon size={14} />
         </button>
       </div>
@@ -54,7 +54,7 @@ function DraftRow({
           <label className="pill pill--select">
             ▶︎{" "}
             <select value={draft.shortcutId ?? ""} onChange={(e) => onChange({ shortcutId: e.target.value || null })}>
-              <option value="">바로가기 없음</option>
+              <option value="">No shortcut</option>
               {shortcuts.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
@@ -67,10 +67,10 @@ function DraftRow({
         <button
           type="button"
           className={`chip chip--toggle${draft.isClear ? " is-off" : ""}`}
-          title="눌러서 정리 여부를 바꿔요"
+          title="Toggle whether this needs a first step"
           onClick={() => onChange({ isClear: !draft.isClear })}
         >
-          {draft.isClear ? "정리됨" : "정리 필요"}
+          {draft.isClear ? "Clear" : "Unclear"}
         </button>
       </div>
     </div>
@@ -149,12 +149,12 @@ export function Review() {
 
   return (
     <div className="review" ref={rootRef}>
-      <div className="review__titlebar">할 일 확인</div>
+      <div className="review__titlebar">Review</div>
       <div className="review__body">
         <button type="button" className={`raw${rawOpen ? " is-open" : ""}`} onClick={() => setRawOpen((v) => !v)}>
-          <span className="raw__label">적은 내용</span>
+          <span className="raw__label">Your thought</span>
           <span className="raw__text">{state.rawText}</span>
-          <span className="raw__more">{rawOpen ? "접기" : "펼치기"}</span>
+          <span className="raw__more">{rawOpen ? "Collapse" : "Expand"}</span>
           <ChevronDownIcon size={12} />
         </button>
 
@@ -162,7 +162,7 @@ export function Review() {
           <>
             <div className="loading">
               <Spinner size={16} />
-              <span>{slow ? "조금 오래 걸리고 있어요" : "Claude가 할 일로 나누는 중…"}</span>
+              <span>{slow ? "Taking a little longer…" : "Claude is splitting your thought…"}</span>
             </div>
             {[0.8, 0.6, 0.7].map((w, i) => (
               <div className="skeleton" key={i}>
@@ -174,26 +174,26 @@ export function Review() {
         )}
 
         {state.status === "error" && err?.kind === "timeout" && (
-          <Notice title="Claude가 응답하지 않아요">
-            <p>적은 내용은 그대로 있어요. 다시 시도하거나, 나누지 않고 정리 안 된 할 일 하나로 넣을 수 있어요.</p>
+          <Notice title="Claude didn't respond">
+            <p>Your thought is safe. Try again, or add it as one unclear task without splitting.</p>
           </Notice>
         )}
         {state.status === "error" && err?.kind === "notLoggedIn" && (
           <>
-            <Notice title="Claude Code 로그인이 필요해요">
-              <p>터미널에서 claude를 실행해 구독 계정으로 로그인한 뒤 다시 시도해 주세요.</p>
+            <Notice title="Sign in to Claude Code">
+              <p>Run claude in Terminal, sign in with your subscription, then try again.</p>
             </Notice>
             <div className="code">$ claude</div>
           </>
         )}
         {state.status === "error" && err?.kind === "notFound" && (
-          <Notice title="Claude Code를 찾지 못했어요">
-            <p>적은 내용은 그대로 있어요. Claude Code를 설치하거나 설정에서 경로를 지정한 뒤 다시 시도해 주세요.</p>
+          <Notice title="Claude Code isn't installed">
+            <p>Your thought is safe. Install Claude Code or set its path in Settings, then try again.</p>
           </Notice>
         )}
         {state.status === "error" && err?.kind === "failed" && (
-          <Notice title="Claude가 할 일을 나누지 못했어요">
-            <p>적은 내용은 그대로 있어요. 다시 시도하거나 나누지 않고 넣을 수 있어요.</p>
+          <Notice title="Claude couldn't split this">
+            <p>Your thought is safe. Try again, or add it without splitting.</p>
             {err.message && <p className="notice__detail">{err.message}</p>}
           </Notice>
         )}
@@ -201,12 +201,12 @@ export function Review() {
         {state.status === "ready" && (
           <>
             {err?.kind === "parseFailed" ? (
-              <Notice title="할 일로 나누지 못했어요">
-                <p>적은 내용을 그대로 넣을게요. 제목을 고치거나, 넣은 뒤 목록에서 첫 행동을 받을 수 있어요.</p>
+              <Notice title="Couldn't split into tasks">
+                <p>It'll go in as written. Edit the title, or shape a first step from the list later.</p>
               </Notice>
             ) : (
               <h2 className="review__heading">
-                <AiSparkle size={14} /> 할 일 {drafts.length}개로 나눴어요
+                <AiSparkle size={14} /> {drafts.length} {drafts.length === 1 ? "task" : "tasks"} from your thought
               </h2>
             )}
             <div className="drafts">
@@ -227,45 +227,45 @@ export function Review() {
       <footer className="review__footer">
         {state.status === "ready" && (
           <button type="button" className="button button--ghost" onClick={addDraft}>
-            <PlusIcon size={14} /> 할 일 추가
+            <PlusIcon size={14} /> Add task
           </button>
         )}
         {state.status === "ready" && err?.kind === "parseFailed" && (
           <button type="button" className="button button--ghost" onClick={api.retryReview}>
-            <RefreshIcon size={14} /> 다시 나누기
+            <RefreshIcon size={14} /> Split again
           </button>
         )}
         {state.status === "error" && err?.kind === "notLoggedIn" && (
           <button type="button" className="button button--ghost" onClick={api.openTerminal}>
-            <TerminalIcon size={14} /> 터미널 열기
+            <TerminalIcon size={14} /> Open Terminal
           </button>
         )}
         <span className="spacer" />
         {state.status === "ready" ? (
           <>
             <button type="button" className="button button--secondary" onClick={api.cancelReview}>
-              취소
+              Cancel
             </button>
             <button type="button" className="button button--primary" disabled={!valid.length} onClick={commit}>
-              {valid.length}개 넣기
+              Add {valid.length} {valid.length === 1 ? "task" : "tasks"}
             </button>
           </>
         ) : state.status === "error" ? (
           <>
             <button type="button" className="button button--secondary" onClick={api.insertRawReview}>
-              나누지 않고 넣기
+              Add without splitting
             </button>
             <button type="button" className="button button--primary" onClick={api.retryReview}>
-              <RefreshIcon size={14} /> 다시 시도
+              <RefreshIcon size={14} /> Try again
             </button>
           </>
         ) : (
           <>
             <button type="button" className="button button--secondary" onClick={api.cancelReview}>
-              취소
+              Cancel
             </button>
             <button type="button" className="button button--primary" disabled>
-              넣기
+              Add
             </button>
           </>
         )}

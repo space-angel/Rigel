@@ -5,11 +5,11 @@ import { AiSparkle, Spinner } from "./components/icons";
 const api = window.todoban;
 
 const ERROR_TEXT: Record<string, string> = {
-  timeout: "Claude가 응답하지 않아요",
-  notLoggedIn: "Claude Code 로그인이 필요해요. 터미널에서 claude를 실행해 주세요",
-  notFound: "Claude Code를 찾지 못했어요",
-  parseFailed: "제안을 읽지 못했어요",
-  failed: "첫 행동을 받지 못했어요",
+  timeout: "Claude didn't respond.",
+  notLoggedIn: "Sign in to Claude Code first — run claude in Terminal.",
+  notFound: "Claude Code isn't installed.",
+  parseFailed: "Couldn't read Claude's answer.",
+  failed: "Couldn't get a first step.",
 };
 
 // 정리 안 된 할 일 아래에 펼쳐지는 카드: 찾는 중(A3) · 제안(A4) · 질문(A5) · 오류
@@ -22,7 +22,7 @@ export function FirstStepCard({ state, originalTitle }: { state: FirstStepState;
   if (state.status === "loading") {
     return (
       <div className="fs-status" {...stop}>
-        <Spinner size={12} /> {state.answer ? "답을 보고 첫 행동을 고르는 중…" : "첫 행동 찾는 중…"}
+        <Spinner size={12} /> {state.answer ? "Shaping a step from your answer…" : "Finding a first step…"}
       </div>
     );
   }
@@ -33,11 +33,11 @@ export function FirstStepCard({ state, originalTitle }: { state: FirstStepState;
         <p className="fs-card__body">{ERROR_TEXT[state.error?.kind ?? "failed"]}</p>
         <div className="fs-card__actions">
           <button type="button" className="button button--primary button--sm" onClick={() => api.requestFirstStep(id, { answer: state.answer ?? undefined })}>
-            다시 시도
+            Try again
           </button>
           <span className="spacer" />
           <button type="button" className="text-button" onClick={() => api.dismissFirstStep(id)}>
-            닫기
+            Close
           </button>
         </div>
       </div>
@@ -47,14 +47,14 @@ export function FirstStepCard({ state, originalTitle }: { state: FirstStepState;
   if (state.status === "question") {
     const send = () => answer.trim() && api.requestFirstStep(id, { answer });
     return (
-      <div className="fs-card fs-card--plain" {...stop}>
-        <p className="fs-card__eyebrow">하나만 물어볼게요</p>
+      <div className="fs-card fs-card--hero" {...stop}>
+        <p className="fs-card__eyebrow">One question</p>
         <p className="fs-card__title">{state.question}</p>
         <input
           className="fs-card__input"
           autoFocus
           value={answer}
-          placeholder="답을 적고 Enter"
+          placeholder="Type an answer, then Enter"
           onChange={(e) => setAnswer(e.target.value)}
           onKeyDown={(e) => {
             e.stopPropagation();
@@ -63,28 +63,28 @@ export function FirstStepCard({ state, originalTitle }: { state: FirstStepState;
             if (e.key === "Escape") api.dismissFirstStep(id);
           }}
         />
-        <p className="fs-card__hint">Enter 답하기 · Esc 그대로 두기</p>
+        <p className="fs-card__hint">ENTER ANSWER · ESC KEEP AS IS</p>
       </div>
     );
   }
 
   return (
-    <div className="fs-card fs-card--mint" {...stop}>
+    <div className="fs-card fs-card--hero" {...stop}>
       <p className="fs-card__eyebrow fs-card__eyebrow--ai">
-        <AiSparkle size={12} /> 첫 행동으로 바꿀까요?
+        <AiSparkle size={12} /> First step
       </p>
       <p className="fs-card__title">{state.title}</p>
-      <p className="fs-card__body">“{originalTitle}” 대신</p>
+      <p className="fs-card__body">Instead of “{originalTitle}”</p>
       <div className="fs-card__actions">
         <button type="button" className="button button--primary button--sm" onClick={() => api.acceptFirstStep(id)}>
-          이걸로 바꾸기
+          Use this step
         </button>
         <button type="button" className="text-button" onClick={() => api.requestFirstStep(id, { again: true })}>
-          다른 제안
+          Reshape
         </button>
         <span className="spacer" />
         <button type="button" className="text-button" onClick={() => api.dismissFirstStep(id)}>
-          그대로 두기
+          Keep as is
         </button>
       </div>
     </div>

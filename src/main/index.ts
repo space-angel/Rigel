@@ -163,14 +163,14 @@ function createReviewWindow(): BrowserWindow {
     height: 360,
     useContentSize: true,
     show: false,
-    title: "할 일 확인",
+    title: "Review",
     titleBarStyle: "hiddenInset",
     trafficLightPosition: { x: 16, y: 16 },
     resizable: false,
     minimizable: false,
     maximizable: false,
     fullscreenable: false,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#15181d",
     webPreferences: { preload: join(__dirname, "../preload/index.js"), sandbox: true },
   });
   win.on("close", (e) => {
@@ -225,14 +225,14 @@ function showSettings(tab: "general" | "shortcuts" | "shortcuts-new" = "general"
       height: 520,
       useContentSize: true,
       show: false,
-      title: "설정",
+      title: "Settings",
       titleBarStyle: "hiddenInset",
       trafficLightPosition: { x: 16, y: 16 },
       resizable: false,
       minimizable: false,
       maximizable: false,
       fullscreenable: false,
-      backgroundColor: "#ffffff",
+      backgroundColor: "#15181d",
       webPreferences: { preload: join(__dirname, "../preload/index.js"), sandbox: true },
     });
     loadView(settingsWindow, `settings-${tab}`);
@@ -267,21 +267,21 @@ function registerHotkey(): void {
   globalShortcut.unregisterAll();
   const accelerator = data.settings.hotkey;
   try {
-    hotkeyError = globalShortcut.register(accelerator, showQuickWindow) ? null : `${accelerator}을(를) 다른 앱이 쓰고 있어요`;
+    hotkeyError = globalShortcut.register(accelerator, showQuickWindow) ? null : `Another app is using ${accelerator}`;
   } catch (e) {
-    hotkeyError = `${accelerator}은(는) 쓸 수 없는 단축키예요`;
+    hotkeyError = `${accelerator} can't be used as a hotkey`;
   }
   if (hotkeyError) console.error(`[hotkey] ${hotkeyError}`);
 }
 
 function trayMenu(): Menu {
   return Menu.buildFromTemplate([
-    { label: "빠른 입력", accelerator: data.settings.hotkey, click: showQuickWindow },
-    { label: "오늘 목록", click: toggleListWindow },
-    { label: "설정…", accelerator: "Command+,", click: () => showSettings() },
+    { label: "Capture", accelerator: data.settings.hotkey, click: showQuickWindow },
+    { label: "Today", click: toggleListWindow },
+    { label: "Settings…", accelerator: "Command+,", click: () => showSettings() },
     ...(hotkeyError ? [{ type: "separator" as const }, { label: hotkeyError, enabled: false }] : []),
     { type: "separator" },
-    { label: "todoBAN 종료", role: "quit" },
+    { label: "Quit todoBAN", role: "quit" },
   ]);
 }
 
@@ -390,6 +390,8 @@ app.whenReady().then(() => {
   if (DEMO_SETTINGS) showSettings(DEMO_SETTINGS);
   if (SNAPSHOT && process.env.TODOBAN_SNAPSHOT_VIEW === "list")
     listWindow.webContents.once("did-finish-load", () => setTimeout(() => snapshotAndQuit(listWindow), 1500));
+  if (SNAPSHOT && process.env.TODOBAN_SNAPSHOT_VIEW === "quick")
+    quickWindow.webContents.once("did-finish-load", () => setTimeout(() => snapshotAndQuit(quickWindow), 1500));
   if (DEMO_QUICK)
     listWindow.webContents.once("did-finish-load", () => {
       submitQuick(DEMO_QUICK);

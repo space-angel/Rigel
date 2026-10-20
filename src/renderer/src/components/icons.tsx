@@ -43,8 +43,8 @@ export function BrandMark({ size = 24 }: { size?: number }) {
     <svg width={size} height={size} viewBox="0 0 28 28" aria-hidden="true">
       <defs>
         <linearGradient id="brand-mark" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#4ccb92" />
-          <stop offset="1" stopColor="#22a56a" />
+          <stop offset="0" stopColor="#2f6bff" />
+          <stop offset="1" stopColor="#6fa6ff" />
         </linearGradient>
       </defs>
       <rect width="28" height="28" rx="9" fill="url(#brand-mark)" />
@@ -85,3 +85,17 @@ export const ExternalLinkIcon = make(["M14 5a1 1 0 1 1 0-2h6a1 1 0 0 1 1 1v6a1 1
 export const TrashIcon = make(["M7 4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2h4a1 1 0 1 1 0 2h-1.069l-.867 12.142A2 2 0 0 1 17.069 22H6.93a2 2 0 0 1-1.995-1.858L4.07 8H3a1 1 0 0 1 0-2h4V4zm2 2h6V4H9v2zM6.074 8l.857 12H17.07l.857-12H6.074zM10 10a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1zm4 0a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1z"], "TrashIcon");
 export const EditIcon = make(["M16.293 2.293a1 1 0 0 1 1.414 0l4 4a1 1 0 0 1 0 1.414l-13 13A1 1 0 0 1 8 21H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 .293-.707l10-10 3-3zM14 7.414l-9 9V19h2.586l9-9L14 7.414zm4 1.172L19.586 7 17 4.414 15.414 6 18 8.586z"], "EditIcon");
 export const CalendarIcon = make(["M9 2a1 1 0 0 1 1 1v1h4V3a1 1 0 1 1 2 0v1h3a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3V3a1 1 0 0 1 1-1zM8 6H5v3h14V6h-3v1a1 1 0 1 1-2 0V6h-4v1a1 1 0 0 1-2 0V6zm11 5H5v8h14v-8z"], "CalendarIcon");
+export const ArrowRightIcon = make(["M12.293 5.293a1 1 0 0 1 1.414 0l6 6a1 1 0 0 1 0 1.414l-6 6a1 1 0 0 1-1.414-1.414L16.586 13H5a1 1 0 1 1 0-2h11.586l-4.293-4.293a1 1 0 0 1 0-1.414z"], "ArrowRightIcon");
+
+// 피그마 로고. 바로가기가 피그마 프레임이라는 표시로만 쓴다.
+export function FigmaMark({ size = 12 }: { size?: number }) {
+  return (
+    <svg width={(size * 10) / 14} height={size} viewBox="0 0 10 14" aria-hidden="true">
+      <circle cx="2.5" cy="2.5" r="2.5" fill="#F24E1E" />
+      <circle cx="7.5" cy="2.5" r="2.5" fill="#FF7262" />
+      <circle cx="2.5" cy="7" r="2.5" fill="#A259FF" />
+      <circle cx="7.5" cy="7" r="2.5" fill="#1ABCFE" />
+      <circle cx="2.5" cy="11.5" r="2.5" fill="#0ACF83" />
+    </svg>
+  );
+}
