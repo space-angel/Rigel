@@ -1,0 +1,36 @@
+{
+  "name": "todoban",
+  "productName": "todoBAN",
+  "version": "0.1.0",
+  "private": true,
+  "description": "생각을 적으면 바로 시작할 수 있는 첫 행동으로 바꿔 주는 맥 메뉴바 할 일 앱",
+  "main": "./out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "start": "electron-vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --test 'src/**/*.test.ts'",
+    "tray-icon": "node scripts/make-tray-icon.ts",
+    "probe": "node scripts/claude-probe.ts"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "electron": "^44.9.1",
+    "electron-vite": "^6.0.0",
+    "pretendard": "^1.3.9",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4"
+  }
+}

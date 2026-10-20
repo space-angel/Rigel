@@ -1,0 +1,68 @@
+/* 기본 테마. 값은 Figma Foundations(uLkrdQtbosV1DMYSYHsYeB)의 변수와 이름을 맞춘다.
+   그레이·간격·모서리·그림자는 SEED 구조, 민트 그라데이션은 부각할 곳에만. */
+:root {
+  --gray-00: #ffffff;
+  --gray-100: #f7f8f9;
+  --gray-200: #f3f4f5;
+  --gray-300: #eeeff1;
+  --gray-400: #dcdee3;
+  --gray-500: #d1d3d8;
+  --gray-600: #b0b3ba;
+  --gray-700: #868b94;
+  --gray-800: #555d6d;
+  --gray-900: #2a3038;
+  --gray-1000: #1a1c20;
+
+  --color-text-primary: var(--gray-1000);
+  --color-text-secondary: var(--gray-800);
+  --color-text-unclear: var(--gray-700);
+  --color-text-done: var(--gray-600);
+  --color-text-on-accent: #ffffff;
+  --color-surface-window: var(--gray-00);
+  --color-surface-hover: var(--gray-100);
+  --color-surface-subtle: var(--gray-200);
+  --color-border-window: rgb(0 0 0 / 8%);
+  --color-border-card: rgb(0 0 0 / 6%);
+  --color-border-divider: var(--gray-300);
+  --color-border-control: var(--gray-600);
+  --color-unclear-dot: #34c08a;
+  --color-summer-ink: #2e8b5a;
+  --color-summer-ink-soft: #4daa79;
+
+  --gradient-summer: linear-gradient(180deg, #8edfb7 0%, #cdefdd 60%, #e9f8f1 100%);
+  --gradient-mint-soft: linear-gradient(180deg, #dff4e9, #f2faf6);
+  --gradient-ink: linear-gradient(180deg, #2a3038, #1a1c20);
+  --gradient-gray-soft: linear-gradient(180deg, #f7f8f9, #f3f4f5);
+  --gradient-brand: linear-gradient(135deg, #4ccb92, #22a56a);
+  --gradient-ai: linear-gradient(135deg, #3cc488, #3fa6d8);
+
+  --dimension-x0-5: 2px;
+  --dimension-x1: 4px;
+  --dimension-x1-5: 6px;
+  --dimension-x2: 8px;
+  --dimension-x2-5: 10px;
+  --dimension-x3: 12px;
+  --dimension-x3-5: 14px;
+  --dimension-x4: 16px;
+  --dimension-x5: 20px;
+  --dimension-x6: 24px;
+  --spacing-global-gutter: var(--dimension-x4);
+  --spacing-component-default: var(--dimension-x3);
+  --spacing-between-text: var(--dimension-x1-5);
+  --spacing-between-chips: var(--dimension-x2);
+
+  --radius-r1-5: 6px;
+  --radius-r2: 8px;
+  --radius-r2-5: 10px;
+  --radius-r3: 12px;
+  --radius-r3-5: 14px;
+  --radius-r4: 16px;
+  --radius-full: 9999px;
+
+  --shadow-s1: 0 1px 4px rgb(0 0 0 / 8%);
+  --shadow-s2: 0 2px 10px rgb(0 0 0 / 10%);
+  --shadow-s3: 0 4px 16px rgb(0 0 0 / 12%), 0 12px 40px rgb(0 0 0 / 10%);
+  --shadow-now-card: 0 6px 18px rgb(46 139 90 / 12%);
+
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
