@@ -1,0 +1,578 @@
+[
+  {
+    "cfg": "A",
+    "id": "c01",
+    "kind": "기본",
+    "title": "면접 답변 다듬기",
+    "ms": 16386,
+    "turns": 4,
+    "cost": 0.1120091,
+    "calls": [
+      "search:면접",
+      "fetch"
+    ],
+    "label": "답변 공통 규칙 · 면접 답변 순서와 확인 목록",
+    "correct": true
+  },
+  {
+    "cfg": "A",
+    "id": "c03",
+    "kind": "줄임말",
+    "title": "포폴 덱 첫 장 고치기",
+    "ms": 19473,
+    "turns": 6,
+    "cost": 0.1261567,
+    "calls": [
+      "search:포폴",
+      "search:덱",
+      "fetch"
+    ],
+    "label": "포트폴리오 피드백 · 덱 구조와 첫 장 수정 방향",
+    "correct": true
+  },
+  {
+    "cfg": "A",
+    "id": "c02",
+    "kind": "기본",
+    "title": "모의면접 피드백 반영하기",
+    "ms": 19780,
+    "turns": 5,
+    "cost": 0.1271504,
+    "calls": [
+      "search:모의면접",
+      "fetch"
+    ],
+    "label": "모의면접 1회차 (멘토 장수지) · 받은 피드백과 다음 면접 체크",
+    "correct": true
+  },
+  {
+    "cfg": "A",
+    "id": "c04",
+    "kind": "회사 이름",
+    "title": "문토 PO 지원서 쓰기",
+    "ms": 16025,
+    "turns": 5,
+    "cost": 0.1375114,
+    "calls": [
+      "search:문토",
+      "fetch"
+    ],
+    "label": "문토 · 주니어 PO 채용공고 (적합도 96, P1)",
+    "correct": true
+  },
+  {
+    "cfg": "A",
+    "id": "c06",
+    "kind": "본문에만 있음",
+    "title": "이력서 v0 초안 점검",
+    "ms": 14483,
+    "turns": 4,
+    "cost": 0.1172798,
+    "calls": [
+      "search:이력서",
+      "fetch"
+    ],
+    "label": "커리어코치_상담 · 이력서 v0 초안 점검",
+    "correct": true
+  },
+  {
+    "cfg": "A",
+    "id": "c05",
+    "kind": "회사 이름",
+    "title": "엘리스 PM 공고 다시 보기",
+    "ms": 14848,
+    "turns": 4,
+    "cost": 0.1073139,
+    "calls": [
+      "search:엘리스",
+      "fetch"
+    ],
+    "label": "엘리스 · 프로덕트 매니저 채용공고",
+    "correct": true
+  },
+  {
+    "cfg": "A",
+    "id": "c07",
+    "kind": "기본",
+    "title": "JD 키워드 정리",
+    "ms": 11808,
+    "turns": 3,
+    "cost": 0.1009159,
+    "calls": [
+      "search:JD"
+    ],
+    "label": "JD 키워드 지도",
+    "correct": true
+  },
+  {
+    "cfg": "A",
+    "id": "c08",
+    "kind": "프로젝트",
+    "title": "올리브영 리뷰탭 회고 다시 읽기",
+    "ms": 14583,
+    "turns": 6,
+    "cost": 0.1816719,
+    "calls": [
+      "search:올리브영",
+      "search:리뷰탭 회고",
+      "fetch"
+    ],
+    "label": "올리브영 PDP 리뷰탭 개선",
+    "correct": false
+  },
+  {
+    "cfg": "A",
+    "id": "c09",
+    "kind": "프로젝트",
+    "title": "사령세계 보스 패턴 설계",
+    "ms": 15410,
+    "turns": 5,
+    "cost": 0.11192010000000001,
+    "calls": [
+      "search:사령세계",
+      "fetch"
+    ],
+    "label": "02-01_사령세계-구조 · 보스방 독립 공간, 첫 진입 보스전",
+    "correct": true
+  },
+  {
+    "cfg": "A",
+    "id": "c10",
+    "kind": "없어야 정상",
+    "title": "운동 루틴 짜기",
+    "ms": 16903,
+    "turns": 6,
+    "cost": 0.12475589999999999,
+    "calls": [
+      "search:운동",
+      "search:루틴",
+      "search:헬스"
+    ],
+    "label": null,
+    "correct": true
+  },
+  {
+    "cfg": "A",
+    "id": "c12",
+    "kind": "영어 입력",
+    "title": "resume review",
+    "ms": 15233,
+    "turns": 6,
+    "cost": 0.138677,
+    "calls": [
+      "search:resume",
+      "search:review",
+      "search:이력서",
+      "fetch"
+    ],
+    "label": "커리어코치_상담 · 이력서 v0 초안 점검",
+    "correct": true
+  },
+  {
+    "cfg": "A",
+    "id": "c11",
+    "kind": "없어야 정상",
+    "title": "고양이 사료 주문",
+    "ms": 16295,
+    "turns": 4,
+    "cost": 0.11311710000000001,
+    "calls": [
+      "search:고양이",
+      "search:사료"
+    ],
+    "label": null,
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c02",
+    "kind": "기본",
+    "title": "모의면접 피드백 반영하기",
+    "ms": 10693,
+    "turns": 3,
+    "cost": 0.1145612,
+    "calls": [
+      "search:모의면접"
+    ],
+    "label": "모의면접 1회차 (멘토 장수지)",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c01",
+    "kind": "기본",
+    "title": "면접 답변 다듬기",
+    "ms": 11193,
+    "turns": 3,
+    "cost": 0.11897769999999999,
+    "calls": [
+      "search:면접"
+    ],
+    "label": "답변 공통 규칙",
+    "correct": true
+  },
+  {
+    "cfg": "A",
+    "id": "c13",
+    "kind": "막연함",
+    "title": "면접 준비",
+    "ms": 22714,
+    "turns": 6,
+    "cost": 0.1424472,
+    "calls": [
+      "search:면접",
+      "fetch",
+      "fetch"
+    ],
+    "label": "답변 공통 규칙 · 면접 답변 작성 후 확인 목록",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c03",
+    "kind": "줄임말",
+    "title": "포폴 덱 첫 장 고치기",
+    "ms": 10200,
+    "turns": 3,
+    "cost": 0.10958790000000002,
+    "calls": [
+      "search:포트폴리오"
+    ],
+    "label": "포트폴리오 피드백 · 덱 개선 방향",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c04",
+    "kind": "회사 이름",
+    "title": "문토 PO 지원서 쓰기",
+    "ms": 12550,
+    "turns": 3,
+    "cost": 0.1099929,
+    "calls": [
+      "search:문토"
+    ],
+    "label": "문토 · 주니어 PO (채용공고, 적합도 96/100 · P1 최우선)",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c05",
+    "kind": "회사 이름",
+    "title": "엘리스 PM 공고 다시 보기",
+    "ms": 9639,
+    "turns": 3,
+    "cost": 0.08232220000000001,
+    "calls": [
+      "search:엘리스"
+    ],
+    "label": "엘리스 · 프로덕트 매니저 (채용공고)",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c07",
+    "kind": "기본",
+    "title": "JD 키워드 정리",
+    "ms": 10124,
+    "turns": 3,
+    "cost": 0.10660289999999999,
+    "calls": [
+      "search:JD"
+    ],
+    "label": "JD 키워드 지도",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c06",
+    "kind": "본문에만 있음",
+    "title": "이력서 v0 초안 점검",
+    "ms": 16374,
+    "turns": 3,
+    "cost": 0.11011249999999999,
+    "calls": [
+      "search:이력서"
+    ],
+    "label": "커리어코치_상담 · 이력서 v0 초안 방향 점검",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c08",
+    "kind": "프로젝트",
+    "title": "올리브영 리뷰탭 회고 다시 읽기",
+    "ms": 12288,
+    "turns": 4,
+    "cost": 0.12784830000000003,
+    "calls": [
+      "search:올리브영",
+      "search:회고"
+    ],
+    "label": "2026-04-30 회고 · 올리브영 PDP 리뷰탭 개선 파이프라인V4",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c09",
+    "kind": "프로젝트",
+    "title": "사령세계 보스 패턴 설계",
+    "ms": 10736,
+    "turns": 3,
+    "cost": 0.11111520000000001,
+    "calls": [
+      "search:사령세계"
+    ],
+    "label": "02-01_사령세계-구조 · 사령세계 구조와 보스전 설계",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c10",
+    "kind": "없어야 정상",
+    "title": "운동 루틴 짜기",
+    "ms": 15073,
+    "turns": 6,
+    "cost": 0.1300982,
+    "calls": [
+      "search:운동",
+      "search:루틴",
+      "search:헬스"
+    ],
+    "label": null,
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c11",
+    "kind": "없어야 정상",
+    "title": "고양이 사료 주문",
+    "ms": 12771,
+    "turns": 4,
+    "cost": 0.1312443,
+    "calls": [
+      "search:사료",
+      "search:고양이"
+    ],
+    "label": null,
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c12",
+    "kind": "영어 입력",
+    "title": "resume review",
+    "ms": 14072,
+    "turns": 4,
+    "cost": 0.1256948,
+    "calls": [
+      "search:resume",
+      "search:이력서"
+    ],
+    "label": "커리어코치_상담 · 이력서 v0 초안 점검",
+    "correct": true
+  },
+  {
+    "cfg": "C",
+    "id": "c01",
+    "kind": "기본",
+    "title": "면접 답변 다듬기",
+    "ms": 10702,
+    "turns": 3,
+    "cost": 0.006660849999999999,
+    "calls": [
+      "search:면접"
+    ],
+    "label": "답변 공통 규칙 · 면접 답변 원칙 정리 (@/recruit)",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c13",
+    "kind": "막연함",
+    "title": "면접 준비",
+    "ms": 13609,
+    "turns": 3,
+    "cost": 0.1154916,
+    "calls": [
+      "search:면접"
+    ],
+    "label": "답변 공통 규칙 · 면접 답변 규칙과 직전 점검 항목",
+    "correct": true
+  },
+  {
+    "cfg": "C",
+    "id": "c02",
+    "kind": "기본",
+    "title": "모의면접 피드백 반영하기",
+    "ms": 12067,
+    "turns": 3,
+    "cost": 0.00630826,
+    "calls": [
+      "search:모의면접"
+    ],
+    "label": "모의면접 1회차 (멘토 장수지)",
+    "correct": true
+  },
+  {
+    "cfg": "C",
+    "id": "c03",
+    "kind": "줄임말",
+    "title": "포폴 덱 첫 장 고치기",
+    "ms": 12052,
+    "turns": 4,
+    "cost": 0.00564455,
+    "calls": [
+      "search:포트폴리오"
+    ],
+    "label": "포트폴리오 피드백 · 덱 현재 상태와 바꿀 방향 정리",
+    "correct": true
+  },
+  {
+    "cfg": "C",
+    "id": "c04",
+    "kind": "회사 이름",
+    "title": "문토 PO 지원서 쓰기",
+    "ms": 15464,
+    "turns": 5,
+    "cost": 0.0077979,
+    "calls": [
+      "search:문토",
+      "search:지원서"
+    ],
+    "label": "문토 · 주니어 PO",
+    "correct": true
+  },
+  {
+    "cfg": "C",
+    "id": "c05",
+    "kind": "회사 이름",
+    "title": "엘리스 PM 공고 다시 보기",
+    "ms": 11469,
+    "turns": 4,
+    "cost": 0.00503861,
+    "calls": [
+      "search:엘리스"
+    ],
+    "label": "엘리스 · 프로덕트 매니저 · 채용공고 페이지 (Archive / Schema / @/recruit / 채용공고)",
+    "correct": true
+  },
+  {
+    "cfg": "C",
+    "id": "c06",
+    "kind": "본문에만 있음",
+    "title": "이력서 v0 초안 점검",
+    "ms": 11255,
+    "turns": 4,
+    "cost": 0.0060764,
+    "calls": [
+      "search:이력서"
+    ],
+    "label": "커리어코치_상담 · 이력서 v0 초안 방향 점검",
+    "correct": true
+  },
+  {
+    "cfg": "C",
+    "id": "c07",
+    "kind": "기본",
+    "title": "JD 키워드 정리",
+    "ms": 12394,
+    "turns": 5,
+    "cost": 0.00707849,
+    "calls": [
+      "search:JD",
+      "search:직무기술서"
+    ],
+    "label": "JD 키워드 지도 · 공고 8곳의 반복 요구 키워드 빈도 정리",
+    "correct": true
+  },
+  {
+    "cfg": "C",
+    "id": "c08",
+    "kind": "프로젝트",
+    "title": "올리브영 리뷰탭 회고 다시 읽기",
+    "ms": 13942,
+    "turns": 5,
+    "cost": 0.0067228800000000005,
+    "calls": [
+      "search:올리브영",
+      "search:회고"
+    ],
+    "label": "올리브영 PDP 리뷰탭 개선 · 2026-04-30 회고",
+    "correct": true
+  },
+  {
+    "cfg": "C",
+    "id": "c09",
+    "kind": "프로젝트",
+    "title": "사령세계 보스 패턴 설계",
+    "ms": 14956,
+    "turns": 5,
+    "cost": 0.00774361,
+    "calls": [
+      "search:사령세계",
+      "search:보스"
+    ],
+    "label": "3.3.5_보스전",
+    "correct": false
+  },
+  {
+    "cfg": "C",
+    "id": "c10",
+    "kind": "없어야 정상",
+    "title": "운동 루틴 짜기",
+    "ms": 9303,
+    "turns": 5,
+    "cost": 0.006810910000000002,
+    "calls": [
+      "search:루틴",
+      "search:운동"
+    ],
+    "label": null,
+    "correct": true
+  },
+  {
+    "cfg": "C",
+    "id": "c11",
+    "kind": "없어야 정상",
+    "title": "고양이 사료 주문",
+    "ms": 13645,
+    "turns": 5,
+    "cost": 0.006831750000000001,
+    "calls": [
+      "search:고양이",
+      "search:사료"
+    ],
+    "label": null,
+    "correct": true
+  },
+  {
+    "cfg": "C",
+    "id": "c13",
+    "kind": "막연함",
+    "title": "면접 준비",
+    "ms": 12988,
+    "turns": 3,
+    "cost": 0.006169530000000001,
+    "calls": [
+      "search:면접"
+    ],
+    "label": "면접 준비 db",
+    "correct": true
+  },
+  {
+    "cfg": "C",
+    "id": "c12",
+    "kind": "영어 입력",
+    "title": "resume review",
+    "ms": 14678,
+    "turns": 5,
+    "cost": 0.006932019999999999,
+    "calls": [
+      "search:resume",
+      "search:이력서"
+    ],
+    "label": "커리어코치_상담 · 이력서 v0 초안 방향 점검",
+    "correct": true
+  }
+]

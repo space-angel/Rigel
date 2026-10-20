@@ -99,7 +99,21 @@ const resultJson = (lines: Line[]): unknown => {
   }
 };
 
+// 같은 서비스·같은 낱말(·같은 프레임)로 15분 안에 다시 읽으면 Claude를 다시 부르지 않는다. 한 번 읽는 데 11초쯤 걸린다.
+const CACHE_MS = 15 * 60_000;
+const collectCache = new Map<string, { at: number; result: ToolResult }>();
+
 export async function collectMcp(source: McpSource, todo: TodoItem, words: string[], data: AppData, signal: AbortSignal): Promise<ToolResult> {
+  const key = `${source}|${source === "frame" ? (frameShortcut(todo, words, data)?.url ?? "") : ""}|${[...words].sort().join(",")}`;
+  const hit = collectCache.get(key);
+  if (hit && Date.now() - hit.at < CACHE_MS) return hit.result;
+  const result = await collectOnce(source, todo, words, data, signal);
+  // 찾았거나 확실히 없을 때만 기억한다. 실패·인증 필요는 다음에 다시 읽는다.
+  if (result.status === "ok" || result.status === "empty") collectCache.set(key, { at: Date.now(), result });
+  return result;
+}
+
+async function collectOnce(source: McpSource, todo: TodoItem, words: string[], data: AppData, signal: AbortSignal): Promise<ToolResult> {
   const shortcut = source === "frame" ? frameShortcut(todo, words, data) : null;
   const target = shortcut ? figmaTarget(shortcut.url) : null;
   if (source === "frame" && !target) return { source, status: "empty", item: null };

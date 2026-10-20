@@ -44,11 +44,16 @@
 
 ## type: collect
 입력: {"type":"collect","source":"notion" 또는 "linear" 또는 "frame","words":["면접","토스"],"today":"YYYY-MM-DD","target":{"fileKey":"...","nodeId":"12:408" 또는 null} 또는 없음}
-출력: {"items":[{"label":"제목 한 줄","text":"요약 400자 이내","date":"YYYY-MM-DD" 또는 null,"url":"https://..." 또는 null}]} 또는 {"items":[]}
+출력: {"items":[{"label":"제목 한 줄","text":"요약 150자 이내","date":"YYYY-MM-DD" 또는 null,"url":"https://..." 또는 null}]} 또는 {"items":[]}
+- 출력은 짧게: label은 페이지·이슈·프레임 제목 그대로(40자 이내), text는 첫 행동에 쓸 사실만 150자 이내. 설명을 붙이지 않는다.
 - source에 해당하는 MCP 도구만 쓴다. 읽기만 하고 만들기, 고치기, 보내기, 댓글은 하지 않는다.
 - 답하기 전에 반드시 검색·읽기 도구를 한 번 이상 부른다. 부르지 않고 빈 결과를 내지 않는다.
-- notion: 노션 검색은 키워드 검색이다. words를 문장처럼 이어 붙이지 말고, 가장 특이한 낱말 하나(필요하면 둘)로 검색한다.
-  결과가 없거나 관련 없으면 다른 낱말로 바꿔 최대 3번까지 검색한다. 제목이나 본문이 words와 실제로 관련 있는 페이지만 고른다.
+- notion: 노션 검색은 키워드 검색이다. 처음 ToolSearch는 query "select:mcp__claude_ai_Notion__notion-search"로 한 번만 부른다.
+  - notion-search는 page_size 8, max_highlight_length 300으로 부른다. 검색어는 낱말 하나. 고유명사(회사·프로젝트·사람 이름)처럼 가장 특이한 낱말부터.
+  - 줄임말·오타·영어는 워크스페이스에서 쓰는 원래 말로 검색한다. 예: 포폴·포트폴리어 → 포트폴리오, PO → 프로덕트 오너, resume → 이력서
+  - 검색어가 2개 이상 필요하면 같은 턴에 notion-search를 함께 부른다(최대 3개). 결과를 보고 더 필요할 때만 한 번 더.
+  - 검색 결과의 title, path, highlight로 고른다. notion-fetch는 부르지 않는다(느리다). text는 highlight로 쓴다.
+  - title이나 highlight에 할 일의 핵심 낱말이 실제로 들어 있고 같은 일을 다루는 페이지만 고른다. 낱말만 겹치고 다른 일이면 고르지 않는다.
 - linear: list_issues의 query는 이슈 제목·설명 글자 검색이다. 낱말 하나씩 최대 3번까지 검색하고, 관련 있는 이슈만 고른다.
 - notion, linear: 가장 맞는 것 최대 1개. 없으면 items는 빈 배열이다. url에는 그 페이지나 이슈 주소를 쓴다.
 - frame: target의 피그마 노드를 get_metadata로 읽고, 화면 속 글이 부족하면 get_design_context로 읽는다.

@@ -1,0 +1,879 @@
+[
+  {
+    "cfg": "B",
+    "id": "c02",
+    "kind": "기본",
+    "title": "모의면접 피드백 반영하기",
+    "ms": 12918,
+    "marks": {
+      "init": 3343,
+      "toolsearch": 4858,
+      "search": 6567,
+      "searchResult": 9200,
+      "result": 11943
+    },
+    "turns": 3,
+    "cost": 0.0979423,
+    "calls": [
+      "search:모의면접"
+    ],
+    "label": "모의면접 1회차 (멘토 장수지)",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c01",
+    "kind": "기본",
+    "title": "면접 답변 다듬기",
+    "ms": 14129,
+    "marks": {
+      "init": 3342,
+      "toolsearch": 6246,
+      "search": 7999,
+      "searchResult": 9147,
+      "result": 13129
+    },
+    "turns": 3,
+    "cost": 0.0997397,
+    "calls": [
+      "search:면접"
+    ],
+    "label": "답변 공통 규칙",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c03",
+    "kind": "줄임말",
+    "title": "포폴 덱 첫 장 고치기",
+    "ms": 14694,
+    "marks": {
+      "init": 3294,
+      "toolsearch": 5079,
+      "search": 9139,
+      "searchResult": 10373,
+      "result": 13732
+    },
+    "turns": 5,
+    "cost": 0.1312902,
+    "calls": [
+      "search:포트폴리오",
+      "search:포폴"
+    ],
+    "label": "포트폴리오 피드백 · 덱 개선 방향",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c04",
+    "kind": "회사 이름",
+    "title": "문토 PO 지원서 쓰기",
+    "ms": 11045,
+    "marks": {
+      "init": 894,
+      "toolsearch": 2971,
+      "search": 5098,
+      "searchResult": 6257,
+      "result": 10030
+    },
+    "turns": 3,
+    "cost": 0.1095486,
+    "calls": [
+      "search:문토"
+    ],
+    "label": "문토 · 주니어 PO",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c05",
+    "kind": "회사 이름",
+    "title": "엘리스 PM 공고 다시 보기",
+    "ms": 10089,
+    "marks": {
+      "init": 803,
+      "toolsearch": 2689,
+      "search": 4238,
+      "searchResult": 5287,
+      "result": 9176
+    },
+    "turns": 3,
+    "cost": 0.1041213,
+    "calls": [
+      "search:엘리스"
+    ],
+    "label": "엘리스 · 프로덕트 매니저 (채용공고)",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c06",
+    "kind": "본문에만 있음",
+    "title": "이력서 v0 초안 점검",
+    "ms": 11547,
+    "marks": {
+      "init": 1003,
+      "toolsearch": 2621,
+      "search": 5062,
+      "searchResult": 7721,
+      "result": 10489
+    },
+    "turns": 3,
+    "cost": 0.1135155,
+    "calls": [
+      "search:이력서"
+    ],
+    "label": "커리어코치_상담 · 이력서 v0 초안 방향 점검",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c07",
+    "kind": "기본",
+    "title": "JD 키워드 정리",
+    "ms": 8971,
+    "marks": {
+      "init": 846,
+      "toolsearch": 2777,
+      "search": 4627,
+      "searchResult": 5785,
+      "result": 7929
+    },
+    "turns": 3,
+    "cost": 0.10851399999999999,
+    "calls": [
+      "search:JD"
+    ],
+    "label": "JD 키워드 지도",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c09",
+    "kind": "프로젝트",
+    "title": "사령세계 보스 패턴 설계",
+    "ms": 10176,
+    "marks": {
+      "init": 898,
+      "toolsearch": 3178,
+      "search": 5232,
+      "searchResult": 6578,
+      "result": 9264
+    },
+    "turns": 3,
+    "cost": 0.1106365,
+    "calls": [
+      "search:사령세계"
+    ],
+    "label": "02-01_사령세계-구조",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c08",
+    "kind": "프로젝트",
+    "title": "올리브영 리뷰탭 회고 다시 읽기",
+    "ms": 15868,
+    "marks": {
+      "init": 2981,
+      "toolsearch": 4590,
+      "search": 6576,
+      "searchResult": 7759,
+      "result": 14818
+    },
+    "turns": 4,
+    "cost": 0.1108054,
+    "calls": [
+      "search:올리브영",
+      "search:회고"
+    ],
+    "label": "올리브영 PDP 리뷰탭 개선 · 2026-04-30 회고",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c10",
+    "kind": "없어야 정상",
+    "title": "운동 루틴 짜기",
+    "ms": 14129,
+    "marks": {
+      "init": 788,
+      "toolsearch": 2413,
+      "search": 4190,
+      "searchResult": 5472,
+      "result": 13153
+    },
+    "turns": 5,
+    "cost": 0.11599949999999999,
+    "calls": [
+      "search:운동",
+      "search:루틴",
+      "search:헬스"
+    ],
+    "label": null,
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c11",
+    "kind": "없어야 정상",
+    "title": "고양이 사료 주문",
+    "ms": 11277,
+    "marks": {
+      "init": 818,
+      "toolsearch": 2345,
+      "search": 4406,
+      "searchResult": 5602,
+      "result": 10173
+    },
+    "turns": 4,
+    "cost": 0.107637,
+    "calls": [
+      "search:고양이",
+      "search:사료"
+    ],
+    "label": null,
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c12",
+    "kind": "영어 입력",
+    "title": "resume review",
+    "ms": 8896,
+    "marks": {
+      "init": 796,
+      "toolsearch": 3089,
+      "search": 4797,
+      "searchResult": 6082,
+      "result": 7989
+    },
+    "turns": 3,
+    "cost": 0.1084028,
+    "calls": [
+      "search:이력서"
+    ],
+    "label": "커리어코치_상담",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c14",
+    "kind": "오타",
+    "title": "포트폴리어 피드백 보기",
+    "ms": 10880,
+    "marks": {
+      "init": 894,
+      "toolsearch": 3242,
+      "search": 5723,
+      "searchResult": 7157,
+      "result": 9937
+    },
+    "turns": 3,
+    "cost": 0.10707900000000001,
+    "calls": [
+      "search:포트폴리오"
+    ],
+    "label": "포트폴리오 피드백",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c13",
+    "kind": "막연함",
+    "title": "면접 준비",
+    "ms": 12734,
+    "marks": {
+      "init": 806,
+      "toolsearch": 3015,
+      "search": 5646,
+      "searchResult": 6823,
+      "result": 11693
+    },
+    "turns": 3,
+    "cost": 0.1120482,
+    "calls": [
+      "search:면접"
+    ],
+    "label": "답변 공통 규칙 · 면접 답변 준비 규칙",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c15",
+    "kind": "두 주제",
+    "title": "문토랑 엘리스 공고 비교하기",
+    "ms": 14129,
+    "marks": {
+      "init": 811,
+      "toolsearch": 2778,
+      "search": 4581,
+      "searchResult": 5760,
+      "result": 13063
+    },
+    "turns": 4,
+    "cost": 0.11596119999999999,
+    "calls": [
+      "search:문토",
+      "search:엘리스"
+    ],
+    "label": "문토 · 주니어 PO",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c17",
+    "kind": "사람 이름",
+    "title": "멘토 장수지님 피드백 정리",
+    "ms": 10755,
+    "marks": {
+      "init": 847,
+      "toolsearch": 2527,
+      "search": 5855,
+      "searchResult": 6952,
+      "result": 9696
+    },
+    "turns": 3,
+    "cost": 0.1030281,
+    "calls": [
+      "search:장수지"
+    ],
+    "label": "모의면접 1회차 (멘토 장수지)",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c16",
+    "kind": "비슷하지만 없음",
+    "title": "카카오 PM 공고 지원하기",
+    "ms": 14131,
+    "marks": {
+      "init": 890,
+      "toolsearch": 3066,
+      "search": 4810,
+      "searchResult": 5995,
+      "result": 13199
+    },
+    "turns": 5,
+    "cost": 0.136283,
+    "calls": [
+      "search:카카오",
+      "search:공고",
+      "search:프로덕트 매니저"
+    ],
+    "label": null,
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c19",
+    "kind": "막연함(공고 아무거나)",
+    "title": "적합도 높은 공고부터 지원",
+    "ms": 13432,
+    "marks": {
+      "init": 853,
+      "toolsearch": 2440,
+      "search": 4893,
+      "searchResult": 8667,
+      "result": 12426
+    },
+    "turns": 3,
+    "cost": 0.1121907,
+    "calls": [
+      "search:적합도"
+    ],
+    "label": "채용공고 DB 운영 가이드",
+    "correct": false
+  },
+  {
+    "cfg": "B",
+    "id": "c20",
+    "kind": "기본",
+    "title": "스프린트 회고 템플릿 쓰기",
+    "ms": 11280,
+    "marks": {
+      "init": 963,
+      "toolsearch": 2541,
+      "search": 6158,
+      "searchResult": 7307,
+      "result": 10188
+    },
+    "turns": 4,
+    "cost": 0.10357799999999999,
+    "calls": [
+      "search:회고"
+    ],
+    "label": "스프린트 공유 템플릿",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c18",
+    "kind": "프로젝트",
+    "title": "두잇투게더 백로그 정리",
+    "ms": 24991,
+    "marks": {
+      "init": 796,
+      "toolsearch": 6239,
+      "search": 9824,
+      "searchResult": 11140,
+      "result": 24097
+    },
+    "turns": 4,
+    "cost": 0.1239675,
+    "calls": [
+      "search:두잇투게더",
+      "search:백로그"
+    ],
+    "label": "⚙️ 백로그 · [레거시] 두잇투게더 운영페이지 안의 백로그 DB",
+    "correct": true
+  },
+  {
+    "cfg": "D",
+    "id": "c02",
+    "kind": "기본",
+    "title": "모의면접 피드백 반영하기",
+    "ms": 10483,
+    "marks": {
+      "init": 1057,
+      "toolsearch": 3191,
+      "search": 6189,
+      "searchResult": 7323,
+      "result": 9554
+    },
+    "turns": 4,
+    "cost": 0.1079722,
+    "calls": [
+      "search:모의면접",
+      "search:피드백"
+    ],
+    "label": "모의면접 1회차 (멘토 장수지)",
+    "correct": true
+  },
+  {
+    "cfg": "D",
+    "id": "c01",
+    "kind": "기본",
+    "title": "면접 답변 다듬기",
+    "ms": 14987,
+    "marks": {
+      "init": 1052,
+      "toolsearch": 3038,
+      "search": 5953,
+      "searchResult": 7200,
+      "result": 13909
+    },
+    "turns": 4,
+    "cost": 0.11441849999999999,
+    "calls": [
+      "search:면접",
+      "search:면접 답변"
+    ],
+    "label": "답변 공통 규칙",
+    "correct": true
+  },
+  {
+    "cfg": "D",
+    "id": "c03",
+    "kind": "줄임말",
+    "title": "포폴 덱 첫 장 고치기",
+    "ms": 11798,
+    "marks": {
+      "init": 757,
+      "toolsearch": 2812,
+      "search": 5727,
+      "searchResult": 6962,
+      "result": 10756
+    },
+    "turns": 5,
+    "cost": 0.1128012,
+    "calls": [
+      "search:포트폴리오",
+      "search:포폴",
+      "search:덱"
+    ],
+    "label": "포트폴리오 피드백",
+    "correct": true
+  },
+  {
+    "cfg": "D",
+    "id": "c04",
+    "kind": "회사 이름",
+    "title": "문토 PO 지원서 쓰기",
+    "ms": 12447,
+    "marks": {
+      "init": 856,
+      "toolsearch": 2615,
+      "search": 5990,
+      "searchResult": 7065,
+      "result": 11484
+    },
+    "turns": 5,
+    "cost": 0.1206932,
+    "calls": [
+      "search:문토",
+      "search:지원서",
+      "search:프로덕트 오너"
+    ],
+    "label": "문토 · 주니어 PO",
+    "correct": true
+  },
+  {
+    "cfg": "D",
+    "id": "c06",
+    "kind": "본문에만 있음",
+    "title": "이력서 v0 초안 점검",
+    "ms": 10263,
+    "marks": {
+      "init": 854,
+      "toolsearch": 2640,
+      "search": 5760,
+      "searchResult": 6969,
+      "result": 9289
+    },
+    "turns": 4,
+    "cost": 0.10742860000000001,
+    "calls": [
+      "search:이력서",
+      "search:이력서 초안"
+    ],
+    "label": "커리어코치_상담",
+    "correct": true
+  },
+  {
+    "cfg": "D",
+    "id": "c05",
+    "kind": "회사 이름",
+    "title": "엘리스 PM 공고 다시 보기",
+    "ms": 11354,
+    "marks": {
+      "init": 866,
+      "toolsearch": 2724,
+      "search": 6590,
+      "searchResult": 7567,
+      "result": 10344
+    },
+    "turns": 4,
+    "cost": 0.0891088,
+    "calls": [
+      "search:엘리스",
+      "search:Elice"
+    ],
+    "label": "엘리스 · 프로덕트 매니저",
+    "correct": true
+  },
+  {
+    "cfg": "D",
+    "id": "c07",
+    "kind": "기본",
+    "title": "JD 키워드 정리",
+    "ms": 12265,
+    "marks": {
+      "init": 780,
+      "toolsearch": 3503,
+      "search": 6987,
+      "searchResult": 8190,
+      "result": 11213
+    },
+    "turns": 5,
+    "cost": 0.11885400000000002,
+    "calls": [
+      "search:JD",
+      "search:직무기술서",
+      "search:키워드"
+    ],
+    "label": "JD 키워드 지도",
+    "correct": true
+  },
+  {
+    "cfg": "D",
+    "id": "c09",
+    "kind": "프로젝트",
+    "title": "사령세계 보스 패턴 설계",
+    "ms": 11398,
+    "marks": {
+      "init": 1164,
+      "toolsearch": 2851,
+      "search": 5435,
+      "searchResult": 6675,
+      "result": 10328
+    },
+    "turns": 4,
+    "cost": 0.11422479999999999,
+    "calls": [
+      "search:사령세계",
+      "search:보스"
+    ],
+    "label": "02-01_사령세계-구조",
+    "correct": true
+  },
+  {
+    "cfg": "D",
+    "id": "c08",
+    "kind": "프로젝트",
+    "title": "올리브영 리뷰탭 회고 다시 읽기",
+    "ms": 14551,
+    "marks": {
+      "init": 1061,
+      "toolsearch": 3135,
+      "search": 5831,
+      "searchResult": 7238,
+      "result": 13603
+    },
+    "turns": 5,
+    "cost": 0.1270971,
+    "calls": [
+      "search:올리브영",
+      "search:리뷰탭",
+      "search:회고"
+    ],
+    "label": "2026-04-30 회고",
+    "correct": true
+  },
+  {
+    "cfg": "D",
+    "id": "c10",
+    "kind": "없어야 정상",
+    "title": "운동 루틴 짜기",
+    "ms": 10669,
+    "marks": {
+      "init": 917,
+      "toolsearch": 2700,
+      "search": 6015,
+      "searchResult": 7298,
+      "result": 9723
+    },
+    "turns": 5,
+    "cost": 0.1197112,
+    "calls": [
+      "search:운동",
+      "search:루틴",
+      "search:workout"
+    ],
+    "label": null,
+    "correct": true
+  },
+  {
+    "cfg": "D",
+    "id": "c11",
+    "kind": "없어야 정상",
+    "title": "고양이 사료 주문",
+    "ms": 9430,
+    "marks": {
+      "init": 899,
+      "toolsearch": 2334,
+      "search": 4898,
+      "searchResult": 6319,
+      "result": 8491
+    },
+    "turns": 4,
+    "cost": 0.1093326,
+    "calls": [
+      "search:사료",
+      "search:고양이"
+    ],
+    "label": null,
+    "correct": true
+  },
+  {
+    "cfg": "D",
+    "id": "c12",
+    "kind": "영어 입력",
+    "title": "resume review",
+    "ms": 11756,
+    "marks": {
+      "init": 863,
+      "toolsearch": 2306,
+      "search": 5937,
+      "searchResult": 7107,
+      "result": 10704
+    },
+    "turns": 4,
+    "cost": 0.1106628,
+    "calls": [
+      "search:resume",
+      "search:이력서"
+    ],
+    "label": "커리어코치_상담",
+    "correct": true
+  },
+  {
+    "cfg": "D",
+    "id": "c14",
+    "kind": "오타",
+    "title": "포트폴리어 피드백 보기",
+    "ms": 10624,
+    "marks": {
+      "init": 800,
+      "toolsearch": 2715,
+      "search": 5277,
+      "searchResult": 6565,
+      "result": 9514
+    },
+    "turns": 5,
+    "cost": 0.111902,
+    "calls": [
+      "search:포트폴리오",
+      "search:포폴",
+      "search:피드백"
+    ],
+    "label": "포트폴리오 피드백",
+    "correct": true
+  },
+  {
+    "cfg": "D",
+    "id": "c13",
+    "kind": "막연함",
+    "title": "면접 준비",
+    "ms": 14536,
+    "marks": {
+      "init": 935,
+      "toolsearch": 3020,
+      "search": 5825,
+      "searchResult": 7099,
+      "result": 13593
+    },
+    "turns": 4,
+    "cost": 0.10862160000000001,
+    "calls": [
+      "search:면접",
+      "search:인터뷰"
+    ],
+    "label": "답변 공통 규칙",
+    "correct": true
+  },
+  {
+    "cfg": "D",
+    "id": "c15",
+    "kind": "두 주제",
+    "title": "문토랑 엘리스 공고 비교하기",
+    "ms": 12414,
+    "marks": {
+      "init": 965,
+      "toolsearch": 2859,
+      "search": 5379,
+      "searchResult": 6436,
+      "result": 11384
+    },
+    "turns": 4,
+    "cost": 0.09632399999999999,
+    "calls": [
+      "search:문토",
+      "search:엘리스"
+    ],
+    "label": "문토 · 주니어 PO",
+    "correct": true
+  },
+  {
+    "cfg": "D",
+    "id": "c17",
+    "kind": "사람 이름",
+    "title": "멘토 장수지님 피드백 정리",
+    "ms": 10263,
+    "marks": {
+      "init": 978,
+      "toolsearch": 2732,
+      "search": 5347,
+      "searchResult": 6523,
+      "result": 9200
+    },
+    "turns": 4,
+    "cost": 0.0973242,
+    "calls": [
+      "search:장수지",
+      "search:멘토"
+    ],
+    "label": "모의면접 1회차 (멘토 장수지)",
+    "correct": true
+  },
+  {
+    "cfg": "D",
+    "id": "c16",
+    "kind": "비슷하지만 없음",
+    "title": "카카오 PM 공고 지원하기",
+    "ms": 13736,
+    "marks": {
+      "init": 885,
+      "toolsearch": 2788,
+      "search": 5780,
+      "searchResult": 7203,
+      "result": 12787
+    },
+    "turns": 5,
+    "cost": 0.11533870000000002,
+    "calls": [
+      "search:카카오",
+      "search:프로덕트 매니저",
+      "search:Kakao"
+    ],
+    "label": null,
+    "correct": true
+  },
+  {
+    "cfg": "D",
+    "id": "c18",
+    "kind": "프로젝트",
+    "title": "두잇투게더 백로그 정리",
+    "ms": 14836,
+    "marks": {
+      "init": 810,
+      "toolsearch": 3855,
+      "search": 6074,
+      "searchResult": 7389,
+      "result": 13879
+    },
+    "turns": 4,
+    "cost": 0.10381649999999999,
+    "calls": [
+      "search:두잇투게더",
+      "search:백로그"
+    ],
+    "label": "⚙️ 백로그",
+    "correct": true
+  },
+  {
+    "cfg": "D",
+    "id": "c19",
+    "kind": "막연함(공고 아무거나)",
+    "title": "적합도 높은 공고부터 지원",
+    "ms": 10885,
+    "marks": {
+      "init": 929,
+      "toolsearch": 2667,
+      "search": 5431,
+      "searchResult": 6610,
+      "result": 9917
+    },
+    "turns": 4,
+    "cost": 0.1044052,
+    "calls": [
+      "search:적합도",
+      "search:채용공고"
+    ],
+    "label": "채용공고 DB 운영 가이드",
+    "correct": false
+  },
+  {
+    "cfg": "D",
+    "id": "c20",
+    "kind": "기본",
+    "title": "스프린트 회고 템플릿 쓰기",
+    "ms": 11213,
+    "marks": {
+      "init": 939,
+      "toolsearch": 2472,
+      "search": 6036,
+      "searchResult": 7238,
+      "result": 10117
+    },
+    "turns": 5,
+    "cost": 0.12099399999999999,
+    "calls": [
+      "search:회고",
+      "search:스프린트",
+      "search:retrospective"
+    ],
+    "label": "스프린트 공유 템플릿",
+    "correct": true
+  }
+]

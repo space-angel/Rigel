@@ -1,0 +1,195 @@
+[
+  {
+    "cfg": "B",
+    "id": "c09",
+    "kind": "프로젝트",
+    "title": "사령세계 보스 패턴 설계",
+    "ms": 11464,
+    "marks": {
+      "init": 3260,
+      "toolsearch": 4689,
+      "search": 6253,
+      "searchResult": 7502,
+      "result": 10475
+    },
+    "turns": 3,
+    "cost": 0.1172839,
+    "calls": [
+      "search:사령세계"
+    ],
+    "label": "02-01_사령세계-구조 · 사령세계 구조와 보스전",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c14",
+    "kind": "오타",
+    "title": "포트폴리어 피드백 보기",
+    "ms": 12833,
+    "marks": {
+      "init": 3239,
+      "toolsearch": 5357,
+      "search": 7546,
+      "searchResult": 9032,
+      "result": 11835
+    },
+    "turns": 3,
+    "cost": 0.09725470000000001,
+    "calls": [
+      "search:포트폴리오"
+    ],
+    "label": "포트폴리오 피드백 · 덱 개선 방향",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c01",
+    "kind": "기본",
+    "title": "면접 답변 다듬기",
+    "ms": 14402,
+    "marks": {
+      "init": 3150,
+      "toolsearch": 5033,
+      "search": 7932,
+      "searchResult": 9250,
+      "result": 13412
+    },
+    "turns": 3,
+    "cost": 0.20571709999999999,
+    "calls": [
+      "search:면접"
+    ],
+    "label": "답변 공통 규칙 · 면접 답변 원칙과 모의면접 회고 추가 항목",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c17",
+    "kind": "사람 이름",
+    "title": "멘토 장수지님 피드백 정리",
+    "ms": 10996,
+    "marks": {
+      "init": 867,
+      "toolsearch": 2955,
+      "search": 4991,
+      "searchResult": 6161,
+      "result": 10054
+    },
+    "turns": 3,
+    "cost": 0.1021235,
+    "calls": [
+      "search:장수지"
+    ],
+    "label": "모의면접 1회차 (멘토 장수지)",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c15",
+    "kind": "두 주제",
+    "title": "문토랑 엘리스 공고 비교하기",
+    "ms": 14022,
+    "marks": {
+      "init": 1013,
+      "toolsearch": 2521,
+      "search": 5594,
+      "searchResult": 6695,
+      "result": 13119
+    },
+    "turns": 5,
+    "cost": 0.1111751,
+    "calls": [
+      "search:엘리스",
+      "search:문토"
+    ],
+    "label": "문토 · 주니어 PO (채용공고)",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c16",
+    "kind": "비슷하지만 없음",
+    "title": "카카오 PM 공고 지원하기",
+    "ms": 14705,
+    "marks": {
+      "init": 831,
+      "toolsearch": 2482,
+      "search": 4124,
+      "searchResult": 5402,
+      "result": 13750
+    },
+    "turns": 5,
+    "cost": 0.1366549,
+    "calls": [
+      "search:카카오",
+      "search:공고",
+      "search:카카오 채용"
+    ],
+    "label": null,
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c19",
+    "kind": "막연함(공고 아무거나)",
+    "title": "적합도 높은 공고부터 지원",
+    "ms": 9788,
+    "marks": {
+      "init": 1143,
+      "toolsearch": 2745,
+      "search": 4287,
+      "searchResult": 5526,
+      "result": 8856
+    },
+    "turns": 3,
+    "cost": 0.1108041,
+    "calls": [
+      "search:적합도"
+    ],
+    "label": "채용공고 DB 운영 가이드",
+    "correct": false
+  },
+  {
+    "cfg": "B",
+    "id": "c20",
+    "kind": "기본",
+    "title": "스프린트 회고 템플릿 쓰기",
+    "ms": 13168,
+    "marks": {
+      "init": 797,
+      "toolsearch": 2442,
+      "search": 7166,
+      "searchResult": 8476,
+      "result": 12091
+    },
+    "turns": 4,
+    "cost": 0.1115895,
+    "calls": [
+      "search:스프린트"
+    ],
+    "label": "스프린트 공유 템플릿",
+    "correct": true
+  },
+  {
+    "cfg": "B",
+    "id": "c18",
+    "kind": "프로젝트",
+    "title": "두잇투게더 백로그 정리",
+    "ms": 16158,
+    "marks": {
+      "init": 1070,
+      "toolsearch": 3173,
+      "search": 6546,
+      "searchResult": 7690,
+      "result": 15205
+    },
+    "turns": 5,
+    "cost": 0.12788270000000002,
+    "calls": [
+      "search:두잇투게더",
+      "search:백로그"
+    ],
+    "label": "⚙️ 백로그 · 두잇투게더 레거시 운영페이지의 백로그 DB",
+    "correct": true
+  }
+]
