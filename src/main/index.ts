@@ -1,6 +1,7 @@
 import { app, BrowserWindow, dialog, globalShortcut, ipcMain, Menu, nativeImage, screen, shell, Tray } from "electron";
 import { join } from "node:path";
 import { writeFileSync } from "node:fs";
+import { execFile } from "node:child_process";
 import type { AppData, TodoAction } from "@shared/types";
 import { applyAction, localDate, pendingCarryOver, todayView } from "@shared/todos";
 import { classifyQuickInput, firstLine, matchShortcutByKeywords } from "@shared/quickInput";
@@ -33,7 +34,9 @@ const DEMO_SHAPE = process.env.TODOBAN_SHAPE_TITLE; // 화면 확인용: 이 할
 const DEMO_SHAPE_GO = process.env.TODOBAN_SHAPE_GO === "1"; // 화면 확인용: 바로 Shape it을 눌러 결과(C2)까지 간다
 // 화면 확인용: 시나리오를 돌리고 결과를 저장한 뒤 종료한다 (src/main/e2e.ts). 창을 띄우지 않고, 다른 앱도 열지 않는다.
 const E2E = process.env.TODOBAN_E2E;
-const HEADLESS = Boolean(SNAPSHOT || E2E);
+// 화면 확인용: 목록과 빠른 입력창을 화면 밖에 포커스 없이 띄워, macOS가 그리는 창 그림자까지 PNG로 찍고 종료한다.
+const WINDOW_SHOT = process.env.TODOBAN_WINDOW_SHOT;
+const HEADLESS = Boolean(SNAPSHOT || E2E || WINDOW_SHOT);
 
 // 바깥 앱(피그마, 터미널, 브라우저)을 여는 동작. 시나리오 실행 중에는 열지 않고 기록만 한다.
 function openOutside(what: string, fn: () => unknown): void {
@@ -49,11 +52,12 @@ async function snapshotAndQuit(win: BrowserWindow | null): Promise<void> {
   app.quit();
 }
 
-// 투명한 창 안에 카드와 그림자를 CSS로 그리므로, 그림자 여백만큼 창이 카드보다 크다.
-const LIST_WIDTH = 380;
-const LIST_MAX_HEIGHT = 640;
-const QUICK_WIDTH = 680;
-const QUICK_MAX_HEIGHT = 260;
+// 목록과 빠른 입력창은 투명 창이고 창 크기가 곧 카드 크기다. 그림자는 macOS가 카드의 둥근 모양을 따라 창 밖에 그린다.
+// (예전에는 CSS로 창 안에 그렸는데, 여백보다 넓게 번진 그림자가 창 가장자리에서 잘려 각진 회색 띠가 생겼다.)
+const LIST_WIDTH = 360;
+const LIST_MAX_HEIGHT = 604;
+const QUICK_WIDTH = 640;
+const QUICK_MAX_HEIGHT = 220;
 const REVIEW_WIDTH = 520;
 const REVIEW_MAX_HEIGHT = 660;
 
@@ -104,7 +108,7 @@ function createPopupWindow(view: "list" | "quick", width: number, height: number
     maximizable: false,
     fullscreenable: false,
     skipTaskbar: true,
-    hasShadow: false,
+    hasShadow: true,
     alwaysOnTop: true,
     webPreferences: {
       preload: join(__dirname, "../preload/index.js"),
@@ -125,7 +129,10 @@ function fitHeight(win: BrowserWindow | null, height: number, max: number): void
   if (!win) return;
   const h = Math.min(Math.max(Math.ceil(height), 80), max);
   const b = win.getBounds();
-  if (b.height !== h) win.setBounds({ ...b, height: h });
+  if (b.height === h) return;
+  win.setBounds({ ...b, height: h });
+  // 투명 창의 그림자는 모양이 바뀌면 다시 계산해야 이전 크기의 그림자가 남지 않는다.
+  win.invalidateShadow();
 }
 
 function positionListWindow(): void {
@@ -147,6 +154,7 @@ function toggleListWindow(): void {
   quickWindow?.hide();
   positionListWindow();
   listWindow.show();
+  listWindow.invalidateShadow();
   listWindow.focus();
   listWindow.webContents.send("list:opened");
 }
@@ -164,6 +172,7 @@ function showQuickWindow(): void {
   quickWindow.setPosition(Math.round(area.x + (area.width - width) / 2), Math.round(area.y + area.height * 0.22));
   app.focus({ steal: true });
   quickWindow.show();
+  quickWindow.invalidateShadow();
   quickWindow.focus();
   quickWindow.webContents.send("quick:opened");
 }
@@ -600,7 +609,31 @@ function showWelcome(): void {
     );
   }
 
-  if (!data.settings.welcomed && !SNAPSHOT) showWelcome();
+  if (!data.settings.welcomed && !SNAPSHOT && !WINDOW_SHOT) showWelcome();
+
+  if (WINDOW_SHOT) {
+    const shot = async (win: BrowserWindow, name: string) => {
+      const { width, height } = win.getBounds();
+      win.setBounds({ x: -width - 400, y: 120, width, height });
+      win.showInactive();
+      win.invalidateShadow();
+      await new Promise((r) => setTimeout(r, 900));
+      const id = win.getMediaSourceId().split(":")[1]!;
+      await new Promise((r) => execFile("/usr/sbin/screencapture", ["-x", "-l", id, join(WINDOW_SHOT, `${name}.png`)], r));
+      console.log(`[shot] ${name} bounds=${JSON.stringify(win.getBounds())}`);
+      win.hide();
+    };
+    listWindow.webContents.once("did-finish-load", () =>
+      setTimeout(async () => {
+        listWindow?.webContents.send("list:opened");
+        await new Promise((r) => setTimeout(r, 600));
+        await shot(listWindow!, "list");
+        await shot(quickWindow!, "quick");
+        quitting = true;
+        app.quit();
+      }, 1200),
+    );
+  }
 
   // 지난번에 넣거나 취소하지 못한 빠른 입력이 있으면 확인 창을 다시 연다.
   const pending = loadPending();

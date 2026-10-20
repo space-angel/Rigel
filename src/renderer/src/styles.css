@@ -98,15 +98,14 @@ kbd {
 
 /* ===== 메뉴바 목록 (380 창, 360 카드) ===== */
 
-/* 투명 창 안의 카드. 그림자가 잘리지 않게 창 가장자리에 여백을 둔다. */
+/* 투명 창 = 카드. 바깥 그림자는 macOS 창 그림자가 카드 모양을 따라 그린다. */
 .window {
-  padding: 8px 10px 28px;
   outline: none;
 }
 
 /* L0 창: 글로우 없이 위 하이라이트와 그림자로만 띄운다. */
 .shell {
-  width: 360px;
+  width: 100%;
   max-height: 604px;
   display: flex;
   flex-direction: column;
@@ -690,13 +689,10 @@ kbd {
 }
 
 /* ===== 빠른 입력창 (B1: 창 자체가 주인공이라 글로우를 쓴다) ===== */
-.quick-window {
-  padding: 12px 20px 40px;
-}
 .quick {
-  width: 640px;
+  width: 100%;
   border-radius: var(--radius-r5);
-  box-shadow: var(--shadow-hero), 0 24px 60px rgb(0 0 0 / 55%);
+  box-shadow: var(--shadow-hero);
   overflow: hidden;
 }
 .quick__input {

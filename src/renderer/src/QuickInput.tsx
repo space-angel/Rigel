@@ -29,7 +29,7 @@ export function QuickInput() {
       el.style.height = `${Math.min(el.scrollHeight, 31 * 4)}px`;
     }
     const panel = panelRef.current;
-    if (panel) api.resizeQuick(panel.getBoundingClientRect().height + 12 + 40);
+    if (panel) api.resizeQuick(panel.getBoundingClientRect().height);
   }, [text]);
 
   const submit = async () => {

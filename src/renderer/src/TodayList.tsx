@@ -202,12 +202,12 @@ export function TodayList() {
     };
   }, []);
 
-  // 카드 높이에 맞춰 창 높이를 바꾼다. 위아래 그림자 여백을 더한다.
+  // 카드 높이에 맞춰 창 높이를 바꾼다. 창이 곧 카드다.
   const hasData = data !== null;
   useLayoutEffect(() => {
     const el = shellRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => api.resizeList(el.getBoundingClientRect().height + 8 + 28));
+    const ro = new ResizeObserver(() => api.resizeList(el.getBoundingClientRect().height));
     ro.observe(el);
     return () => ro.disconnect();
   }, [hasData]);
