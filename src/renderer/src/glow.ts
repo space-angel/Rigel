@@ -1,6 +1,8 @@
 // 지금 할 일 카드의 글로우 움직임 (실험). 설정에서 고르고, 같은 앱의 모든 창이 localStorage로 함께 바뀐다.
-// static: 지금처럼 고정 · breathe: 천천히 숨쉬기 · follow: 마우스를 따라오기 · handoff: 다음 할 일이 이어받을 때 한 번 · all: 모두
-export const GLOW_MODES = ["static", "breathe", "follow", "handoff", "all"] as const;
+// 토스 인터랙션 기준(피드백·다음 행동 안내·지금 일어나는 일 전달)에 맞는 순간에만 움직인다. 아무 일 없을 때 계속 도는 움직임은 두지 않는다.
+// static: 고정 · nudge: 목록을 열고 망설이면 한 번 “여기서 시작해요” · press: 누르는 순간 빛이 손끝에 모임
+// handoff: 체크한 빛이 다음 할 일로 넘어감 · all: 모두. 생각 중·답 도착은 static 말고 모두에서.
+export const GLOW_MODES = ["static", "nudge", "press", "handoff", "all"] as const;
 export type GlowMode = (typeof GLOW_MODES)[number];
 const KEY = "todoban.glow";
 

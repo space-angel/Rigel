@@ -2990,8 +2990,9 @@ html[lang="ko"] :is(.eyebrow,
 }
 
 /* ===== 움직이는 글로우 (실험, 설정 → 일반 → 글로우 실험) =====
-   바닥의 고정 글로우(--shadow-hero)는 그대로 두고, 그 위에 빛 덩어리 하나를 얹어 transform·opacity로만 움직인다.
-   층: hero-glow(카드 모양으로 자름) > rise(이어받기) > follow(따라오기) > blob(숨쉬기·생각 중) */
+   토스 인터랙션 기준: 피드백을 주거나, 다음 행동을 알려 주거나, 지금 일어나는 일을 전할 때만 움직인다.
+   바닥의 고정 글로우(--shadow-hero)는 그대로 두고, 위에 빛 두 개를 얹어 transform·opacity로만 움직인다.
+   easing은 두 가지만: --ease-out(bezier), --ease-spring. 요소 하나에는 움직임 하나. */
 .now-card {
   isolation: isolate;
 }
@@ -3002,11 +3003,6 @@ html[lang="ko"] :is(.eyebrow,
   border-radius: inherit;
   overflow: hidden;
   pointer-events: none;
-}
-.hero-glow__rise,
-.hero-glow__follow {
-  position: absolute;
-  inset: 0;
 }
 .hero-glow__blob {
   position: absolute;
@@ -3019,47 +3015,56 @@ html[lang="ko"] :is(.eyebrow,
   opacity: 0;
 }
 
-/* 숨쉬기: 5초에 한 번 천천히 밝아졌다 어두워진다 */
-@keyframes glow-breathe {
-  0%, 100% { opacity: 0.2; transform: scale(0.92); }
-  50% { opacity: 0.8; transform: scale(1.04); }
+/* 시작 힌트: 망설이는 순간 한 번만, 아래에서 빛이 차올랐다가 가라앉는다. 반복하지 않는다(재촉하지 않기). */
+@keyframes glow-nudge {
+  0% { opacity: 0; transform: translate3d(0, 40px, 0) scale(0.9); }
+  45% { opacity: 0.9; transform: translate3d(0, 0, 0) scale(1.05); }
+  100% { opacity: 0; transform: translate3d(0, 0, 0) scale(1); }
 }
-:is([data-glow="breathe"], [data-glow="all"]) .hero-glow__blob {
-  animation: glow-breathe 5s ease-in-out infinite;
+:is([data-glow="nudge"], [data-glow="all"]) .now-card.is-nudge .hero-glow__blob {
+  animation: glow-nudge 1600ms var(--ease-out) both;
 }
-
-/* 따라오기: 마우스를 올리면 빛이 조금 늦게 따라온다 */
-:is([data-glow="follow"], [data-glow="all"]) .hero-glow__follow {
-  transform: translate3d(0, 0, 0);
-  transition: transform 520ms var(--ease-out);
+:is([data-glow="nudge"], [data-glow="all"]) .now-card.is-nudge .start--now {
+  animation: nudge-arrow 1600ms var(--ease-spring) both;
 }
-:is([data-glow="follow"], [data-glow="all"]) .now-card:is(:hover, .is-hover) .hero-glow__follow {
-  transform: translate3d(calc(var(--gx, 0px) * 0.8), var(--gy, 0px), 0);
-  transition-duration: 380ms;
-}
-[data-glow="follow"] .hero-glow__blob {
-  transition: opacity var(--dur-m) var(--ease-out);
-}
-[data-glow="follow"] .now-card:is(:hover, .is-hover) .hero-glow__blob {
-  opacity: 0.75;
+@keyframes nudge-arrow {
+  30% { transform: translate3d(3px, 0, 0); }
+  55% { transform: translate3d(0, 0, 0); }
 }
 
-/* 이어받기: 다음 할 일이 지금 할 일이 되면 빛이 아래에서 올라오고, 테두리를 한 바퀴 돈다 */
-@keyframes glow-rise {
-  from { opacity: 0; transform: translate3d(0, 60px, 0); }
-  45% { opacity: 1; }
-  to { opacity: 1; transform: translate3d(0, 0, 0); }
+/* 누르기: 카드가 살짝 눌리고, 누른 자리에 빛이 모인다. 떼면 spring으로 돌아온다. */
+.hero-glow__press {
+  position: absolute;
+  left: -90px;
+  top: -90px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(120 170 255 / 55%), rgb(120 170 255 / 0%));
+  opacity: 0;
+  transform: translate3d(var(--px, 50%), var(--py, 50%), 0) scale(0.3);
+  transition: opacity 360ms var(--ease-out), transform 420ms var(--ease-out);
 }
-@keyframes glow-rise-blob {
-  0% { opacity: 0; }
-  40% { opacity: 1; }
-  100% { opacity: 0.35; }
+:is([data-glow="press"], [data-glow="all"]) .now-card.is-pressing .hero-glow__press {
+  opacity: 1;
+  transform: translate3d(var(--px, 50%), var(--py, 50%), 0) scale(1);
+  transition: opacity 120ms var(--ease-out), transform 260ms var(--ease-out);
 }
-:is([data-glow="handoff"], [data-glow="all"]) .now-card.is-handoff .hero-glow__rise {
-  animation: glow-rise 900ms var(--ease-out) both;
+:is([data-glow="press"], [data-glow="all"]) .now-card {
+  transition: transform 380ms var(--ease-spring);
 }
-[data-glow="handoff"] .now-card.is-handoff .hero-glow__blob {
-  animation: glow-rise-blob 1400ms var(--ease-out) both;
+:is([data-glow="press"], [data-glow="all"]) .now-card.is-pressing {
+  transform: scale(0.985);
+  transition: transform 120ms var(--ease-out);
+}
+
+/* 이어받기: 체크한 카드의 빛이 꺼지지 않고, 올라오는 다음 할 일에 그대로 실려 와서 천천히 가라앉는다. 테두리를 한 바퀴 돈다. */
+@keyframes glow-carry {
+  0% { opacity: 0.95; }
+  100% { opacity: 0; }
+}
+:is([data-glow="handoff"], [data-glow="all"]) .now-card.is-handoff .hero-glow__blob {
+  animation: glow-carry 1400ms var(--ease-out) both;
 }
 .hero-ring {
   display: none;
@@ -3086,7 +3091,7 @@ html[lang="ko"] :is(.eyebrow,
   aspect-ratio: 1;
   translate: -50% -50%;
   background: conic-gradient(from 0deg, transparent 0 70%, rgb(150 190 255 / 0%) 72%, rgb(170 205 255 / 95%) 88%, transparent 96%);
-  animation: ring-spin 1000ms var(--ease-in-out, ease-in-out) both;
+  animation: ring-spin 1000ms var(--ease-out) both;
 }
 @keyframes ring-spin {
   from { transform: rotate(-90deg); }
@@ -3098,7 +3103,7 @@ html[lang="ko"] :is(.eyebrow,
   100% { opacity: 0; }
 }
 
-/* 생각 중: Claude가 이 카드의 첫 행동을 찾는 동안 빛이 좌우로 흐른다 (고정 말고는 모든 방식에서) */
+/* 생각 중: Claude가 이 카드의 첫 행동을 찾는 동안 빛이 좌우로 흐른다. 답이 오면 한 번 반짝인다(도착). */
 @keyframes glow-think {
   from { opacity: 0.55; transform: translate3d(-30%, 0, 0) scale(0.9); }
   to { opacity: 0.95; transform: translate3d(30%, 0, 0) scale(1.05); }
@@ -3106,12 +3111,21 @@ html[lang="ko"] :is(.eyebrow,
 html:not([data-glow="static"]) .now-card.is-thinking .hero-glow__blob {
   animation: glow-think 1.6s ease-in-out infinite alternate;
 }
+@keyframes glow-arrive {
+  0% { opacity: 0.6; transform: scale(1); }
+  30% { opacity: 1; transform: scale(1.25); }
+  100% { opacity: 0; transform: scale(1.1); }
+}
+html:not([data-glow="static"]) .now-card.is-arrived .hero-glow__blob {
+  animation: glow-arrive 900ms var(--ease-out) both;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .hero-glow__blob,
-  .hero-glow__rise,
+  .hero-glow__press,
   .hero-ring,
-  .hero-ring__spin {
+  .hero-ring__spin,
+  .now-card {
     animation: none !important;
     transition: none !important;
   }

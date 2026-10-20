@@ -77,14 +77,14 @@ const MODELS = [
 ];
 
 // 글로우 실험: 지금 할 일 카드의 빛을 어떻게 움직일지 직접 보고 고른다. 이 Mac에만 저장된다.
-const GLOW_LABEL: Record<GlowMode, string> = { static: msg("Static"), breathe: msg("Breathe"), follow: msg("Follow"), handoff: msg("Handoff"), all: msg("All") };
+const GLOW_LABEL: Record<GlowMode, string> = { static: msg("Static"), nudge: msg("Start hint"), press: msg("Press"), handoff: msg("Handoff"), all: msg("All") };
 function GlowSetting() {
   const [mode, setMode] = useState<GlowMode>(getGlow);
   return (
     <div className="setting setting--stack">
       <div className="setting__text">
         <p>{t("Glow (experiment)")}</p>
-        <p className="setting__desc">{t("How the Now card glows. Check a task or ask for a first step to see it move.")}</p>
+        <p className="setting__desc">{t("How the Now card glows. Wait 6 seconds, press the card, check it, or ask Claude for a first step.")}</p>
       </div>
       <div className="segmented" role="radiogroup" aria-label={t("Glow (experiment)")}>
         {GLOW_MODES.map((m) => (
@@ -655,7 +655,9 @@ export function Settings({ initialTab, openSheet }: { initialTab: Tab; openSheet
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-  useEffect(() => window.scrollTo(0, 0), [tab]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [tab]);
   useEffect(() => {
     api.getData().then(setData);
     const off = api.onData(setData);

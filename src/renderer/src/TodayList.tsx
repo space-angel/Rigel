@@ -172,6 +172,7 @@ function NowCard({
   isNew,
   completing,
   thinking,
+  nudge,
 }: {
   item: TodoItem;
   shortcut?: Shortcut;
@@ -183,33 +184,50 @@ function NowCard({
   isNew?: boolean;
   completing?: boolean;
   thinking?: boolean;
+  nudge?: boolean;
 }) {
   const click = useSingleClick(item.isClear || edit.editing ? undefined : onShape);
   const [handoff] = useState(() => takeHandoff(item.id));
-  // 따라오기: 카드 가운데에서 마우스까지의 거리를 CSS 변수로 넘긴다. 빛은 transform으로만 움직인다.
-  const follow = (e: React.PointerEvent<HTMLDivElement>) => {
+  // 누르기: 누른 자리를 CSS 변수로 넘기고, 누르는 동안 빛이 손끝에 모인다(transform·opacity만).
+  const [pressing, setPressing] = useState(false);
+  const press = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
     const r = e.currentTarget.getBoundingClientRect();
-    e.currentTarget.style.setProperty("--gx", `${Math.round(e.clientX - r.left - r.width / 2)}px`);
-    e.currentTarget.style.setProperty("--gy", `${Math.round((e.clientY - r.bottom) * 0.7)}px`);
+    e.currentTarget.style.setProperty("--px", `${Math.round(e.clientX - r.left)}px`);
+    e.currentTarget.style.setProperty("--py", `${Math.round(e.clientY - r.top)}px`);
+    setPressing(true);
   };
+  const release = () => setPressing(false);
+  // 답 도착: 생각 중이 끝나는 순간 한 번 반짝인다(결과가 왔다는 피드백).
+  const [arrived, setArrived] = useState(false);
+  const wasThinking = useRef(false);
+  useEffect(() => {
+    if (wasThinking.current && !thinking) {
+      setArrived(true);
+      const timer = setTimeout(() => setArrived(false), 900);
+      wasThinking.current = false;
+      return () => clearTimeout(timer);
+    }
+    wasThinking.current = Boolean(thinking);
+  }, [thinking]);
   return (
     <div
       data-flip-id={item.id}
-      className={`now-card${selected ? " is-selected" : ""}${isNew ? " is-new" : ""}${completing ? " is-completing" : ""}${thinking ? " is-thinking" : ""}${handoff ? " is-handoff" : ""}`}
-      onPointerMove={follow}
+      className={`now-card${selected ? " is-selected" : ""}${isNew ? " is-new" : ""}${completing ? " is-completing" : ""}${thinking ? " is-thinking" : ""}${handoff ? " is-handoff" : ""}${pressing ? " is-pressing" : ""}${arrived ? " is-arrived" : ""}${nudge ? " is-nudge" : ""}`}
+      onPointerDown={press}
+      onPointerUp={release}
+      onPointerLeave={release}
+      onPointerCancel={release}
       {...click}
       onContextMenu={(e) => {
         e.preventDefault();
         edit.onMenu();
       }}
     >
-      {/* 움직이는 글로우 층(실험). 바깥부터 이어받기 → 따라오기 → 숨쉬기·생각 중을 맡아 transform이 겹치지 않는다. */}
+      {/* 움직이는 글로우 층(실험). 요소 하나에 움직임 하나: blob은 아래 빛(힌트·이어받기·생각 중·도착), press는 손끝 빛. */}
       <span className="hero-glow" aria-hidden="true">
-        <span className="hero-glow__rise">
-          <span className="hero-glow__follow">
-            <span className="hero-glow__blob" />
-          </span>
-        </span>
+        <span className="hero-glow__blob" />
+        <span className="hero-glow__press" />
       </span>
       {handoff && (
         <span className="hero-ring" aria-hidden="true">
@@ -409,6 +427,31 @@ export function TodayList() {
   const [completing, setCompleting] = useState<string[]>([]);
   // 화면 전환 방향(목록 → 빚기는 앞으로, 돌아오면 뒤로)과 창 열기 움직임
   const [viewDir, setViewDir] = useState<"forward" | "back" | null>(null);
+  // 시작 힌트: 목록을 열고 6초 동안 아무것도 안 하면, 지금 할 일 카드가 한 번만 “여기서 시작해요”라고 빛난다. 무엇이든 누르면 취소.
+  const [nudge, setNudge] = useState(false);
+  const nudgeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const armNudge = () => {
+    if (nudgeTimer.current) clearTimeout(nudgeTimer.current);
+    setNudge(false);
+    nudgeTimer.current = setTimeout(() => {
+      setNudge(true);
+      nudgeTimer.current = setTimeout(() => setNudge(false), 1800);
+    }, 6000);
+  };
+  const cancelNudge = () => {
+    if (nudgeTimer.current) clearTimeout(nudgeTimer.current);
+    nudgeTimer.current = null;
+  };
+  useEffect(() => {
+    armNudge();
+    window.addEventListener("pointerdown", cancelNudge, true);
+    window.addEventListener("keydown", cancelNudge, true);
+    return () => {
+      cancelNudge();
+      window.removeEventListener("pointerdown", cancelNudge, true);
+      window.removeEventListener("keydown", cancelNudge, true);
+    };
+  }, []);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dataRef = useRef<AppData | null>(null);
   dataRef.current = data;
@@ -420,6 +463,7 @@ export function TodayList() {
     const offFirst = api.onFirstSteps(setFirstSteps);
     const offOpen = api.onListOpened((opts) => {
       replayOpen();
+      armNudge();
       setSelected(0);
       setDialDir(null);
       setDial("today");
@@ -826,7 +870,7 @@ export function TodayList() {
               <div className="list">
                 {now && (
                   <SortableItem key={now.id} id={now.id}>
-                    <NowCard item={now} shortcut={shortcutOf(now)} selected={selected === 0} onToggle={() => complete(now)} completing={completing.includes(now.id)} onFirstStep={() => askFirstStep(now)} onShape={() => shape(now)} edit={edit(now)} isNew={highlight.includes(now.id)} thinking={stepOf(now.id)?.status === "loading"} />
+                    <NowCard item={now} shortcut={shortcutOf(now)} selected={selected === 0} onToggle={() => complete(now)} completing={completing.includes(now.id)} onFirstStep={() => askFirstStep(now)} onShape={() => shape(now)} edit={edit(now)} isNew={highlight.includes(now.id)} thinking={stepOf(now.id)?.status === "loading"} nudge={nudge} />
                   </SortableItem>
                 )}
                 {now && stepCard(now)}
