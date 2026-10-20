@@ -18,7 +18,7 @@ import { safeServiceUrl, type McpSource } from "@shared/mcp";
 import type { ShapeInput, ToolItem } from "@shared/shape";
 import { openShortcut } from "./shortcutOpener";
 import { runE2E } from "./e2e";
-import { claudeVersion, ensureWorkDir, findClaude, resetRules, resourcePath, rulesStatus } from "./claude/setup";
+import { claudeAuth, claudeVersion, ensureWorkDir, findClaude, resetRules, resourcePath, rulesStatus } from "./claude/setup";
 
 app.setName("todoBAN");
 const IS_MAC = process.platform === "darwin";
@@ -692,7 +692,9 @@ app.whenReady().then(() => {
   ipcMain.handle("settings:hotkeyStatus", () => hotkeyError());
   ipcMain.handle("settings:claudeInfo", async () => {
     const found = await findClaude(data.settings.claudePath);
-    return { ...found, version: found.path ? await claudeVersion(found.path) : null };
+    if (!found.path) return { ...found, version: null, auth: null };
+    const [version, auth] = await Promise.all([claudeVersion(found.path), claudeAuth(found.path)]);
+    return { ...found, version, auth };
   });
   ipcMain.handle("settings:rulesStatus", () => rulesStatus());
   ipcMain.handle("settings:resetRules", () => {

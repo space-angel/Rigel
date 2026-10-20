@@ -104,7 +104,8 @@ export class FirstStepManager {
       const err = e instanceof ClaudeError ? e : new ClaudeError("failed", String(e));
       // 미리 찾다가 실패하면 조용히 버린다. 물어볼 때 다시 찾는다.
       if (this.states.get(todoId)?.hidden) {
-        if (err.kind === "notFound" || err.kind === "notLoggedIn") this.prefetchOff = true;
+        // claude가 없거나, 로그인이 안 됐거나, 사용량 한도면 이번 실행 동안 다시 미리 찾지 않는다(남은 한도를 아낀다)
+        if (err.kind === "notFound" || err.kind === "notLoggedIn" || err.kind === "usageLimit" || err.kind === "outdated") this.prefetchOff = true;
         this.states.delete(todoId);
         this.onChange(this.all());
         return;

@@ -9,6 +9,8 @@ import { Spinner } from "./components/icons";
 import { localDate } from "@shared/todos";
 import { currentLang, t } from "./i18n";
 import { modKey } from "./platform";
+import { limitReset } from "@shared/claude";
+import { resetTime } from "./claudeLabels";
 import { AiSparkle, ChevronDownIcon, CloseIcon, PlusIcon, RefreshIcon, TerminalIcon, WarningIcon } from "./components/icons";
 
 const api = window.todoban;
@@ -249,6 +251,25 @@ export function Review() {
         {state.status === "error" && err?.kind === "notFound" && (
           <Notice title={t("Claude Code isn't installed")}>
             <p>{t("Your thought is safe. Install Claude Code or set its path in Settings, then try again.")}</p>
+          </Notice>
+        )}
+        {state.status === "error" && err?.kind === "usageLimit" && (
+          <Notice title={t("You've reached your Claude usage limit")}>
+            <p>
+              {limitReset(err.message)
+                ? t("Your thought is safe. You can try again after {time}, or add it without splitting now.", { time: resetTime(limitReset(err.message)!) })
+                : t("Your thought is safe. Try again a little later, or add it without splitting now.")}
+            </p>
+          </Notice>
+        )}
+        {state.status === "error" && err?.kind === "outdated" && (
+          <Notice title={t("Update Claude Code")}>
+            <p>{t("Your thought is safe. Run claude update in a terminal, then try again.")}</p>
+          </Notice>
+        )}
+        {state.status === "error" && err?.kind === "network" && (
+          <Notice title={t("Couldn't reach Claude")}>
+            <p>{t("Your thought is safe. Check your internet connection, then try again.")}</p>
           </Notice>
         )}
         {state.status === "error" && err?.kind === "failed" && (

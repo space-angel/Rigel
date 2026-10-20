@@ -5,6 +5,8 @@ import { FIGMA_BUNDLE_ID } from "@shared/types";
 import { figmaLinkInfo } from "@shared/todos";
 import { toAccelerator } from "@shared/hotkey";
 import { IS_MAC, LOCAL_AVAILABLE, showHotkey } from "./platform";
+import type { ClaudeInfo } from "@shared/claude";
+import { authLabel, shortVersion } from "./claudeLabels";
 import { CheckIcon, EditIcon, FigmaMark, LinkIcon, PlusIcon, Spinner, TerminalIcon, TrashIcon, UserIcon } from "./components/icons";
 import { LOCAL_SOURCES, normalizeMix, type LocalSource } from "@shared/shape";
 import { MCP_SERVICES, MCP_SOURCES, statusOf, type McpSource, type McpStatus } from "@shared/mcp";
@@ -77,7 +79,7 @@ const MODELS = [
 ];
 
 function GeneralTab({ data }: { data: AppData }) {
-  const [info, setInfo] = useState<{ path: string | null; searched: string[]; version: string | null } | null>(null);
+  const [info, setInfo] = useState<ClaudeInfo | null>(null);
   const [path, setPath] = useState(data.settings.claudePath ?? "");
   const refresh = () => api.claudeInfo().then(setInfo);
   // 규칙 파일을 고쳤는데 앱 기능 규칙이 빠졌으면 알린다. 되돌릴 때 고친 내용은 옆 파일로 남는다.
@@ -115,15 +117,21 @@ function GeneralTab({ data }: { data: AppData }) {
             <div className="setting__text">
               <p>{t("Executable")}</p>
               {info &&
-                (info.path ? (
+                (info.path && info.auth && !info.auth.loggedIn ? (
+                  <p className="field__error">{t("Found claude, but it isn't signed in. Run claude in a terminal and sign in.")}</p>
+                ) : info.path ? (
                   <p className="setting__desc">
-                    {data.settings.claudePath ? t("Using this path") : t("Found automatically")} · {info.version ?? t("version unknown")}
+                    {[data.settings.claudePath ? t("Using this path") : t("Found automatically"), shortVersion(info.version) ?? t("version unknown"), authLabel(info.auth)].filter(Boolean).join(" · ")}
                   </p>
                 ) : (
                   <p className="field__error">{t("Couldn't find claude here. Leave empty to search automatically.")}</p>
                 ))}
             </div>
-            {info && <span className={`status${info.path ? " status--ok" : " status--error"}`}>{info.path ? t("FOUND") : t("MISSING")}</span>}
+            {info && (
+              <span className={`status${info.path && info.auth?.loggedIn !== false ? " status--ok" : " status--error"}`}>
+                {!info.path ? t("MISSING") : info.auth?.loggedIn === false ? t("SIGN IN") : t("FOUND")}
+              </span>
+            )}
           </div>
           <input
             className={`field__input${info && !info.path ? " is-error" : ""}`}

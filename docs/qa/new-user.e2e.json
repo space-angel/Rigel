@@ -1,0 +1,9 @@
+[
+ {"name":"설정 · Claude Code 칸","win":"settings","main":"openSettings:general","until":"__e2e.$('.status')","timeout":20000,"wait":800,"snap":true,
+  "run":"return null;"},
+ {"name":"설정 · 무엇으로 보이나","win":"settings","run":"const g = [...document.querySelectorAll('.group')].find(g => g.textContent.includes('실행 파일')); return { status: g.querySelector('.status')?.textContent, desc: (g.querySelector('.setting__desc') || g.querySelector('.field__error'))?.textContent };"},
+ {"name":"목록 · 첫 행동 물어보기","win":"list","main":"openList","until":"__e2e.$('.now-card')","wait":300,"run":"__e2e.click('.now-card .pill-question'); return true;"},
+ {"name":"목록 · 무엇으로 보이나","win":"list","until":"__e2e.$('.fs-card')","timeout":20000,"wait":300,"snap":true,"run":"return null;"},
+ {"name":"목록 · 카드 글","win":"list","run":"return __e2e.$('.fs-card')?.textContent;"},
+ {"name":"짧은 할 일은 claude 없이도 들어간다","win":"quick","run":"__e2e.type('textarea', '내일 운동'); __e2e.key('textarea', 'Enter'); await new Promise(r => setTimeout(r, 800)); const d = await window.todoban.getData(); return d.todos.some(t => t.title === '내일 운동');","expect":"true"}
+]

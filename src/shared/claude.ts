@@ -26,7 +26,9 @@ export function splitRequest(text: string, today: string, shortcuts: Shortcut[])
   return JSON.stringify({ type: "split", today, text, shortcuts: shortcutHints(shortcuts) });
 }
 
-export type ClaudeErrorKind = "notFound" | "notLoggedIn" | "timeout" | "parseFailed" | "failed";
+// usageLimit: 구독 사용량 한도(또는 API 크레딧 부족). network: 인터넷이나 Anthropic 서버에 닿지 못함.
+// outdated: 앱이 쓰는 옵션을 모르는 옛 claude(업데이트하면 풀린다).
+export type ClaudeErrorKind = "notFound" | "notLoggedIn" | "usageLimit" | "network" | "outdated" | "timeout" | "parseFailed" | "failed";
 
 export class ClaudeError extends Error {
   kind: ClaudeErrorKind;
@@ -37,6 +39,30 @@ export class ClaudeError extends Error {
 }
 
 const LOGIN_HINT = /log ?in|logged out|authenticat|invalid api key|oauth|\/login|credential/i;
+// 다른 사람이 처음 쓸 때 자주 만나는 실패. 실제 CLI 문구(docs/qa/fixtures/claude-outputs)에 맞춘다.
+const LIMIT_HINT = /usage limit|limit reached|hit your limit|rate.?limit|too many requests|\b429\b|credit balance|quota/i;
+const OUTDATED_HINT = /unknown option|unrecognized option|unknown argument|invalid option/i;
+const NETWORK_HINT = /connection error|network|ENOTFOUND|ECONNREFUSED|ECONNRESET|ETIMEDOUT|EAI_AGAIN|fetch failed|getaddrinfo|socket hang up/i;
+
+// 한도 문구에서 다시 쓸 수 있는 때를 꺼낸다: "resets 3pm", "resets 7pm (Asia/Seoul)", "…|1760000000"(유닉스 초)
+export function limitReset(message: string, now = new Date()): string | null {
+  const epoch = message.match(/\|(\d{10})\b/);
+  if (epoch) {
+    const d = new Date(Number(epoch[1]) * 1000);
+    if (d > now) return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  }
+  const at = message.match(/resets?\s+(?:at\s+)?([0-9]{1,2}(?::[0-9]{2})?\s*(?:am|pm)?)/i);
+  return at ? at[1]!.replace(/\s+/g, "").toLowerCase() : null;
+}
+
+// 실패 문구를 종류로 나눈다. 로그인 문구가 한도·네트워크 문구와 같이 오면 로그인을 먼저 본다(다시 로그인하면 풀린다).
+export function classifyFailure(text: string): ClaudeErrorKind {
+  if (OUTDATED_HINT.test(text)) return "outdated";
+  if (LOGIN_HINT.test(text)) return "notLoggedIn";
+  if (LIMIT_HINT.test(text)) return "usageLimit";
+  if (NETWORK_HINT.test(text)) return "network";
+  return "failed";
+}
 
 // CLI가 돌려준 JSON 하나에서 result 문자열을 꺼내, 앞뒤 코드 블록 표시를 지운 뒤 다시 JSON으로 파싱한다.
 export function parseClaudeOutput<T>(stdout: string, stderr: string, schema: z.ZodType<T>): T {
@@ -44,14 +70,11 @@ export function parseClaudeOutput<T>(stdout: string, stderr: string, schema: z.Z
   try {
     outer = JSON.parse(stdout);
   } catch {
-    if (LOGIN_HINT.test(stderr) || LOGIN_HINT.test(stdout)) throw new ClaudeError("notLoggedIn", stderr || stdout);
-    throw new ClaudeError("failed", (stderr || stdout).slice(0, 500) || "claude가 아무것도 돌려주지 않았어요");
+    const text = `${stderr}\n${stdout}`;
+    throw new ClaudeError(classifyFailure(text), (stderr || stdout).slice(0, 500) || "claude가 아무것도 돌려주지 않았어요");
   }
   const result = String(outer.result ?? "");
-  if (outer.is_error) {
-    if (LOGIN_HINT.test(result) || LOGIN_HINT.test(stderr)) throw new ClaudeError("notLoggedIn", result);
-    throw new ClaudeError("failed", result.slice(0, 500));
-  }
+  if (outer.is_error) throw new ClaudeError(classifyFailure(`${result}\n${stderr}`), result.slice(0, 500));
   const cleaned = result
     .trim()
     .replace(/^```(?:json)?\s*/i, "")
@@ -110,4 +133,32 @@ export function firstStepRequest(input: FirstStepInput, today: string, shortcuts
       claudeWeight: input.shape.claudeWeight,
     }),
   });
+}
+
+// claude auth status 결과에서 앱이 쓰는 것만. 이 명령이 없는 옛 claude면 null(모름).
+export interface ClaudeAuth {
+  loggedIn: boolean;
+  method: string | null; // "claude.ai"(구독) | API 키 등
+  plan: string | null; // pro | max | team | enterprise
+}
+
+export function parseAuthStatus(stdout: string): ClaudeAuth | null {
+  try {
+    const d = JSON.parse(stdout) as { loggedIn?: unknown; authMethod?: unknown; subscriptionType?: unknown };
+    if (typeof d.loggedIn !== "boolean") return null;
+    return {
+      loggedIn: d.loggedIn,
+      method: typeof d.authMethod === "string" && d.authMethod !== "none" ? d.authMethod : null,
+      plan: typeof d.subscriptionType === "string" ? d.subscriptionType : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export interface ClaudeInfo {
+  path: string | null;
+  searched: string[];
+  version: string | null;
+  auth: ClaudeAuth | null;
 }

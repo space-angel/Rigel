@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { AppData } from "@shared/types";
 import { LOCAL_AVAILABLE, showHotkey } from "./platform";
+import type { ClaudeInfo } from "@shared/claude";
+import { authLabel, homeShort, shortVersion } from "./claudeLabels";
 import { MCP_SERVICES, MCP_SOURCES, statusOf, type McpStatus } from "@shared/mcp";
 import { ArrowRightIcon, CheckIcon, Spinner } from "./components/icons";
 import { sourceName } from "./components/SourceIcon";
@@ -8,7 +10,6 @@ import { t } from "./i18n";
 
 const api = window.todoban;
 
-type ClaudeInfo = { path: string | null; searched: string[]; version: string | null };
 
 function Step({ n, state, title, desc, action }: { n: number; state: "done" | "todo" | "error" | "wait"; title: string; desc: React.ReactNode; action?: React.ReactNode }) {
   return (
@@ -62,7 +63,9 @@ export function Welcome() {
   }, [data !== null]);
 
   if (!data) return <div ref={rootRef} />;
-  const claudeState = claude === null ? "wait" : claude.path ? "done" : "error";
+  // 찾았어도 로그인이 안 됐으면 아직 끝난 게 아니다. 로그인 상태를 모르는 옛 claude는 찾은 것으로 본다.
+  const needsLogin = Boolean(claude?.path && claude.auth && !claude.auth.loggedIn);
+  const claudeState = claude === null ? "wait" : claude.path && !needsLogin ? "done" : "error";
   const hotkeyState = hotkeyError ? "error" : "done";
   const localOn = LOCAL_AVAILABLE.filter((s) => data.settings.tools.local[s]).map((s) => sourceName(s));
   const connected = mcp ? MCP_SOURCES.filter((s) => statusOf(mcp, s) === "connected").map((s) => sourceName(s)) : [];
@@ -83,16 +86,28 @@ export function Welcome() {
         <Step
           n={1}
           state={claudeState}
-          title={claudeState === "error" ? t("Claude Code not found") : "Claude Code"}
+          title={needsLogin ? t("Sign in to Claude Code") : claudeState === "error" ? t("Claude Code not found") : "Claude Code"}
           desc={
             claude === null
-              ? t("Looking for claude on this Mac…")
-              : claude.path
-                ? `${claude.path.replace(/^\/Users\/[^/]+/, "~")} · ${claude.version?.replace(" (Claude Code)", "") ?? t("version unknown")}`
-                : t("Short tasks still go straight in. Splitting and first steps need Claude Code.")
+              ? t("Looking for claude on this computer…")
+              : needsLogin
+                ? t("Run claude in a terminal and sign in with your Claude account. Come back here when you're done.")
+                : claude.path
+                  ? [homeShort(claude.path), shortVersion(claude.version) ?? t("version unknown"), authLabel(claude.auth)].filter(Boolean).join(" · ")
+                  : t("Short tasks still go straight in. Splitting and first steps need Claude Code.")
           }
         />
-        {claudeState === "error" && (
+        {needsLogin && (
+          <div className="step__actions">
+            <button type="button" className="button button--primary button--sm" onClick={() => api.openTerminal()}>
+              {t("Open Terminal")}
+            </button>
+            <button type="button" className="button button--secondary button--sm" onClick={refresh}>
+              {t("Check again")}
+            </button>
+          </div>
+        )}
+        {claudeState === "error" && !needsLogin && (
           <div className="step__actions">
             <button type="button" className="button button--primary button--sm" onClick={() => api.installGuide()}>
               {t("Install guide")}

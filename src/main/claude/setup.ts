@@ -1,24 +1,40 @@
 import { app } from "electron";
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { claudeCandidates, claudeEnv, killClaude, spawnClaude } from "./paths";
+import { claudeCandidates, claudeEnv, killClaude, shellLookups, sortNodeVersions, spawnClaude } from "./paths";
+import { homedir } from "node:os";
+import { parseAuthStatus, type ClaudeAuth } from "@shared/claude";
 
 // 앱은 터미널의 PATH를 읽지 않는다. 그래서 claude를 정해 둔 자리(맥·윈도우 각각)에서 직접 찾고, 실행할 때 PATH를 보강한다.
-const CANDIDATES = claudeCandidates();
+function candidates(): string[] {
+  let versions: string[] = [];
+  try {
+    versions = sortNodeVersions(readdirSync(join(homedir(), ".nvm", "versions", "node")));
+  } catch {
+    // nvm 없음
+  }
+  return claudeCandidates(process.platform, homedir(), process.env, versions);
+}
 
 export function resourcePath(...parts: string[]): string {
   return app.isPackaged ? join(process.resourcesPath, ...parts) : join(__dirname, "../../resources", ...parts);
 }
 
-// 정해 둔 자리에 없으면 셸에 물어본다. 맥은 로그인 셸(zsh)의 PATH, 윈도우는 where.
-const SHELL_LOOKUP = process.platform === "win32" ? "where claude" : 'zsh -lc "command -v claude"';
-function loginShellLookup(): Promise<string | null> {
+// 정해 둔 자리에 없으면 셸에 물어본다(사용자의 기본 셸, 윈도우는 where). 앞의 것이 안 되면 다음 것.
+async function loginShellLookup(): Promise<string | null> {
+  for (const [cmd, args] of shellLookups()) {
+    const found = await askShell(cmd, args);
+    if (found) return found;
+  }
+  return null;
+}
+function askShell(cmd: string, args: string[]): Promise<string | null> {
   return new Promise((resolve) => {
-    const [cmd, args] = process.platform === "win32" ? ["where.exe", ["claude"]] : ["/bin/zsh", ["-lc", "command -v claude"]];
-    execFile(cmd, args, { timeout: 5000, env: claudeEnv(), windowsHide: true }, (err, stdout) => {
+    // 대화형 셸이 입력을 기다리며 멈추지 않게 표준 입력을 닫는다
+    const child = execFile(cmd, args, { timeout: 5000, env: claudeEnv(), windowsHide: true }, (err, stdout) => {
       // where는 여러 줄을 돌려줄 수 있다(claude, claude.cmd). 실제로 있는 첫 파일을 쓴다.
       const p = stdout
         .split(/\r?\n/)
@@ -26,6 +42,7 @@ function loginShellLookup(): Promise<string | null> {
         .find((l) => l && existsSync(l));
       resolve(!err && p ? p : null);
     });
+    child.stdin?.end();
   });
 }
 
@@ -39,10 +56,11 @@ export interface ClaudeLookup {
 export async function findClaude(configured: string | null): Promise<ClaudeLookup> {
   const override = process.env.TODOBAN_CLAUDE_PATH ?? configured;
   if (override) return { path: existsSync(override) ? override : null, searched: [override] };
-  const found = CANDIDATES.find((p) => existsSync(p));
-  if (found) return { path: found, searched: CANDIDATES };
+  const list = candidates();
+  const found = list.find((p) => existsSync(p));
+  if (found) return { path: found, searched: list };
   const viaShell = await loginShellLookup();
-  return { path: viaShell, searched: [...CANDIDATES, SHELL_LOOKUP] };
+  return { path: viaShell, searched: [...list, ...shellLookups().map(([c, a]) => `${c} ${a.join(" ")}`)] };
 }
 
 const sha = (s: string) => createHash("sha256").update(s).digest("hex");
@@ -93,6 +111,18 @@ export function claudeVersion(path: string): Promise<string | null> {
     child.stdout?.on("data", (d) => (out += d));
     child.on("error", () => (clearTimeout(timer), resolve(null)));
     child.on("close", (code) => (clearTimeout(timer), resolve(code === 0 ? out.trim() : null)));
+  });
+}
+
+// 로그인 상태. 사용량을 쓰지 않는 명령이라 시작하기·설정 화면을 열 때마다 확인해도 된다.
+export function claudeAuth(path: string): Promise<ClaudeAuth | null> {
+  return new Promise((resolve) => {
+    const child = spawnClaude(path, ["auth", "status"], { env: claudeEnv() });
+    let out = "";
+    const timer = setTimeout(() => (killClaude(child), resolve(null)), 10_000);
+    child.stdout?.on("data", (d) => (out += d));
+    child.on("error", () => (clearTimeout(timer), resolve(null)));
+    child.on("close", () => (clearTimeout(timer), resolve(parseAuthStatus(out))));
   });
 }
 

@@ -37,7 +37,9 @@ test("로그인 안내가 오면 notLoggedIn", () => {
 });
 
 test("그 밖의 오류는 failed", () => {
-  assert.equal(kindOf(() => parseClaudeOutput(JSON.stringify({ is_error: true, result: "rate limited" }), "", SplitResult)), "failed");
+  assert.equal(kindOf(() => parseClaudeOutput(JSON.stringify({ is_error: true, result: "unexpected tool state" }), "", SplitResult)), "failed");
+  // 요청·사용량 한도는 따로 알린다(usageLimit)
+  assert.equal(kindOf(() => parseClaudeOutput(JSON.stringify({ is_error: true, result: "rate limited" }), "", SplitResult)), "usageLimit");
   assert.equal(kindOf(() => parseClaudeOutput("", "", SplitResult)), "failed");
 });
 
@@ -69,4 +71,28 @@ test("firstStep 요청 본문에 이전 제안과 답을 넣는다", () => {
   assert.equal(body.type, "firstStep");
   assert.equal(body.answer, "토스 PO");
   assert.deepEqual(body.previous, ["a"]);
+});
+
+test("다른 사람이 처음 쓸 때의 실패를 종류로 나눈다", async () => {
+  const { readFileSync } = await import("node:fs");
+  const real = readFileSync(new URL("../../docs/qa/fixtures/claude-outputs/not-logged-in.json", import.meta.url), "utf8");
+  // 실제 claude 2.1.304가 로그인 안 된 홈 폴더에서 돌려준 출력
+  assert.equal(kindOf(() => parseClaudeOutput(real, "", FirstStepResult)), "notLoggedIn");
+  const err = (result: string) => JSON.stringify({ type: "result", subtype: "success", is_error: true, result });
+  assert.equal(kindOf(() => parseClaudeOutput(err("OAuth token has expired. Please obtain a new token or refresh your existing token."), "", FirstStepResult)), "notLoggedIn");
+  assert.equal(kindOf(() => parseClaudeOutput(err("Claude AI usage limit reached|1893456000"), "", FirstStepResult)), "usageLimit");
+  assert.equal(kindOf(() => parseClaudeOutput(err("5-hour limit reached ∙ resets 3pm"), "", FirstStepResult)), "usageLimit");
+  assert.equal(kindOf(() => parseClaudeOutput(err("Credit balance is too low"), "", FirstStepResult)), "usageLimit");
+  assert.equal(kindOf(() => parseClaudeOutput(err("API Error: Connection error."), "", FirstStepResult)), "network");
+  assert.equal(kindOf(() => parseClaudeOutput("", "getaddrinfo ENOTFOUND api.anthropic.com", FirstStepResult)), "network");
+  assert.equal(kindOf(() => parseClaudeOutput(err("Something else broke"), "", FirstStepResult)), "failed");
+  assert.equal(kindOf(() => parseClaudeOutput("", "error: unknown option '--setting-sources'", FirstStepResult)), "outdated");
+});
+
+test("한도 문구에서 다시 쓸 수 있는 때를 꺼낸다", async () => {
+  const { limitReset } = await import("./claude.ts");
+  assert.equal(limitReset("5-hour limit reached ∙ resets 3pm"), "3pm");
+  assert.equal(limitReset("You've hit your limit · resets 7:30pm (Asia/Seoul)"), "7:30pm");
+  assert.match(limitReset("Claude AI usage limit reached|1893456000", new Date("2026-10-21T00:00:00Z")) ?? "", /^\d{2}:\d{2}$/);
+  assert.equal(limitReset("limit reached"), null);
 });

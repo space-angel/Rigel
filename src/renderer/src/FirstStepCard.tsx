@@ -5,6 +5,8 @@ import { AiSparkle, Spinner } from "./components/icons";
 import { t } from "./i18n";
 import { CheckIcon } from "./components/icons";
 import { sourceName } from "./components/SourceIcon";
+import { limitReset } from "@shared/claude";
+import { resetTime } from "./claudeLabels";
 
 const api = window.todoban;
 
@@ -12,6 +14,9 @@ const ERROR_TEXT: Record<string, string> = {
   timeout: msg("Claude didn't respond."),
   notLoggedIn: msg("Sign in to Claude Code first — run claude in Terminal."),
   notFound: msg("Claude Code isn't installed."),
+  usageLimit: msg("You've reached your Claude usage limit. Try again a little later."),
+  network: msg("Couldn't reach Claude. Check your internet connection."),
+  outdated: msg("Your Claude Code is too old for todoBAN. Run claude update in a terminal."),
   parseFailed: msg("Couldn't read Claude's answer."),
   failed: msg("Couldn't get a first step."),
 };
@@ -67,7 +72,11 @@ export function FirstStepCard({ state, originalTitle }: { state: FirstStepState;
   if (state.status === "error") {
     return (
       <div className="fs-card fs-card--plain motion-rise" {...stop}>
-        <p className="fs-card__body">{t(ERROR_TEXT[state.error?.kind ?? "failed"] ?? ERROR_TEXT.failed!)}</p>
+        <p className="fs-card__body">
+          {state.error?.kind === "usageLimit" && limitReset(state.error.message)
+            ? t("You've reached your Claude usage limit. You can try again after {time}.", { time: resetTime(limitReset(state.error.message)!) })
+            : t(ERROR_TEXT[state.error?.kind ?? "failed"] ?? ERROR_TEXT.failed!)}
+        </p>
         <div className="fs-card__actions">
           <button type="button" className="button button--primary button--sm" onClick={() => api.requestFirstStep(id, { answer: state.answer ?? undefined })}>
             {t("Try again")}

@@ -1,0 +1,3 @@
+[{"name":"시작하기 화면","win":"welcome","until":"__e2e.$('.step--n1:not(.step--wait)')","timeout":20000,"wait":600,"snap":true,
+  "run":"return null;"},
+ {"name":"1단계 글","win":"welcome","run":"const s = __e2e.$('.step--n1'); return { cls: s.className, title: s.querySelector('.step__title')?.textContent, desc: s.querySelector('.step__desc')?.textContent, actions: [...document.querySelectorAll('.step__actions button')].map(b => b.textContent) };"}]
