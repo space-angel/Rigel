@@ -1,3 +1,4 @@
+import { msg } from "@shared/i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { AppData, TodoItem } from "@shared/types";
 import type { FirstStepState } from "@shared/firstStep";
@@ -7,27 +8,28 @@ import { MCP_SERVICES, MCP_SOURCES, type McpSource } from "@shared/mcp";
 import { AiSparkle, ChevronLeftIcon, RefreshIcon, Spinner } from "./components/icons";
 import { SizeDial } from "./components/SizeDial";
 import { MixBar } from "./components/MixBar";
-import { SOURCE_NAME, SourceIcon } from "./components/SourceIcon";
+import { SourceIcon, sourceName } from "./components/SourceIcon";
+import { currentLang, loc, t } from "./i18n";
 import { FirstStepCard } from "./FirstStepCard";
 import { Evidence } from "./components/Evidence";
 
 const api = window.todoban;
 
 const TOOL_DESC: Record<string, string> = {
-  slow: "Took too long",
-  denied: "Allow Calendar in System Settings",
-  failed: "Couldn't read",
-  empty: "Nothing matched",
-  loading: "Reading…",
-  "needs-auth": "Needs sign-in · open Settings",
+  slow: msg("Took too long"),
+  denied: msg("Allow Calendar in System Settings"),
+  failed: msg("Couldn't read"),
+  empty: msg("Nothing matched"),
+  loading: msg("Reading…"),
+  "needs-auth": msg("Needs sign-in · open Settings"),
 };
 
-const OPEN_LABEL: Record<string, string> = { shortcut: "Open in Figma", figma: "Open in Figma", file: "Open file", calendar: "Open Calendar" };
+const OPEN_LABEL: Record<string, string> = { shortcut: msg("Open in Figma"), figma: msg("Open in Figma"), file: msg("Open file"), calendar: msg("Open Calendar") };
 const isMcp = (s: string): s is McpSource => s in MCP_SERVICES;
 const SKIP_AFTER_MS = 15_000;
 
 function dayName(date: string): string {
-  return new Date(`${date}T00:00:00`).toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+  return new Date(`${date}T00:00:00`).toLocaleDateString(loc(), { weekday: "short" }).toUpperCase();
 }
 
 // 첫 행동 빚기. C1(낱말·도구·크기·비율을 고름)과 C2(결과)를 메뉴바 목록 창 안에서 그린다.
@@ -97,7 +99,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
   // 크기 기본값은 가까운 마감으로 정한다: 할 일의 마감, 또는 캘린더에서 찾은 일정.
   const calendarDate = found.find((r) => r.source === "calendar" && selected.includes("calendar"))?.item?.date ?? null;
   const deadline = [todo.dueDate, calendarDate].filter((d): d is string => Boolean(d)).sort()[0] ?? null;
-  const deadlineFrom = deadline && deadline === todo.dueDate ? "Due" : "From calendar";
+  const deadlineFrom = deadline && deadline === todo.dueDate ? t("Due") : t("From calendar");
   const dial = defaultMinutes(deadline, today);
 
   // 고른 도구가 바뀌면 비율을 기본값에서 다시 나눈다.
@@ -179,7 +181,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
   const header = (title: string) => (
     <header className="shape__head">
       <button type="button" className="back" onClick={onClose}>
-        <ChevronLeftIcon size={12} /> Today
+        <ChevronLeftIcon size={12} /> {t("Today")}
       </button>
       <h1>{title}</h1>
       <span className="task-chip">
@@ -200,21 +202,21 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
     const due = todo.dueDate ?? state.shape.context.find((c) => c.source === "calendar")?.date;
     return (
       <div className="shape">
-        {header("Your first step")}
+        {header(t("Your first step"))}
         <div className="shape__body">
           <div className="result motion-rise">
             <div className="result__top">
-              <span className="eyebrow">First step</span>
+              <span className="eyebrow">{t("First step")}</span>
               {state.minutes && (
                 <span className="due">
-                  {state.minutes} min{due ? ` · before ${dayName(due)}` : ""}
+                  {sizeLabel(state.minutes, currentLang())}{due ? ` · ${t("before {day}", { day: dayName(due) })}` : ""}
                 </span>
               )}
             </div>
             <p className="result__title">{state.title}</p>
             {state.sources.some((s) => s.source !== "claude") && (
               <>
-                <span className="eyebrow">Made from</span>
+                <span className="eyebrow">{t("Made from")}</span>
                 <div className="made">
                   {state.sources
                     .filter((s) => s.source !== "claude")
@@ -235,16 +237,16 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
             )}
             {state.sources.every((s) => s.source === "claude") &&
               (state.shape.context.length === 0 && found.length > 0 ? (
-                <p className="result__hint">Made from general knowledge only — you left your material out.</p>
+                <p className="result__hint">{t("Made from general knowledge only — you left your material out.")}</p>
               ) : state.shape.context.length === 0 && (tools ?? []).length > 0 ? (
-                <p className="result__hint">Made from general knowledge only — nothing in your tools matched these words. Try picking other words.</p>
+                <p className="result__hint">{t("Made from general knowledge only — nothing in your tools matched these words. Try picking other words.")}</p>
               ) : (
                 <p className="result__hint">
-                  Made from general knowledge only.{" "}
+                  {t("Made from general knowledge only.")}{" "}
                   <button type="button" className="link" onClick={() => api.openSettings("tools")}>
-                    Turn on tools
-                  </button>{" "}
-                  for a step from your own files and notes.
+                    {t("Turn on tools")}
+                  </button>
+                  {t(" for a step from your own files and notes.")}
                 </p>
               ))}
             {(used.length > 0 || claude) && (
@@ -261,20 +263,20 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
           <div className="result__actions motion-rise" style={{ "--i": 3 } as React.CSSProperties}>
             {todo.plannedDate !== today && (
               <label className="pill-question">
-                Swap into today
+                {t("Swap into today")}
                 <button type="button" role="switch" aria-checked={toToday} className={`toggle${toToday ? " is-on" : ""}`} onClick={() => setToToday((v) => !v)} />
               </label>
             )}
             {top?.open && (
               <button type="button" className="button button--secondary button--sm" onClick={() => api.openToolItem(top.open)}>
-                <SourceIcon source={top.source} size={12} /> {top.open.kind === "url" ? `Open in ${MCP_SERVICES[top.open.source].name.replace(" frame", "")}` : OPEN_LABEL[top.open.kind]}
+                <SourceIcon source={top.source} size={12} /> {top.open.kind === "url" ? t("Open in {name}", { name: sourceName(top.open.source === "frame" ? "figma" : top.open.source) }) : t(OPEN_LABEL[top.open.kind] ?? "Open file")}
               </button>
             )}
           </div>
         </div>
         <footer className="shape__foot">
           <button type="button" className="text-button" onClick={() => api.requestFirstStep(todo.id, { again: true })}>
-            <RefreshIcon size={12} /> Reshape
+            <RefreshIcon size={12} /> {t("Reshape")}
           </button>
           <span className="spacer" />
           <button
@@ -291,7 +293,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
               onClose();
             }}
           >
-            Use this step
+            {t("Use this step")}
           </button>
         </footer>
       </div>
@@ -301,10 +303,10 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
   // C1: 고르기
   return (
     <div className="shape">
-      {header("Shape with your tools")}
+      {header(t("Shape with your tools"))}
       <div className="shape__body">
         <section className="shape__section">
-          <h2 className="eyebrow">01 · Your words</h2>
+          <h2 className="eyebrow">{t("01 · Your words")}</h2>
           <div className="words">
             {words.map((w, i) => (
               <button
@@ -317,28 +319,28 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
                 {w.word}
               </button>
             ))}
-            {words.length === 0 && <p className="shape__empty">No words to pick — Claude will use the title.</p>}
+            {words.length === 0 && <p className="shape__empty">{t("No words to pick — Claude will use the title.")}</p>}
           </div>
         </section>
 
         <section className="shape__section">
           <div className="shape__label-row">
-            <h2 className="eyebrow">02 · Your tools</h2>
+            <h2 className="eyebrow">{t("02 · Your tools")}</h2>
             {tools && tools.length > 0 && (
               <span className="eyebrow">
-                {selected.length} of {tools.length} on
+                {t("{n} of {total} on", { n: selected.length, total: tools.length })}
               </span>
             )}
           </div>
           {tools === null ? (
             <p className="shape__empty">
-              <Spinner size={12} /> Reading your tools…
+              <Spinner size={12} /> {t("Reading your tools…")}
             </p>
           ) : tools.length === 0 ? (
             <p className="shape__empty">
-              No tools on.{" "}
+              {t("No tools on.")}{" "}
               <button type="button" className="link" onClick={() => api.openSettings("tools")}>
-                Choose in Settings
+                {t("Choose in Settings")}
               </button>
             </p>
           ) : (
@@ -359,19 +361,19 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
                       <span className="tool__icon">
                         <SourceIcon source={r.source} size={12} />
                       </span>
-                      <span className="tool__name">{SOURCE_NAME[r.source]}</span>
+                      <span className="tool__name">{sourceName(r.source)}</span>
                       <span className={`toggle toggle--sm${on ? " is-on" : ""}`} />
                     </span>
                     <span className="tool__item motion-fade" key={r.status + (r.item?.label ?? "")}>
                       {loading && <Spinner size={10} />}{" "}
-                      {r.item?.label ?? (r.source === "figma" && r.status === "empty" && data.shortcuts.length === 0 ? "No shortcuts yet" : TOOL_DESC[r.status])}
+                      {r.item?.label ?? (r.source === "figma" && r.status === "empty" && data.shortcuts.length === 0 ? t("No shortcuts yet") : t(TOOL_DESC[r.status] ?? ""))}
                     </span>
                     {isMcp(r.source) ? (
-                      <span className="badge badge--mcp" title="Workspace Claude Code reads">
-                        MCP · {data.settings.tools.mcpInfo[r.source]?.workspace ?? "read only"}
+                      <span className="badge badge--mcp" title={t("Workspace Claude Code reads")}>
+                        MCP · {data.settings.tools.mcpInfo[r.source]?.workspace ?? t("read only")}
                       </span>
                     ) : (
-                      <span className="badge">Local</span>
+                      <span className="badge">{t("Local")}</span>
                     )}
                   </button>
                 );
@@ -380,7 +382,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
           )}
           {found.some((r) => r.item?.text || r.item?.preview) && (
             <div className="found motion-rise" style={{ "--i": 2 } as React.CSSProperties}>
-              <span className="eyebrow">What we found · tap to check</span>
+              <span className="eyebrow">{t("What we found · tap to check")}</span>
               {found
                 .filter((r) => r.item?.text || r.item?.preview)
                 .map((r) => (
@@ -392,10 +394,10 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
 
         <section className="shape__section">
           <div className="shape__label-row">
-            <h2 className="eyebrow">03 · How big?</h2>
+            <h2 className="eyebrow">{t("03 · How big?")}</h2>
             {dial.daysLeft !== null && minutes === null && (
               <span className="eyebrow">
-                {deadlineFrom} · {dial.daysLeft === 0 ? "today" : `${dial.daysLeft} ${dial.daysLeft === 1 ? "day" : "days"} left`}
+                {deadlineFrom} · {dial.daysLeft === 0 ? t("today") : dial.daysLeft === 1 ? t("1 day left") : t("{n} days left", { n: dial.daysLeft })}
               </span>
             )}
           </div>
@@ -405,8 +407,8 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
         {selected.length > 0 && (
           <section className="shape__section">
             <div className="shape__label-row">
-              <h2 className="eyebrow">04 · Mix by source</h2>
-              <span className="eyebrow">Drag edges</span>
+              <h2 className="eyebrow">{t("04 · Mix by source")}</h2>
+              <span className="eyebrow">{t("Drag edges")}</span>
             </div>
             <MixBar mix={currentMix} onChange={setMix} />
           </section>
@@ -417,17 +419,17 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
       <footer className="shape__foot">
         {waitingSince !== null && now - waitingSince > SKIP_AFTER_MS ? (
           <button type="button" className="text-button" onClick={skipWaiting}>
-            Skip {waiting.map((r) => MCP_SERVICES[r.source as McpSource]?.name ?? r.source).join(", ")}
+            {t("Skip {names}", { names: waiting.map((r) => sourceName(r.source)).join(", ") })}
           </button>
         ) : (
           <span className="shape__note">
-            {mcpOn.length ? "MCP reads via Claude Code" : "Sends titles only"} · {sizeLabel(size)}
+            {mcpOn.length ? t("MCP reads via Claude Code") : t("Sends titles only")} · {sizeLabel(size, currentLang())}
           </span>
         )}
         <span className="spacer" />
         <button type="button" className="button button--primary" disabled={busy || tools === null} onClick={shapeIt}>
           {busy ? <Spinner size={12} /> : <AiSparkle size={12} />}{" "}
-          {waitingSince !== null ? `Waiting for ${waiting.map((r) => MCP_SERVICES[r.source as McpSource]?.name ?? r.source).join(", ")}` : busy ? "Shaping…" : "Shape it"}
+          {waitingSince !== null ? t("Waiting for {names}", { names: waiting.map((r) => sourceName(r.source)).join(", ") }) : busy ? t("Shaping…") : t("Shape it")}
         </button>
       </footer>
     </div>

@@ -3,6 +3,8 @@
 // - 마감: 언제까지인지. “금요일까지”, “금요일 면접 준비”의 금요일. 준비 할 일은 마감 전, 보통 오늘 한다.
 // 짧은 입력은 AI를 부르지 않으므로 앱이 직접 날짜 말을 읽는다. 긴 입력은 Claude가 같은 규칙으로 나눈다(CLAUDE.md).
 
+import { localeOf, translate, type Lang } from "./i18n.ts";
+
 const DAY = 86_400_000;
 const WEEKDAYS = "일월화수목금토";
 
@@ -84,40 +86,42 @@ export function readDates(text: string, today: string): { plannedDate: string; d
 }
 
 // 마감 배지. 지났거나 오늘이면 눈에 띄게, 일주일 넘게 남으면 날짜로.
-export function dueLabel(due: string, today: string): { text: string; tone: "late" | "soon" | "calm" } {
+export function dueLabel(due: string, today: string, lang: Lang = "en"): { text: string; tone: "late" | "soon" | "calm" } {
   const n = daysBetween(today, due);
-  if (n < 0) return { text: "Overdue", tone: "late" };
-  if (n === 0) return { text: "Due today", tone: "soon" };
-  if (n === 1) return { text: "Due tomorrow", tone: "soon" };
-  if (n < 7) return { text: `${n} days left`, tone: "calm" };
-  return { text: `Due ${at(due).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`, tone: "calm" };
+  const t = (k: string, v?: Record<string, string | number>) => translate(lang, k, v);
+  if (n < 0) return { text: t("Overdue"), tone: "late" };
+  if (n === 0) return { text: t("Due today"), tone: "soon" };
+  if (n === 1) return { text: t("Due tomorrow"), tone: "soon" };
+  if (n < 7) return { text: t("{n} days left", { n }), tone: "calm" };
+  return { text: t("Due {date}", { date: at(due).toLocaleDateString(localeOf(lang), { month: "short", day: "numeric" }) }), tone: "calm" };
 }
 
 // 첫 행동 결과(C2)의 “금 마감 전” 같은 짧은 표시
-export function dueShort(due: string): string {
-  return at(due).toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+export function dueShort(due: string, lang: Lang = "en"): string {
+  return at(due).toLocaleDateString(localeOf(lang), { weekday: "short" }).toUpperCase();
 }
 
 // 줄에 붙이는 짧은 배지: D-3, D-DAY, 지남, 일주일 넘으면 날짜
-export function dueBadge(due: string, today: string): { text: string; tone: "late" | "soon" | "calm" } {
+export function dueBadge(due: string, today: string, lang: Lang = "en"): { text: string; tone: "late" | "soon" | "calm" } {
   const n = daysBetween(today, due);
-  if (n < 0) return { text: "Overdue", tone: "late" };
+  if (n < 0) return { text: translate(lang, "Overdue"), tone: "late" };
   if (n === 0) return { text: "D-day", tone: "soon" };
   if (n < 7) return { text: `D-${n}`, tone: n === 1 ? "soon" : "calm" };
-  return { text: at(due).toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase(), tone: "calm" };
+  return { text: at(due).toLocaleDateString(localeOf(lang), { month: "short", day: "numeric" }).toUpperCase(), tone: "calm" };
 }
 
 // 마감 고르기 메뉴와 날짜 고르기 창에서 쓰는 빠른 선택지
-export function deadlineOptions(today: string): { label: string; date: string }[] {
+export function deadlineOptions(today: string, lang: Lang = "en"): { label: string; date: string }[] {
   const wd = at(today).getDay();
   const fri = (5 - wd + 7) % 7 || 7; // 오늘이 금요일이면 다음 주 금요일
   const mon = (1 - wd + 7) % 7 || 7;
-  const name = (d: string) => at(d).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  const name = (d: string) => at(d).toLocaleDateString(localeOf(lang), { weekday: "short", month: "short", day: "numeric" });
+  const t = (k: string, date?: string) => translate(lang, k, date ? { date: name(date) } : undefined);
   return [
-    { label: "Today", date: today },
-    { label: "Tomorrow", date: plus(today, 1) },
-    { label: `This Friday · ${name(plus(today, fri))}`, date: plus(today, fri) },
-    { label: `Next Monday · ${name(plus(today, mon))}`, date: plus(today, mon) },
-    { label: `In a week · ${name(plus(today, 7))}`, date: plus(today, 7) },
+    { label: t("Today"), date: today },
+    { label: t("Tomorrow"), date: plus(today, 1) },
+    { label: t("This Friday · {date}", plus(today, fri)), date: plus(today, fri) },
+    { label: t("Next Monday · {date}", plus(today, mon)), date: plus(today, mon) },
+    { label: t("In a week · {date}", plus(today, 7)), date: plus(today, 7) },
   ].filter((o, i, all) => all.findIndex((x) => x.date === o.date) === i);
 }

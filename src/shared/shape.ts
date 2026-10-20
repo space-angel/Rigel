@@ -1,5 +1,6 @@
 // 첫 행동 빚기(C1)의 순수 로직: 낱말 나누기, 크기, 출처별 비율.
 
+import { translate, type Lang } from "./i18n.ts";
 import type { McpSource } from "./mcp.ts";
 
 export const LOCAL_SOURCES = ["figma", "calendar", "files", "todoban"] as const;
@@ -117,9 +118,9 @@ export function splitWords(title: string, rawText: string, max = 12): WordChip[]
 
 export const SIZES = [5, 15, 30, 60, 120] as const;
 
-export function sizeLabel(minutes: number): string {
-  if (minutes < 60) return `${minutes} min`;
-  return minutes === 60 ? "1 hour" : `${minutes / 60} hours`;
+export function sizeLabel(minutes: number, lang: Lang = "en"): string {
+  if (minutes < 60) return translate(lang, "{n} min", { n: minutes });
+  return minutes === 60 ? translate(lang, "1 hour") : translate(lang, "{n} hours", { n: minutes / 60 });
 }
 
 function daysBetween(from: string, to: string): number {

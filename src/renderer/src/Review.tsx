@@ -4,22 +4,23 @@ import type { ContextNote, Shortcut } from "@shared/types";
 import { MCP_SERVICES, type McpSource } from "@shared/mcp";
 import { noteOpen } from "@shared/shape";
 import { dueLabel } from "@shared/due";
-import { SourceIcon } from "./components/SourceIcon";
+import { SourceIcon, sourceName } from "./components/SourceIcon";
 import { Spinner } from "./components/icons";
 import { localDate } from "@shared/todos";
+import { currentLang, t } from "./i18n";
 import { AiSparkle, ChevronDownIcon, CloseIcon, PlusIcon, RefreshIcon, TerminalIcon, WarningIcon } from "./components/icons";
 
 const api = window.todoban;
 const SLOW_AFTER_MS = 10_000;
 
 function dayLabel(date: string | null, today: string): string {
-  if (date === null) return "Later";
-  if (date <= today) return "Today";
+  if (date === null) return t("Later");
+  if (date <= today) return t("Today");
   const [, m, d] = date.split("-");
   return `${Number(m)}/${Number(d)}`;
 }
 
-const serviceName = (s: string) => MCP_SERVICES[s as McpSource]?.name.replace(" frame", "") ?? s;
+const serviceName = (s: string) => sourceName(s === "frame" ? "figma" : s);
 
 // 확인 창 카드 아래 자료 줄: 찾는 중인 서비스, 찾은 자료 칩(✕로 빼기)
 function DraftNotes({ notes, loading, onRemove }: { notes: ContextNote[]; loading: McpSource[]; onRemove: (n: ContextNote) => void }) {
@@ -38,14 +39,14 @@ function DraftNotes({ notes, loading, onRemove }: { notes: ContextNote[]; loadin
           >
             {serviceName(n.source)} · {n.label}
           </button>
-          <button type="button" className="note-chip__remove" aria-label={`Remove ${serviceName(n.source)} note`} onClick={() => onRemove(n)}>
+          <button type="button" className="note-chip__remove" aria-label={t("Remove {name} note", { name: serviceName(n.source) })} onClick={() => onRemove(n)}>
             <CloseIcon size={10} />
           </button>
         </span>
       ))}
       {loading.length > 0 && (
         <span className="note-loading">
-          <Spinner size={10} /> Looking in {loading.map(serviceName).join(", ")}…
+          <Spinner size={10} /> {t("Looking in {names}…", { names: loading.map(serviceName).join(", ") })}
         </span>
       )}
     </div>
@@ -81,21 +82,21 @@ function DraftRow({
         <input
           className="draft__title"
           value={draft.title}
-          placeholder="Task title"
+          placeholder={t("Task title")}
           onChange={(e) => onChange({ title: e.target.value })}
         />
-        <button type="button" className="draft__remove" aria-label="Remove" onClick={onRemove}>
+        <button type="button" className="draft__remove" aria-label={t("Remove")} onClick={onRemove}>
           <CloseIcon size={14} />
         </button>
       </div>
       <div className="draft__meta">
-        <button type="button" className="pill" onClick={cycleDay} title="When you'll do it">
+        <button type="button" className="pill" onClick={cycleDay} title={t("When you'll do it")}>
           {dayLabel(draft.plannedDate, today)} <ChevronDownIcon size={12} />
         </button>
         {draft.dueDate && (
-          <span className={`due-chip due-badge--${dueLabel(draft.dueDate, today).tone}`} title={`Due ${draft.dueDate}`}>
-            {dueLabel(draft.dueDate, today).text}
-            <button type="button" aria-label="Remove deadline" onClick={() => onChange({ dueDate: null })}>
+          <span className={`due-chip due-badge--${dueLabel(draft.dueDate, today).tone}`} title={t("Due {date}", { date: draft.dueDate })}>
+            {dueLabel(draft.dueDate, today, currentLang()).text}
+            <button type="button" aria-label={t("Remove deadline")} onClick={() => onChange({ dueDate: null })}>
               <CloseIcon size={10} />
             </button>
           </span>
@@ -104,7 +105,7 @@ function DraftRow({
           <label className="pill pill--select">
             ▶︎{" "}
             <select value={draft.shortcutId ?? ""} onChange={(e) => onChange({ shortcutId: e.target.value || null })}>
-              <option value="">No shortcut</option>
+              <option value="">{t("No shortcut")}</option>
               {shortcuts.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
@@ -117,10 +118,10 @@ function DraftRow({
         <button
           type="button"
           className={`chip chip--toggle${draft.isClear ? " is-off" : ""}`}
-          title="Toggle whether this needs a first step"
+          title={t("Toggle whether this needs a first step")}
           onClick={() => onChange({ isClear: !draft.isClear })}
         >
-          {draft.isClear ? "Clear" : "Unclear"}
+          {draft.isClear ? t("Clear") : t("Unclear")}
         </button>
       </div>
       {children}
@@ -206,12 +207,12 @@ export function Review() {
 
   return (
     <div className="review" ref={rootRef}>
-      <div className="review__titlebar">Review</div>
+      <div className="review__titlebar">{t("Review")}</div>
       <div className="review__body">
         <button type="button" className={`raw${rawOpen ? " is-open" : ""}`} onClick={() => setRawOpen((v) => !v)}>
-          <span className="raw__label">Your thought</span>
+          <span className="raw__label">{t("Your thought")}</span>
           <span className="raw__text">{state.rawText}</span>
-          <span className="raw__more">{rawOpen ? "Collapse" : "Expand"}</span>
+          <span className="raw__more">{rawOpen ? t("Collapse") : t("Expand")}</span>
           <ChevronDownIcon size={12} />
         </button>
 
@@ -219,7 +220,7 @@ export function Review() {
           // B2: 나누는 동안 할 일 카드가 될 빈 글래스 카드들이 흩어져 떠 있다.
           <div className="splitting motion-fade">
             <div className="splitting__pill">
-              <AiSparkle size={12} /> {slow ? "Taking a little longer…" : "Splitting into tasks…"}
+              <AiSparkle size={12} /> {slow ? t("Taking a little longer…") : t("Splitting into tasks…")}
             </div>
             {[0, 1, 2, 3].map((i) => (
               <div className={`ghost ghost--${i}`} key={i} aria-hidden="true">
@@ -232,26 +233,26 @@ export function Review() {
         )}
 
         {state.status === "error" && err?.kind === "timeout" && (
-          <Notice title="Claude didn't respond">
-            <p>Your thought is safe. Try again, or add it as one unclear task without splitting.</p>
+          <Notice title={t("Claude didn't respond")}>
+            <p>{t("Your thought is safe. Try again, or add it as one unclear task without splitting.")}</p>
           </Notice>
         )}
         {state.status === "error" && err?.kind === "notLoggedIn" && (
           <>
-            <Notice title="Sign in to Claude Code">
-              <p>Run claude in Terminal, sign in with your subscription, then try again.</p>
+            <Notice title={t("Sign in to Claude Code")}>
+              <p>{t("Run claude in Terminal, sign in with your subscription, then try again.")}</p>
             </Notice>
             <div className="code">$ claude</div>
           </>
         )}
         {state.status === "error" && err?.kind === "notFound" && (
-          <Notice title="Claude Code isn't installed">
-            <p>Your thought is safe. Install Claude Code or set its path in Settings, then try again.</p>
+          <Notice title={t("Claude Code isn't installed")}>
+            <p>{t("Your thought is safe. Install Claude Code or set its path in Settings, then try again.")}</p>
           </Notice>
         )}
         {state.status === "error" && err?.kind === "failed" && (
-          <Notice title="Claude couldn't split this">
-            <p>Your thought is safe. Try again, or add it without splitting.</p>
+          <Notice title={t("Claude couldn't split this")}>
+            <p>{t("Your thought is safe. Try again, or add it without splitting.")}</p>
             {err.message && <p className="notice__detail">{err.message}</p>}
           </Notice>
         )}
@@ -259,21 +260,22 @@ export function Review() {
         {state.status === "ready" && (
           <>
             {err?.kind === "parseFailed" ? (
-              <Notice title="Couldn't split into tasks">
-                <p>It'll go in as written. Edit the title, or shape a first step from the list later.</p>
+              <Notice title={t("Couldn't split into tasks")}>
+                <p>{t("It'll go in as written. Edit the title, or shape a first step from the list later.")}</p>
               </Notice>
             ) : (
               <h2 className="review__heading">
-                <AiSparkle size={14} /> {drafts.length} {drafts.length === 1 ? "task" : "tasks"} from your thought
+                <AiSparkle size={14} /> {drafts.length === 1 ? t("1 task from your thought") : t("{n} tasks from your thought", { n: drafts.length })}
               </h2>
             )}
             {(state.mentions ?? []).length > 0 && (
               <p className="review__mention motion-fade">
-                Your thought mentions {state.mentions.map(serviceName).join(" and ")}. Turn {state.mentions.length === 1 ? "it" : "them"} on in{" "}
+                {t("Your thought mentions {names}.", { names: state.mentions.map(serviceName).join(t(" and ")) })}{" "}
+                {state.mentions.length === 1 ? t("Turn it on in") : t("Turn them on in")}{" "}
                 <button type="button" className="link" onClick={() => api.openSettings("tools")}>
-                  Settings → Tools
-                </button>{" "}
-                to look things up there.
+                  {t("Settings → Tools")}
+                </button>
+                {t(" to look things up there.")}
               </p>
             )}
             <div className="drafts">
@@ -301,45 +303,45 @@ export function Review() {
       <footer className="review__footer">
         {state.status === "ready" && (
           <button type="button" className="button button--ghost" onClick={addDraft}>
-            <PlusIcon size={14} /> Add task
+            <PlusIcon size={14} /> {t("Add task")}
           </button>
         )}
         {state.status === "ready" && err?.kind === "parseFailed" && (
           <button type="button" className="button button--ghost" onClick={() => api.retryReview()}>
-            <RefreshIcon size={14} /> Split again
+            <RefreshIcon size={14} /> {t("Split again")}
           </button>
         )}
         {state.status === "error" && err?.kind === "notLoggedIn" && (
           <button type="button" className="button button--ghost" onClick={() => api.openTerminal()}>
-            <TerminalIcon size={14} /> Open Terminal
+            <TerminalIcon size={14} /> {t("Open Terminal")}
           </button>
         )}
         <span className="spacer" />
         {state.status === "ready" ? (
           <>
             <button type="button" className="button button--secondary" onClick={() => api.cancelReview()}>
-              Cancel
+              {t("Cancel")}
             </button>
             <button type="button" className="button button--primary" disabled={!valid.length} onClick={commit}>
-              Add {valid.length} {valid.length === 1 ? "task" : "tasks"}
+              {valid.length === 1 ? t("Add 1 task") : t("Add {n} tasks", { n: valid.length })}
             </button>
           </>
         ) : state.status === "error" ? (
           <>
             <button type="button" className="button button--secondary" onClick={() => api.insertRawReview()}>
-              Add without splitting
+              {t("Add without splitting")}
             </button>
             <button type="button" className="button button--primary" onClick={() => api.retryReview()}>
-              <RefreshIcon size={14} /> Try again
+              <RefreshIcon size={14} /> {t("Try again")}
             </button>
           </>
         ) : (
           <>
             <button type="button" className="button button--secondary" onClick={() => api.cancelReview()}>
-              Cancel
+              {t("Cancel")}
             </button>
             <button type="button" className="button button--primary" disabled>
-              Add
+              {t("Add")}
             </button>
           </>
         )}

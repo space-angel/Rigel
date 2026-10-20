@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { CLAUDE_MIN, moveEdge } from "@shared/shape";
 import { SourceIcon } from "./SourceIcon";
+import { t } from "../i18n";
 
 // 출처별 비율 막대. 칸 사이 경계를 끌면 이웃한 두 칸만 바뀐다. Claude(일반 지식) 칸은 점선이고 최소 10%.
 export function MixBar({ mix, onChange }: { mix: Record<string, number>; onChange: (mix: Record<string, number>) => void }) {
@@ -37,7 +38,7 @@ export function MixBar({ mix, onChange }: { mix: Record<string, number>; onChang
             <SourceIcon source={id} size={11} />
             {values[i]! >= 12 && <span>{values[i]}%</span>}
           </div>
-          {i < ids.length - 1 && <span className="mix__edge" role="separator" aria-label="Drag to change the mix" onPointerDown={startDrag(i)} />}
+          {i < ids.length - 1 && <span className="mix__edge" role="separator" aria-label={t("Drag to change the mix")} onPointerDown={startDrag(i)} />}
         </div>
       ))}
     </div>

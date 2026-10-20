@@ -1,16 +1,24 @@
+import { msg } from "@shared/i18n";
 import type { SourceId } from "@shared/shape";
+import { t } from "../i18n";
 import { AiSparkle, CalendarIcon, CheckIcon, DocIcon, FigmaMark, IssueIcon, NoteIcon } from "./icons";
 
 export const SOURCE_NAME: Record<SourceId, string> = {
-  figma: "Figma",
-  calendar: "Calendar",
-  files: "Files",
-  todoban: "todoBAN",
-  notion: "Notion",
-  linear: "Linear",
-  frame: "Figma frame",
-  claude: "Claude",
+  figma: msg("Figma"),
+  calendar: msg("Calendar"),
+  files: msg("Files"),
+  todoban: msg("todoBAN"),
+  notion: msg("Notion"),
+  linear: msg("Linear"),
+  frame: msg("Figma frame"),
+  claude: msg("Claude"),
 };
+
+// 화면에 보이는 도구 이름(지금 언어로)
+export function sourceName(source: string): string {
+  const name = SOURCE_NAME[source as SourceId];
+  return name ? t(name) : source;
+}
 
 export function SourceIcon({ source, size = 13 }: { source: string; size?: number }) {
   switch (source) {

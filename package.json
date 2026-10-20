@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "node --test 'src/**/*.test.ts'",
     "tray-icon": "node scripts/make-tray-icon.ts",
-    "probe": "node scripts/claude-probe.ts"
+    "probe": "node scripts/claude-probe.ts",
+    "i18n:check": "node scripts/i18n-check.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

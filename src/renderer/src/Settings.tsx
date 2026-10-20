@@ -1,3 +1,4 @@
+import { msg } from "@shared/i18n";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { AppData, Shortcut } from "@shared/types";
 import { FIGMA_BUNDLE_ID } from "@shared/types";
@@ -7,7 +8,9 @@ import { CheckIcon, EditIcon, FigmaMark, LinkIcon, PlusIcon, Spinner, TerminalIc
 import { LOCAL_SOURCES, normalizeMix, type LocalSource } from "@shared/shape";
 import { MCP_SERVICES, MCP_SOURCES, statusOf, type McpSource, type McpStatus } from "@shared/mcp";
 import { MixBar } from "./components/MixBar";
-import { SOURCE_NAME, SourceIcon } from "./components/SourceIcon";
+import { SourceIcon, sourceName } from "./components/SourceIcon";
+import { LANGS } from "@shared/i18n";
+import { currentLang, t } from "./i18n";
 
 const api = window.todoban;
 type Tab = "general" | "tools" | "shortcuts";
@@ -47,9 +50,9 @@ function HotkeyRecorder({ value }: { value: string }) {
 
   return (
     <div className="hotkey">
-      <kbd className={recording ? "is-recording" : ""}>{recording ? "Press keys…" : displayAccelerator(value)}</kbd>
+      <kbd className={recording ? "is-recording" : ""}>{recording ? t("Press keys…") : displayAccelerator(value)}</kbd>
       <button type="button" className="button button--secondary button--sm" onClick={() => setRecording((r) => !r)}>
-        {recording ? "Cancel" : "Record"}
+        {recording ? t("Cancel") : t("Record")}
       </button>
       {error && !recording && <p className="field__error">{error}</p>}
     </div>
@@ -67,7 +70,7 @@ function Group({ label, children }: { label: string; children: React.ReactNode }
 }
 
 const MODELS = [
-  { value: "", label: "Default" },
+  { value: "", label: msg("Default") },
   { value: "sonnet", label: "Sonnet" },
   { value: "haiku", label: "Haiku" },
 ];
@@ -92,11 +95,11 @@ function GeneralTab({ data }: { data: AppData }) {
 
   return (
     <div className="settings__body">
-      <Group label="Capture">
+      <Group label={t("Capture")}>
         <div className="setting">
           <div className="setting__text">
-            <p>Capture hotkey</p>
-            <p className="setting__desc">Open the capture panel from any app</p>
+            <p>{t("Capture hotkey")}</p>
+            <p className="setting__desc">{t("Open the capture panel from any app")}</p>
           </div>
           <HotkeyRecorder value={data.settings.hotkey} />
         </div>
@@ -109,17 +112,17 @@ function GeneralTab({ data }: { data: AppData }) {
               <TerminalIcon size={14} />
             </span>
             <div className="setting__text">
-              <p>Executable</p>
+              <p>{t("Executable")}</p>
               {info &&
                 (info.path ? (
                   <p className="setting__desc">
-                    {data.settings.claudePath ? "Using this path" : "Found automatically"} · {info.version ?? "version unknown"}
+                    {data.settings.claudePath ? t("Using this path") : t("Found automatically")} · {info.version ?? t("version unknown")}
                   </p>
                 ) : (
-                  <p className="field__error">Couldn't find claude here. Leave empty to search automatically.</p>
+                  <p className="field__error">{t("Couldn't find claude here. Leave empty to search automatically.")}</p>
                 ))}
             </div>
-            {info && <span className={`status${info.path ? " status--ok" : " status--error"}`}>{info.path ? "FOUND" : "MISSING"}</span>}
+            {info && <span className={`status${info.path ? " status--ok" : " status--error"}`}>{info.path ? t("FOUND") : t("MISSING")}</span>}
           </div>
           <input
             className={`field__input${info && !info.path ? " is-error" : ""}`}
@@ -132,8 +135,8 @@ function GeneralTab({ data }: { data: AppData }) {
         </div>
         <div className="setting">
           <div className="setting__text">
-            <p>Model</p>
-            <p className="setting__desc">Sonnet was fastest in our step-0 test (avg 6.5s)</p>
+            <p>{t("Model")}</p>
+            <p className="setting__desc">{t("Sonnet was fastest in our step-0 test (avg 6.5s)")}</p>
           </div>
           <div className="segmented" role="radiogroup">
             {MODELS.map((m) => (
@@ -145,36 +148,57 @@ function GeneralTab({ data }: { data: AppData }) {
                 className={`segmented__item${(data.settings.model ?? "") === m.value ? " is-active" : ""}`}
                 onClick={() => api.act({ type: "setSettings", patch: { model: m.value || null } })}
               >
-                {m.label}
+                {t(m.label)}
               </button>
             ))}
           </div>
         </div>
         <div className="setting">
           <div className="setting__text">
-            <p>Rules</p>
+            <p>{t("Rules")}</p>
             {rules && rules.missing.length > 0 ? (
               <p className="setting__desc is-error">
-                Your edited CLAUDE.md is missing rules for {rules.missing.join(", ")}. Reading tools and shaping won't work until you reset it.
+                {t("Your edited CLAUDE.md is missing rules for {names}. Reading tools and shaping won't work until you reset it.", { names: rules.missing.join(", ") })}
               </p>
             ) : (
-              <p className="setting__desc">CLAUDE.md — how tasks are split and shaped{rules?.customized ? " · edited by you" : ""}</p>
+              <p className="setting__desc">{t("CLAUDE.md — how tasks are split and shaped")}{rules?.customized ? ` · ${t("edited by you")}` : ""}</p>
             )}
           </div>
           {rules && rules.missing.length > 0 && (
             <button type="button" className="button button--primary button--sm" onClick={() => api.resetRules().then(setRules)}>
-              Reset to default
+              {t("Reset to default")}
             </button>
           )}
           <button type="button" className="button button--secondary button--sm" onClick={() => api.openRules()}>
-            Open
+            {t("Open")}
           </button>
         </div>
       </Group>
 
-      <Group label="General">
+      <Group label={t("General")}>
         <div className="setting">
-          <p className="setting__text">Open at login</p>
+          <div className="setting__text">
+            <p>{t("Language")}</p>
+            <p className="setting__desc">{t("Menus and screens change right away")}</p>
+          </div>
+          <div className="segmented" role="radiogroup" aria-label={t("Language")}>
+            {LANGS.map((l) => (
+              <button
+                type="button"
+                key={l.value}
+                role="radio"
+                lang={l.value}
+                aria-checked={data.settings.language === l.value}
+                className={`segmented__item${data.settings.language === l.value ? " is-active" : ""}`}
+                onClick={() => api.act({ type: "setSettings", patch: { language: l.value } })}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="setting">
+          <p className="setting__text">{t("Open at login")}</p>
           <Toggle on={data.settings.openAtLogin} onChange={(v) => api.act({ type: "setSettings", patch: { openAtLogin: v } })} />
         </div>
       </Group>
@@ -183,24 +207,24 @@ function GeneralTab({ data }: { data: AppData }) {
 }
 
 const LOCAL_DESC: Record<LocalSource, (data: AppData) => string> = {
-  figma: (d) => `Your shortcuts · ${d.shortcuts.length}`,
-  calendar: () => "Next 7 days · deadlines set the size. macOS asks once",
-  files: () => "Documents you opened this week · names only",
-  todoban: () => "Done & later tasks",
+  figma: (d) => t("Your shortcuts · {n}", { n: d.shortcuts.length }),
+  calendar: () => t("Next 7 days · deadlines set the size. macOS asks once"),
+  files: () => t("Documents you opened this week · names only"),
+  todoban: () => t("Done & later tasks"),
 };
 
 const MCP_DESC: Record<McpSource, string> = {
-  notion: "Pages that match your words",
-  linear: "Issues that match your words",
-  frame: "Reads the frame of the task's Figma shortcut",
+  notion: msg("Pages that match your words"),
+  linear: msg("Issues that match your words"),
+  frame: msg("Reads the frame of the task's Figma shortcut"),
 };
 
 type Verify = { state: "testing" } | { state: "ok"; ms: number; workspace: string | null } | { state: "fail"; reason: string };
 const VERIFY_FAIL: Record<string, string> = {
-  "needs-auth": "Needs sign-in in Claude Code",
-  "no-shortcut": "Add a Figma shortcut with a frame link first",
-  slow: "Took longer than 30s",
-  failed: "Couldn't read — turn it on again to retry",
+  "needs-auth": msg("Needs sign-in in Claude Code"),
+  "no-shortcut": msg("Add a Figma shortcut with a frame link first"),
+  slow: msg("Took longer than 30s"),
+  failed: msg("Couldn't read — turn it on again to retry"),
 };
 
 function StatusPill({ status }: { status: McpStatus | null }) {
@@ -211,49 +235,57 @@ function StatusPill({ status }: { status: McpStatus | null }) {
   );
 }
 function StatusPillInner({ status }: { status: McpStatus | null }) {
-  if (status === null) return <span className="status">Checking</span>;
-  if (status === "connected") return <span className="status status--ok">Connected</span>;
-  if (status === "pending") return <span className="status">Connecting</span>;
-  if (status === "needs-auth") return <span className="status status--error">Needs sign-in</span>;
-  return <span className="status status--off">Not added</span>;
+  if (status === null) return <span className="status">{t("Checking")}</span>;
+  if (status === "connected") return <span className="status status--ok">{t("Connected")}</span>;
+  if (status === "pending") return <span className="status">{t("Connecting")}</span>;
+  if (status === "needs-auth") return <span className="status status--error">{t("Needs sign-in")}</span>;
+  return <span className="status status--off">{t("Not added")}</span>;
 }
 
 // MCP 연결 안내. 인증이 필요하면 Claude Code에서 /mcp, 커넥터가 없으면 claude.ai에서 추가한다.
 function McpGuide({ source, status, onClose }: { source: McpSource; status: McpStatus; onClose: () => void }) {
-  const name = MCP_SERVICES[source].name.replace(" frame", "");
+  const name = sourceName(source === "frame" ? "figma" : source);
   const signIn = status === "needs-auth";
   return (
     <div className="guide motion-rise">
       <div className="guide__head">
-        <p className="guide__title">{signIn ? `Sign in to ${name}` : `Add ${name} to Claude`}</p>
+        <p className="guide__title">{signIn ? t("Sign in to {name}", { name }) : t("Add {name} to Claude", { name })}</p>
         <button type="button" className="text-button" onClick={onClose}>
-          Close
+          {t("Close")}
         </button>
       </div>
       {signIn ? (
         <ol className="guide__steps">
           <li>
-            Open Terminal{" "}
+            {t("Open Terminal")}{" "}
             <button type="button" className="link" onClick={() => api.openMcpGuide("terminal")}>
-              Open
+              {t("Open")}
             </button>
           </li>
           <li>
-            Run <kbd>claude</kbd>, then type <kbd>/mcp</kbd>
+            {currentLang() === "ko" ? (
+              <>
+                <kbd>claude</kbd>를 실행하고 <kbd>/mcp</kbd>를 입력해요
+              </>
+            ) : (
+              <>
+                Run <kbd>claude</kbd>, then type <kbd>/mcp</kbd>
+              </>
+            )}
           </li>
-          <li>Pick “{MCP_SERVICES[source].server}” and finish signing in in your browser</li>
-          <li>Come back here — todoBAN checks again on its own</li>
+          <li>{t("Pick “{server}” and finish signing in in your browser", { server: MCP_SERVICES[source].server })}</li>
+          <li>{t("Come back here — todoBAN checks again on its own")}</li>
         </ol>
       ) : (
         <ol className="guide__steps">
           <li>
-            Open Claude → Settings → Connectors{" "}
+            {t("Open Claude → Settings → Connectors")}{" "}
             <button type="button" className="link" onClick={() => api.openMcpGuide("connectors")}>
-              Open
+              {t("Open")}
             </button>
           </li>
-          <li>Connect {name} with the same account you use in Claude Code</li>
-          <li>Come back here — todoBAN checks again on its own</li>
+          <li>{t("Connect {name} with the same account you use in Claude Code", { name })}</li>
+          <li>{t("Come back here — todoBAN checks again on its own")}</li>
         </ol>
       )}
     </div>
@@ -330,55 +362,54 @@ function ToolsTab({ data }: { data: AppData }) {
   const mcpDesc = (s: McpSource, st: McpStatus | null) => {
     const v = verify[s];
     const info = tools.mcpInfo[s];
-    if (v?.state === "testing") return "Checking which workspace it reads… about 10 seconds";
-    if (v?.state === "ok") return `Works · ${v.workspace ? `reads “${v.workspace}”` : "connected"} · ${(v.ms / 1000).toFixed(1)}s`;
-    if (v?.state === "fail") return v.reason;
-    if (st === null) return "Checking Claude Code…";
+    if (v?.state === "testing") return t("Checking which workspace it reads… about 10 seconds");
+    if (v?.state === "ok") return `${t("Works")} · ${v.workspace ? t("reads “{name}”", { name: v.workspace }) : t("connected")} · ${(v.ms / 1000).toFixed(1)}s`;
+    if (v?.state === "fail") return t(v.reason);
+    if (st === null) return t("Checking Claude Code…");
     if ((st === "connected" || st === "pending") && info?.workspace)
-      return `Reads “${info.workspace}”${info.account ? ` · ${info.account}` : ""}`;
-    if (st === "connected" || st === "pending") return MCP_DESC[s];
-    if (st === "needs-auth") return "Connected to Claude, but needs sign-in in Claude Code";
-    return "Not connected in Claude yet";
+      return `${t("Reads “{name}”", { name: info.workspace })}${info.account ? ` · ${info.account}` : ""}`;
+    if (st === "connected" || st === "pending") return t(MCP_DESC[s]);
+    if (st === "needs-auth") return t("Connected to Claude, but needs sign-in in Claude Code");
+    return t("Not connected in Claude yet");
   };
 
   return (
     <div className="settings__body">
-      <Group label="Local · fast">
+      <Group label={t("Local · fast")}>
         {LOCAL_SOURCES.map((s) => (
           <div className="setting" key={s}>
             <span className="setting__icon">
               <SourceIcon source={s} size={13} />
             </span>
             <div className="setting__text">
-              <p>{SOURCE_NAME[s]}</p>
+              <p>{sourceName(s)}</p>
               <p className="setting__desc">{LOCAL_DESC[s](data)}</p>
             </div>
-            <span className="badge">Local</span>
+            <span className="badge">{t("Local")}</span>
             <Toggle on={tools.local[s]} onChange={(v) => save({ local: { ...tools.local, [s]: v } })} />
           </div>
         ))}
       </Group>
       <section className="group">
         <div className="settings__head">
-          <h2 className="group__label">MCP · read only</h2>
+          <h2 className="group__label">{t("MCP · read only")}</h2>
           <button type="button" className="text-button" onClick={() => check(true)} disabled={status === null}>
-            {status === null ? "Checking…" : "Check again"}
+            {status === null ? t("Checking…") : t("Check again")}
           </button>
         </div>
         {rulesBroken && (
           <div className="guide motion-rise">
             <div className="guide__head">
-              <p className="guide__title">Your edited CLAUDE.md can't read these yet</p>
+              <p className="guide__title">{t("Your edited CLAUDE.md can't read these yet")}</p>
               <button type="button" className="button button--primary button--sm" onClick={() => api.resetRules().then((r) => (setRules(r), check(true)))}>
-                Reset rules
+                {t("Reset rules")}
               </button>
             </div>
-            <p className="setting__desc">It's missing rules for {rules!.missing.join(", ")}. Your edits are kept in a separate file next to it.</p>
+            <p className="setting__desc">{t("It's missing rules for {names}. Your edits are kept in a separate file next to it.", { names: rules!.missing.join(", ") })}</p>
           </div>
         )}
         <p className="group__desc">
-          Claude Code reads these with your Claude sign-in, one workspace per service. Each read takes about 10 seconds and uses your Claude plan. Notion
-          search matches keywords, not meaning, unless your Notion plan includes AI search.
+          {t("Claude Code reads these with your Claude sign-in, one workspace per service. Each read takes about 10 seconds and uses your Claude plan. Notion search matches keywords, not meaning, unless your Notion plan includes AI search.")}
         </p>
         <div className="group__box">
           {MCP_SOURCES.map((s) => {
@@ -392,7 +423,7 @@ function ToolsTab({ data }: { data: AppData }) {
                 </span>
                 <div className="setting__text">
                   <p className="setting__title">
-                    {MCP_SERVICES[s].name} <StatusPill status={st} />
+                    {sourceName(s)} <StatusPill status={st} />
                   </p>
                   <p className={`setting__desc motion-fade${v?.state === "ok" ? " is-ok" : v?.state === "fail" ? " is-error" : ""}`} key={mcpDesc(s, st)}>
                     {v?.state === "testing" && <Spinner size={10} />} {mcpDesc(s, st)}
@@ -403,7 +434,7 @@ function ToolsTab({ data }: { data: AppData }) {
                 ) : (
                   st !== null && (
                     <button type="button" className="button button--secondary button--sm" onClick={() => setGuide(s)}>
-                      {st === "needs-auth" ? "Sign in" : "Add"}
+                      {st === "needs-auth" ? t("Sign in") : t("Add")}
                     </button>
                   )
                 )}
@@ -415,12 +446,12 @@ function ToolsTab({ data }: { data: AppData }) {
       </section>
       {on.length > 0 && (
         <section className="group">
-          <h2 className="group__label">Default mix</h2>
+          <h2 className="group__label">{t("Default mix")}</h2>
           <MixBar mix={normalizeMix(tools.defaultMix, on)} onChange={(mix) => save({ defaultMix: { ...tools.defaultMix, ...mix } })} />
         </section>
       )}
       <div className="tip">
-        <UserIcon size={14} /> Local tools send titles only — links, paths and file contents stay on your Mac. MCP tools are read by Claude Code itself; a Figma frame sends its file key.
+        <UserIcon size={14} /> {t("Local tools send titles only — links, paths and file contents stay on your Mac. MCP tools are read by Claude Code itself; a Figma frame sends its file key.")}
       </div>
     </div>
   );
@@ -450,26 +481,26 @@ function ShortcutSheet({ initial, onClose }: { initial: Shortcut | null; onClose
     <div className="sheet-backdrop" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <h2 className="sheet__title">
-          <PlusIcon size={13} /> {initial ? "Edit shortcut" : "New shortcut"}
+          <PlusIcon size={13} /> {initial ? t("Edit shortcut") : t("New shortcut")}
         </h2>
         <label className="field">
-          <span className="field__label">Name</span>
+          <span className="field__label">{t("Name")}</span>
           <input className="field__input" autoFocus value={name} placeholder="포폴" onChange={(e) => setName(e.target.value)} />
         </label>
         <div className="field">
-          <span className="field__label">Called</span>
+          <span className="field__label">{t("Called")}</span>
           <div className="chips-input">
             {keywords.map((k) => (
               <span className="kw" key={k}>
                 {k}
-                <button type="button" aria-label={`Remove ${k}`} onClick={() => setKeywords(keywords.filter((x) => x !== k))}>
+                <button type="button" aria-label={t("Remove {name}", { name: k })} onClick={() => setKeywords(keywords.filter((x) => x !== k))}>
                   ×
                 </button>
               </span>
             ))}
             <input
               value={kw}
-              placeholder={keywords.length ? "Add a word…" : "포폴, 포트폴리오, 덱"}
+              placeholder={keywords.length ? t("Add a word…") : "포폴, 포트폴리오, 덱"}
               onChange={(e) => setKw(e.target.value)}
               onKeyDown={(e) => {
                 if (e.nativeEvent.isComposing) return;
@@ -481,32 +512,32 @@ function ShortcutSheet({ initial, onClose }: { initial: Shortcut | null; onClose
               }}
             />
           </div>
-          <span className="field__help">Press Enter to add · tasks that mention a word get linked</span>
+          <span className="field__help">{t("Press Enter to add · tasks that mention a word get linked")}</span>
         </div>
         <label className="field">
-          <span className="field__label">Figma link</span>
+          <span className="field__label">{t("Figma link")}</span>
           <input className="field__input" value={url} placeholder="figma.com/design/…?node-id=…" onChange={(e) => setUrl(e.target.value)} />
           {url.trim() &&
             (link.hasNode ? (
               <span className="field__help field__help--ok">
-                <CheckIcon size={12} /> Has a node-id — opens right at this frame
+                <CheckIcon size={12} /> {t("Has a node-id — opens right at this frame")}
               </span>
             ) : link.isFigma ? (
-              <span className="field__help">Opens the file, not a frame. Select a frame and use “Copy link” to jump straight to it.</span>
+              <span className="field__help">{t("Opens the file, not a frame. Select a frame and use “Copy link” to jump straight to it.")}</span>
             ) : (
-              <span className="field__help">Not a Figma link — opens in your default browser.</span>
+              <span className="field__help">{t("Not a Figma link — opens in your default browser.")}</span>
             ))}
         </label>
         <div className="sheet__actions">
           <label className="pill-question">
-            Open in Figma app <Toggle on={useFigma} onChange={setUseFigma} />
+            {t("Open in Figma app")} <Toggle on={useFigma} onChange={setUseFigma} />
           </label>
           <span className="spacer" />
           <button type="button" className="button button--secondary" onClick={onClose}>
-            Cancel
+            {t("Cancel")}
           </button>
           <button type="button" className="button button--primary" disabled={!canSave} onClick={save}>
-            Save
+            {t("Save")}
           </button>
         </div>
       </div>
@@ -522,16 +553,16 @@ function ShortcutsTab({ data, openSheet }: { data: AppData; openSheet?: boolean 
     <div className="settings__body">
       <div className="settings__head">
         <h2 className="group__label">
-          {n} {n === 1 ? "shortcut" : "shortcuts"}
+          {n === 1 ? t("1 shortcut") : t("{n} shortcuts", { n })}
         </h2>
         <button type="button" className="button button--secondary button--sm" onClick={() => setEditing("new")}>
-          <PlusIcon size={12} /> Add
+          <PlusIcon size={12} /> {t("Add")}
         </button>
       </div>
       {n === 0 ? (
         <div className="empty-box">
-          <p>No shortcuts yet</p>
-          <p className="setting__desc">Add a Figma frame you open often, like “포폴”. Tasks that mention it get a start button.</p>
+          <p>{t("No shortcuts yet")}</p>
+          <p className="setting__desc">{t("Add a Figma frame you open often, like “포폴”. Tasks that mention it get a start button.")}</p>
         </div>
       ) : (
         <div className="group__box">
@@ -545,7 +576,7 @@ function ShortcutsTab({ data, openSheet }: { data: AppData; openSheet?: boolean 
                   {s.name}
                   {usage(s.id) > 0 && (
                     <span className="mono-label">
-                      {usage(s.id)} {usage(s.id) === 1 ? "TASK" : "TASKS"}
+                      {usage(s.id) === 1 ? t("1 TASK") : t("{n} TASKS", { n: usage(s.id) })}
                     </span>
                   )}
                 </p>
@@ -562,10 +593,10 @@ function ShortcutsTab({ data, openSheet }: { data: AppData; openSheet?: boolean 
                   {s.url.replace(/^https?:\/\/(www\.)?/, "")}
                 </span>
               </div>
-              <button type="button" className="icon-button" aria-label="Edit" onClick={() => setEditing(s)}>
+              <button type="button" className="icon-button" aria-label={t("Edit")} onClick={() => setEditing(s)}>
                 <EditIcon size={14} />
               </button>
-              <button type="button" className="icon-button" aria-label="Delete" onClick={() => api.act({ type: "removeShortcut", id: s.id })}>
+              <button type="button" className="icon-button" aria-label={t("Delete")} onClick={() => api.act({ type: "removeShortcut", id: s.id })}>
                 <TrashIcon size={14} />
               </button>
             </div>
@@ -573,7 +604,7 @@ function ShortcutsTab({ data, openSheet }: { data: AppData; openSheet?: boolean 
         </div>
       )}
       <div className="tip">
-        <LinkIcon size={14} /> Write “포폴 장표 고쳐야 함” and the task links to the 포폴 shortcut.
+        <LinkIcon size={14} /> {t("Write “포폴 장표 고쳐야 함” and the task links to the 포폴 shortcut.")}
       </div>
       {editing && <ShortcutSheet initial={editing === "new" ? null : editing} onClose={() => setEditing(null)} />}
     </div>
@@ -626,13 +657,13 @@ export function Settings({ initialTab, openSheet }: { initialTab: Tab; openSheet
       <div className="settings__toolbar">
         <div className="tabs" role="tablist">
           <button type="button" role="tab" aria-selected={tab === "general"} className={`tab${tab === "general" ? " is-active" : ""}`} onClick={() => setTab("general")}>
-            General
+            {t("General")}
           </button>
           <button type="button" role="tab" aria-selected={tab === "tools"} className={`tab${tab === "tools" ? " is-active" : ""}`} onClick={() => setTab("tools")}>
-            Tools
+            {t("Tools")}
           </button>
           <button type="button" role="tab" aria-selected={tab === "shortcuts"} className={`tab${tab === "shortcuts" ? " is-active" : ""}`} onClick={() => setTab("shortcuts")}>
-            Shortcuts
+            {t("Shortcuts")}
           </button>
         </div>
       </div>

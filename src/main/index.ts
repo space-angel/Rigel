@@ -6,6 +6,7 @@ import { FIGMA_BUNDLE_ID, type AppData, type TodoAction } from "@shared/types";
 import { applyAction, localDate, pendingCarryOver, todayView } from "@shared/todos";
 import { addDays } from "@shared/dial";
 import { deadlineOptions, readDates } from "@shared/due";
+import { msg, translate, type Vars } from "@shared/i18n";
 import { classifyQuickInput, firstLine, matchShortcutByKeywords } from "@shared/quickInput";
 import { loadData, saveData } from "./store";
 import type { ReviewDraft } from "@shared/review";
@@ -73,7 +74,10 @@ let firstSteps: FirstStepManager;
 let settingsWindow: BrowserWindow | null = null;
 let welcomeWindow: BrowserWindow | null = null;
 let data: AppData;
-let hotkeyError: string | null = null;
+// 단축키를 못 쓰는 이유. 화면에 보일 때 지금 언어로 바꾼다.
+let hotkeyFail: { key: string; accelerator: string } | null = null;
+const tr = (key: string, vars?: Vars) => translate(data.settings.language, key, vars);
+const hotkeyError = () => (hotkeyFail ? tr(hotkeyFail.key, { key: hotkeyFail.accelerator }) : null);
 
 function updateTray(): void {
   const today = localDate();
@@ -256,7 +260,7 @@ function createReviewWindow(): BrowserWindow {
     height: 360,
     useContentSize: true,
     show: false,
-    title: "Review",
+    title: tr("Review"),
     titleBarStyle: "hiddenInset",
     trafficLightPosition: { x: 16, y: 16 },
     resizable: false,
@@ -318,7 +322,7 @@ function showSettings(tab: "general" | "tools" | "shortcuts" | "shortcuts-new" =
       height: 520,
       useContentSize: true,
       show: false,
-      title: "Settings",
+      title: tr("Settings"),
       titleBarStyle: "hiddenInset",
       trafficLightPosition: { x: 16, y: 16 },
       resizable: false,
@@ -361,7 +365,7 @@ function showWelcome(): void {
     height: 560,
     useContentSize: true,
     show: false,
-    title: "Welcome",
+    title: tr("Welcome"),
     titleBarStyle: "hiddenInset",
     trafficLightPosition: { x: 16, y: 16 },
     resizable: false,
@@ -415,27 +419,29 @@ function registerHotkey(): void {
   globalShortcut.unregisterAll();
   const accelerator = data.settings.hotkey;
   try {
-    hotkeyError = globalShortcut.register(accelerator, showQuickWindow) ? null : `Another app is using ${accelerator}`;
+    hotkeyFail = globalShortcut.register(accelerator, showQuickWindow) ? null : { key: msg("Another app is using {key}"), accelerator };
   } catch (e) {
-    hotkeyError = `${accelerator} can't be used as a hotkey`;
+    hotkeyFail = { key: msg("{key} can't be used as a hotkey"), accelerator };
   }
-  if (hotkeyError) console.error(`[hotkey] ${hotkeyError}`);
+  if (hotkeyFail) console.error(`[hotkey] ${translate("en", hotkeyFail.key, { key: accelerator })}`);
 }
 
 function trayMenu(): Menu {
   return Menu.buildFromTemplate([
-    { label: "Capture", accelerator: data.settings.hotkey, click: showQuickWindow },
-    { label: "Today", click: toggleListWindow },
-    { label: "Settings…", accelerator: "Command+,", click: () => showSettings() },
-    ...(hotkeyError ? [{ type: "separator" as const }, { label: hotkeyError, enabled: false }] : []),
+    { label: tr("Capture"), accelerator: data.settings.hotkey, click: showQuickWindow },
+    { label: tr("Today"), click: toggleListWindow },
+    { label: tr("Settings…"), accelerator: "Command+,", click: () => showSettings() },
+    ...(hotkeyFail ? [{ type: "separator" as const }, { label: hotkeyError()!, enabled: false }] : []),
     { type: "separator" },
-    { label: "Quit todoBAN", role: "quit" },
+    { label: tr("Quit todoBAN"), role: "quit" },
   ]);
 }
 
 app.whenReady().then(() => {
   app.dock?.hide();
   data = loadData();
+  // 자동 점검(E2E)의 시나리오는 영어 문구로 화면을 찾는다. TODOBAN_LANG=ko로 한국어 화면도 점검한다.
+  if (E2E) data.settings.language = process.env.TODOBAN_LANG === "ko" ? "ko" : "en";
   // 규칙 파일(CLAUDE.md)을 시작할 때 최신으로 맞춘다. 첫 Claude 호출까지 미루면 그 전에 연 화면이 예전 규칙을 쓴다.
   ensureWorkDir();
 
@@ -449,28 +455,28 @@ app.whenReady().then(() => {
     const tomorrow = addDays(today, 1);
     const send = (channel: string) => listWindow?.webContents.send(channel, id);
     const items: Electron.MenuItemConstructorOptions[] = [
-      { label: "Edit title", accelerator: "CommandOrControl+E", registerAccelerator: false, click: () => send("todo:requestEdit") },
+      { label: tr("Edit title"), accelerator: "CommandOrControl+E", registerAccelerator: false, click: () => send("todo:requestEdit") },
       { type: "separator" },
-      { label: "Move to Today", enabled: !t.completedAt && !(t.plannedDate !== null && t.plannedDate <= today), click: () => act({ type: "moveToToday", id }) },
-      { label: "Move to Tomorrow", enabled: !t.completedAt && t.plannedDate !== tomorrow, click: () => act({ type: "schedule", id, plannedDate: tomorrow }) },
-      { label: "Move to Later", enabled: !t.completedAt && t.plannedDate !== null, click: () => act({ type: "schedule", id, plannedDate: null }) },
+      { label: tr("Move to Today"), enabled: !t.completedAt && !(t.plannedDate !== null && t.plannedDate <= today), click: () => act({ type: "moveToToday", id }) },
+      { label: tr("Move to Tomorrow"), enabled: !t.completedAt && t.plannedDate !== tomorrow, click: () => act({ type: "schedule", id, plannedDate: tomorrow }) },
+      { label: tr("Move to Later"), enabled: !t.completedAt && t.plannedDate !== null, click: () => act({ type: "schedule", id, plannedDate: null }) },
       {
-        label: t.dueDate ? `Deadline · ${t.dueDate.slice(5).replace("-", "/")}` : "Deadline",
+        label: t.dueDate ? `${tr("Deadline")} · ${t.dueDate.slice(5).replace("-", "/")}` : tr("Deadline"),
         enabled: !t.completedAt,
         submenu: [
-          ...deadlineOptions(today).map((o) => ({
+          ...deadlineOptions(today, data.settings.language).map((o) => ({
             label: o.label,
             type: "checkbox" as const,
             checked: t.dueDate === o.date,
             click: () => act({ type: "setDue", id, dueDate: o.date }),
           })),
           { type: "separator" as const },
-          { label: "Pick a date…", accelerator: "CommandOrControl+D", registerAccelerator: false, click: () => send("todo:requestDue") },
-          ...(t.dueDate ? [{ label: "Clear deadline", click: () => act({ type: "setDue", id, dueDate: null }) }] : []),
+          { label: tr("Pick a date…"), accelerator: "CommandOrControl+D", registerAccelerator: false, click: () => send("todo:requestDue") },
+          ...(t.dueDate ? [{ label: tr("Clear deadline"), click: () => act({ type: "setDue", id, dueDate: null }) }] : []),
         ],
       },
       { type: "separator" },
-      { label: "Delete", accelerator: "CommandOrControl+Backspace", registerAccelerator: false, click: () => send("todo:requestDelete") },
+      { label: tr("Delete"), accelerator: "CommandOrControl+Backspace", registerAccelerator: false, click: () => send("todo:requestDelete") },
     ];
     if (!E2E) Menu.buildFromTemplate(items).popup({ window: listWindow });
     return items
@@ -599,7 +605,7 @@ app.whenReady().then(() => {
   ipcMain.on("welcome:installGuide", () => openOutside("Claude Code install guide", () => shell.openExternal("https://docs.claude.com/en/docs/claude-code/setup")));
   ipcMain.handle("welcome:chooseClaude", async () => {
     if (E2E) return null;
-    const r = await dialog.showOpenDialog({ title: "Choose the claude executable", properties: ["openFile", "showHiddenFiles"], defaultPath: join(app.getPath("home"), ".local/bin") });
+    const r = await dialog.showOpenDialog({ title: tr("Choose the claude executable"), properties: ["openFile", "showHiddenFiles"], defaultPath: join(app.getPath("home"), ".local/bin") });
     const path = r.canceled ? null : (r.filePaths[0] ?? null);
     if (path) act({ type: "setSettings", patch: { claudePath: path } });
     return path;
@@ -610,7 +616,7 @@ app.whenReady().then(() => {
     const [w, cur] = settingsWindow.getContentSize();
     if (cur !== h) resizeAnimated(settingsWindow, w ?? 560, h);
   });
-  ipcMain.handle("settings:hotkeyStatus", () => hotkeyError);
+  ipcMain.handle("settings:hotkeyStatus", () => hotkeyError());
   ipcMain.handle("settings:claudeInfo", async () => {
     const found = await findClaude(data.settings.claudePath);
     return { ...found, version: found.path ? await claudeVersion(found.path) : null };

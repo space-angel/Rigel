@@ -1,7 +1,7 @@
 import type { ContextNote } from "@shared/types";
 import { noteOpen } from "@shared/shape";
-import { SOURCE_NAME, SourceIcon } from "./SourceIcon";
-import type { SourceId } from "@shared/shape";
+import { SourceIcon, sourceName } from "./SourceIcon";
+import { t } from "../i18n";
 
 const api = window.todoban;
 
@@ -13,14 +13,14 @@ export function Attachments({ notes, variant }: { notes: ContextNote[]; variant:
   return (
     <span className={`attach attach--${variant}`}>
       {openable.slice(0, variant === "icons" ? 3 : 4).map((n) => {
-        const name = SOURCE_NAME[n.source as SourceId] ?? n.source;
+        const name = sourceName(n.source);
         return (
           <button
             type="button"
             key={`${n.source}-${n.label}`}
             className="attach__item"
-            title={`Open ${name} · ${n.label}`}
-            aria-label={`Open ${name}: ${n.label}`}
+            title={t("Open {name} · {label}", { name, label: n.label })}
+            aria-label={t("Open {name}: {label}", { name, label: n.label })}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.stopPropagation();

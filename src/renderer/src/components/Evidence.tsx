@@ -1,17 +1,18 @@
+import { msg } from "@shared/i18n";
 import { useState, type ReactNode } from "react";
 import type { ToolItem } from "@shared/shape";
-import { SOURCE_NAME, SourceIcon } from "./SourceIcon";
-import type { SourceId } from "@shared/shape";
+import { SourceIcon, sourceName } from "./SourceIcon";
+import { t } from "../i18n";
 import { ChevronDownIcon } from "./icons";
 
 const api = window.todoban;
 
 // LOCAL 도구는 제목만 쓰므로 근거 문장이 없다. 무엇을 봤는지 한 줄로 알려 준다.
 const LOCAL_NOTE: Record<string, string> = {
-  figma: "Your Figma shortcut — only its name is sent to Claude",
-  files: "A file you opened this week — only its name is sent",
-  todoban: "One of your done or later tasks",
-  calendar: "An event in your calendar — only its title and time are sent",
+  figma: msg("Your Figma shortcut — only its name is sent to Claude"),
+  files: msg("A file you opened this week — only its name is sent"),
+  todoban: msg("One of your done or later tasks"),
+  calendar: msg("An event in your calendar — only its title and time are sent"),
 };
 
 // 근거 문장에서 낱말을 표시한다.
@@ -41,7 +42,7 @@ export function Evidence({
   onLeaveOut?: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const name = SOURCE_NAME[source as SourceId] ?? source;
+  const name = sourceName(source);
   // MCP는 Claude가 읽은 문장, 로컬 파일은 맥 안에서 읽은 줄(보내지 않음)
   const text = item?.text || item?.preview || "";
   const isFile = item?.open?.kind === "file";
@@ -55,7 +56,7 @@ export function Evidence({
           <SourceIcon source={source} size={12} />
         </span>
         <span className="made__label">{label}</span>
-        {weak && <span className="evidence__weak">weak match</span>}
+        {weak && <span className="evidence__weak">{t("weak match")}</span>}
         {weight !== undefined && <span className="made__pct">{weight}%</span>}
         <ChevronDownIcon size={12} className="evidence__chev" />
       </button>
@@ -67,32 +68,32 @@ export function Evidence({
             {isFile ? item?.where : name}
             {!isFile && item?.workspace ? ` · ${item.workspace}` : ""}
             {!isFile && item?.where ? ` / ${item.where}` : ""}
-            {isFile && item?.modified ? ` · edited ${item.modified.slice(5).replace("-", "/")}` : ""}
+            {isFile && item?.modified ? ` · ${t("edited {date}", { date: item.modified.slice(5).replace("-", "/") })}` : ""}
           </p>
-          {text ? <blockquote className="evidence__quote">{highlight(text, words)}</blockquote> : <p className="evidence__note">{LOCAL_NOTE[source] ?? "Only the title was used"}</p>}
+          {text ? <blockquote className="evidence__quote">{highlight(text, words)}</blockquote> : <p className="evidence__note">{t(LOCAL_NOTE[source] ?? msg("Only the title was used"))}</p>}
           {isFile && (
             <p className="evidence__note">
-              {item?.matchedIn === "content" ? "Found in the text, not the name. " : item?.matchedIn === "both" ? "Found in the name and the text. " : "Found in the name. "}
-              Only the file name is sent to Claude.
+              {t(item?.matchedIn === "content" ? msg("Found in the text, not the name.") : item?.matchedIn === "both" ? msg("Found in the name and the text.") : msg("Found in the name."))}{" "}
+              {t("Only the file name is sent to Claude.")}
             </p>
           )}
           <p className={`evidence__match${weak ? " is-weak" : ""}`}>
-            {matched.length ? `Matched: ${matched.join(" · ")}` : words.length ? "None of your words appear here — check before using it" : "Picked without words"}
+            {matched.length ? t("Matched: {words}", { words: matched.join(" · ") }) : words.length ? t("None of your words appear here — check before using it") : t("Picked without words")}
           </p>
           <div className="evidence__actions">
             {item?.open?.kind === "file" && (
               <button type="button" className="button button--secondary button--sm" onClick={() => api.quickLook((item.open as { path: string }).path)}>
-                Quick Look
+                {t("Quick Look")}
               </button>
             )}
             {item?.open && (
               <button type="button" className="button button--secondary button--sm" onClick={() => api.openToolItem(item.open)}>
-                {isFile ? "Open file" : `Open in ${name.replace(" frame", "")}`}
+                {isFile ? t("Open file") : t("Open in {name}", { name: sourceName(source === "frame" ? "figma" : source) })}
               </button>
             )}
             {onLeaveOut && (
               <button type="button" className="text-button" onClick={onLeaveOut}>
-                Leave this out and reshape
+                {t("Leave this out and reshape")}
               </button>
             )}
           </div>

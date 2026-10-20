@@ -14,14 +14,15 @@ import { DuePicker } from "./components/DuePicker";
 import { Presence } from "./components/Presence";
 import { useFlip } from "./components/useFlip";
 import { dueBadge, dueLabel } from "@shared/due";
+import { currentLang, loc, t } from "./i18n";
 
 // 마감 배지. 줄에서는 짧게(D-3), 지금 할 일 카드에서는 말로(3 days left).
 function Due({ item, long }: { item: TodoItem; long?: boolean }) {
   if (!item.dueDate || item.completedAt) return null;
   const today = localDate();
-  const b = long ? dueLabel(item.dueDate, today) : dueBadge(item.dueDate, today);
+  const b = long ? dueLabel(item.dueDate, today, currentLang()) : dueBadge(item.dueDate, today, currentLang());
   return (
-    <span className={`due-badge due-badge--${b.tone}`} title={`Due ${item.dueDate}`}>
+    <span className={`due-badge due-badge--${b.tone}`} title={t("Due {date}", { date: item.dueDate })}>
       {b.text}
     </span>
   );
@@ -33,6 +34,7 @@ import { DIAL_LABEL, DIAL_VIEWS, dialBuckets, dialRatio, type DialView } from "@
 const api = window.todoban;
 
 function dateLabel(d = new Date()): string {
+  if (currentLang() === "ko") return d.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" });
   return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }).toUpperCase().replace(",", " ·");
 }
 
@@ -67,7 +69,7 @@ function StartButton({ shortcut, variant = "row" }: { shortcut: Shortcut; varian
       type="button"
       className={`start start--${variant}`}
       title={shortcut.url}
-      aria-label={`Open ${shortcut.name}`}
+      aria-label={t("Open {name}", { name: shortcut.name })}
       onPointerDown={(e) => e.stopPropagation()}
       onClick={(e) => {
         e.stopPropagation();
@@ -108,7 +110,7 @@ function Title({ item, className, editing, onEdit, onSave, onCancel }: { item: T
   return (
     <input
       className={`${className} title-input`}
-      aria-label="Task title"
+      aria-label={t("Task title")}
       autoFocus
       value={value}
       onFocus={(e) => e.currentTarget.select()}
@@ -131,7 +133,7 @@ function MoreButton({ onMenu }: { onMenu: () => void }) {
     <button
       type="button"
       className="more"
-      aria-label="More actions"
+      aria-label={t("More actions")}
       onPointerDown={(e) => e.stopPropagation()}
       onClick={(e) => {
         e.stopPropagation();
@@ -191,7 +193,7 @@ function NowCard({
     >
       <div className="now-card__top">
         <span className="now-card__eyebrow">
-          <span className="eyebrow">Now</span>
+          <span className="eyebrow">{t("Now")}</span>
           <Due item={item} long />
         </span>
         <span className="now-card__tools">
@@ -208,7 +210,7 @@ function NowCard({
               <FigmaMark size={11} /> {shortcut.name}
             </span>
           ) : (
-            <span className="now-card__sub">Ready to start</span>
+            <span className="now-card__sub">{t("Ready to start")}</span>
           )}
           {shortcut && <StartButton shortcut={shortcut} variant="now" />}
         </div>
@@ -222,7 +224,7 @@ function NowCard({
             onFirstStep();
           }}
         >
-          <AiSparkle size={12} /> Let Claude find a first step
+          <AiSparkle size={12} /> {t("Let Claude find a first step")}
         </button>
       )}
     </div>
@@ -265,14 +267,14 @@ function Row({
       }}
     >
       <Checkbox checked={Boolean(done) || Boolean(completing)} onToggle={onToggle} />
-      {unclear && <span className="row__dot" aria-label="Unclear" />}
+      {unclear && <span className="row__dot" aria-label={t("Unclear")} />}
       <Title item={item} className="row__title" {...edit} />
       {!edit.editing && (
         <>
           <Due item={item} />
           {unclear && onFirstStep && (
             <span className="row__hint">
-              <AiSparkle size={12} /> Shape
+              <AiSparkle size={12} /> {t("Shape")}
             </span>
           )}
           <Attachments notes={item.context.filter((n) => !(shortcut && n.source === "figma"))} variant="icons" />
@@ -286,7 +288,9 @@ function Row({
 }
 
 function shortDate(date: string): string {
-  return new Date(`${date}T00:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase();
+  // 한국어는 “10월 22일”이 길어 제목을 가리므로 10/22로 쓴다.
+  if (currentLang() === "ko") return `${Number(date.slice(5, 7))}/${Number(date.slice(8, 10))}`;
+  return new Date(`${date}T00:00:00`).toLocaleDateString(loc(), { month: "short", day: "numeric" }).toUpperCase();
 }
 
 function SortableItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -619,27 +623,27 @@ export function TodayList() {
         <div className="shell__inner" ref={innerRef}>
         <header className="header">
           <div className="header__title">
-            <h1>Today</h1>
+            <h1>{t("Today")}</h1>
             <div className="header__sub">
               <span>{dateLabel()}</span>
-              {open.length > 0 && <span>· {open.length} open</span>}
-              {unclearCount > 0 && <span className="chip">{unclearCount} unclear</span>}
+              {open.length > 0 && <span>· {t("{n} open", { n: open.length })}</span>}
+              {unclearCount > 0 && <span className="chip">{t("{n} unclear", { n: unclearCount })}</span>}
             </div>
           </div>
-          <button type="button" className="icon-button" aria-label="Add task" onClick={() => captureRef.current?.focus()}>
+          <button type="button" className="icon-button" aria-label={t("Add task")} onClick={() => captureRef.current?.focus()}>
             <PlusIcon size={14} />
           </button>
           <button
             type="button"
             className={`icon-button${data.settings.listPin.pinned ? " is-on" : ""}`}
-            aria-label={data.settings.listPin.pinned ? "Unpin list" : "Pin list"}
+            aria-label={data.settings.listPin.pinned ? t("Unpin list") : t("Pin list")}
             aria-pressed={data.settings.listPin.pinned}
-            title={data.settings.listPin.pinned ? "Unpin — closes when you click elsewhere" : "Pin — stays open while you use other apps"}
+            title={data.settings.listPin.pinned ? t("Unpin — closes when you click elsewhere") : t("Pin — stays open while you use other apps")}
             onClick={() => api.pinList(!data.settings.listPin.pinned)}
           >
             <PinIcon size={14} />
           </button>
-          <button type="button" className="icon-button" aria-label="Settings" onClick={() => api.openSettings()}>
+          <button type="button" className="icon-button" aria-label={t("Settings")} onClick={() => api.openSettings()}>
             <SettingsIcon size={14} />
           </button>
         </header>
@@ -647,8 +651,8 @@ export function TodayList() {
         <div className="overview">
           <FanDial
             variant="bare"
-            label="Which tasks to show"
-            items={DIAL_VIEWS.map((v) => ({ key: v, label: DIAL_LABEL[v], muted: v !== "today" && buckets[v].length === 0 }))}
+            label={t("Which tasks to show")}
+            items={DIAL_VIEWS.map((v) => ({ key: v, label: t(DIAL_LABEL[v]), muted: v !== "today" && buckets[v].length === 0 }))}
             value={aim}
             onChange={turnDial}
           />
@@ -659,35 +663,35 @@ export function TodayList() {
           {dial !== "today" ? (
             <section className={`section section--view${dialDir ? ` swap--${dialDir}` : ""}`} key={dial}>
               <h2 className="section__label">
-                {DIAL_LABEL[dial]} · {buckets[dial].length}
+                {t(DIAL_LABEL[dial])} · {buckets[dial].length}
               </h2>
-              {buckets[dial].length === 0 && <p className="section__empty">Nothing here.</p>}
-              {buckets[dial].map((t, i) => (
+              {buckets[dial].length === 0 && <p className="section__empty">{t("Nothing here.")}</p>}
+              {buckets[dial].map((item, i) => (
                 <Row
-                  key={t.id}
-                  item={t}
-                  shortcut={shortcutOf(t)}
+                  key={item.id}
+                  item={item}
+                  shortcut={shortcutOf(item)}
                   selected={selected === i}
                   done={dial === "done"}
-                  onToggle={() => complete(t)}
-                  completing={completing.includes(t.id)}
-                  onFirstStep={() => shape(t)}
-                  edit={edit(t)}
-                  isNew={highlight.includes(t.id)}
+                  onToggle={() => complete(item)}
+                  completing={completing.includes(item.id)}
+                  onFirstStep={() => shape(item)}
+                  edit={edit(item)}
+                  isNew={highlight.includes(item.id)}
                   trailing={
                     dial !== "done" && (
                       <>
-                        {t.plannedDate && t.plannedDate !== t.dueDate && <span className="row__date">{shortDate(t.plannedDate)}</span>}
+                        {item.plannedDate && item.plannedDate !== item.dueDate && <span className="row__date">{shortDate(item.plannedDate)}</span>}
                         <button
                           type="button"
                           className="small-button"
                           onPointerDown={(e) => e.stopPropagation()}
                           onClick={(e) => {
                             e.stopPropagation();
-                            act({ type: "moveToToday", id: t.id });
+                            act({ type: "moveToToday", id: item.id });
                           }}
                         >
-                          → Today
+                          → {t("Today")}
                         </button>
                       </>
                     )
@@ -695,7 +699,7 @@ export function TodayList() {
                 />
               ))}
               <button type="button" className="section__toggle" onClick={() => turnDial("today")}>
-                Back to Today <ChevronRightIcon size={12} />
+                {t("Back to Today")} <ChevronRightIcon size={12} />
               </button>
             </section>
           ) : (
@@ -704,18 +708,18 @@ export function TodayList() {
             <div className="carry motion-rise">
               <div className="carry__top">
                 <span className="eyebrow">
-                  <CalendarIcon size={12} /> From yesterday
+                  <CalendarIcon size={12} /> {t("From yesterday")}
                 </span>
-                <span className="eyebrow eyebrow--count">{carry.length} left</span>
+                <span className="eyebrow eyebrow--count">{t("{n} left", { n: carry.length })}</span>
               </div>
-              <p className="carry__title">Bring {carry.length === 1 ? "this task" : `these ${carry.length} tasks`} into today?</p>
+              <p className="carry__title">{carry.length === 1 ? t("Bring this task into today?") : t("Bring these {n} tasks into today?", { n: carry.length })}</p>
               <p className="carry__desc">{carry.map((t) => t.title).join(" · ")}</p>
               <div className="carry__actions">
                 <button type="button" className="button button--primary button--sm" onClick={() => act({ type: "carryOver", to: "today" })}>
-                  Bring to today
+                  {t("Bring to today")}
                 </button>
                 <button type="button" className="text-button" onClick={() => act({ type: "carryOver", to: "later" })}>
-                  Later
+                  {t("Later")}
                 </button>
               </div>
             </div>
@@ -726,8 +730,8 @@ export function TodayList() {
               <span className="empty__mark">
                 <CheckIcon size={18} />
               </span>
-              <p className="empty__title">{done.length ? "All clear for today" : "Nothing for today yet"}</p>
-              <p className="empty__sub">{done.length ? `${done.length} done. Capture the next thought below.` : "Write what's on your mind below."}</p>
+              <p className="empty__title">{done.length ? t("All clear for today") : t("Nothing for today yet")}</p>
+              <p className="empty__sub">{done.length ? t("{n} done. Capture the next thought below.", { n: done.length }) : t("Write what's on your mind below.")}</p>
             </div>
           )}
 
@@ -758,7 +762,7 @@ export function TodayList() {
                 .filter((v) => buckets[v].length > 0)
                 .map((v) => (
                   <button type="button" key={v} className="section__toggle" onClick={() => turnDial(v)}>
-                    {DIAL_LABEL[v]} <span className="section__count">{buckets[v].length}</span> <ChevronRightIcon size={12} />
+                    {t(DIAL_LABEL[v])} <span className="section__count">{buckets[v].length}</span> <ChevronRightIcon size={12} />
                   </button>
                 ))}
             </nav>
@@ -788,9 +792,9 @@ export function TodayList() {
         <Presence value={undo}>
           {(u, state) => (
             <div className="toast motion-sheet" data-motion={state} role="status">
-              <span className="toast__text">Deleted “{u.title}”</span>
+              <span className="toast__text">{t("Deleted “{title}”", { title: u.title })}</span>
               <button type="button" className="toast__undo" onClick={restore}>
-                Undo <kbd>⌘Z</kbd>
+                {t("Undo")} <kbd>⌘Z</kbd>
               </button>
             </div>
           )}
@@ -800,7 +804,7 @@ export function TodayList() {
           <input
             ref={captureRef}
             value={draft}
-            placeholder="Capture a thought…"
+            placeholder={t("Capture a thought…")}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => {
               e.stopPropagation();
@@ -813,7 +817,7 @@ export function TodayList() {
             }}
           />
           {!draft && <kbd>{displayAccelerator(data.settings.hotkey)}</kbd>}
-          <button type="button" className="capture__send" aria-label="Add" disabled={!draft.trim()} onClick={submitDraft}>
+          <button type="button" className="capture__send" aria-label={t("Add")} disabled={!draft.trim()} onClick={submitDraft}>
             <ArrowRightIcon size={14} />
           </button>
         </footer>

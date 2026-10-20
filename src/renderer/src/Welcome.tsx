@@ -4,7 +4,8 @@ import { displayAccelerator } from "@shared/hotkey";
 import { LOCAL_SOURCES } from "@shared/shape";
 import { MCP_SERVICES, MCP_SOURCES, statusOf, type McpStatus } from "@shared/mcp";
 import { ArrowRightIcon, CheckIcon, Spinner } from "./components/icons";
-import { SOURCE_NAME } from "./components/SourceIcon";
+import { sourceName } from "./components/SourceIcon";
+import { t } from "./i18n";
 
 const api = window.todoban;
 
@@ -64,9 +65,9 @@ export function Welcome() {
   if (!data) return <div ref={rootRef} />;
   const claudeState = claude === null ? "wait" : claude.path ? "done" : "error";
   const hotkeyState = hotkeyError ? "error" : "done";
-  const localOn = LOCAL_SOURCES.filter((s) => data.settings.tools.local[s]).map((s) => SOURCE_NAME[s]);
-  const connected = mcp ? MCP_SOURCES.filter((s) => statusOf(mcp, s) === "connected").map((s) => MCP_SERVICES[s].name) : [];
-  const mcpOn = MCP_SOURCES.filter((s) => data.settings.tools.mcp[s]).map((s) => MCP_SERVICES[s].name);
+  const localOn = LOCAL_SOURCES.filter((s) => data.settings.tools.local[s]).map((s) => sourceName(s));
+  const connected = mcp ? MCP_SOURCES.filter((s) => statusOf(mcp, s) === "connected").map((s) => sourceName(s)) : [];
+  const mcpOn = MCP_SOURCES.filter((s) => data.settings.tools.mcp[s]).map((s) => sourceName(s));
   const toolsState = toolsSeen ? "done" : "todo";
   const hero = claudeState !== "done" ? 1 : hotkeyState !== "done" ? 2 : toolsState !== "done" ? 3 : 0;
 
@@ -76,44 +77,44 @@ export function Welcome() {
       <span className="welcome__mark">
         <CheckIcon size={24} />
       </span>
-      <h1>Welcome to todoBAN</h1>
-      <p className="welcome__sub">Write what's on your mind. Shape the first step with your own words and tools.</p>
+      <h1>{t("Welcome to todoBAN")}</h1>
+      <p className="welcome__sub">{t("Write what's on your mind. Shape the first step with your own words and tools.")}</p>
 
       <div className={`steps stagger hero-${hero}`}>
         <Step
           n={1}
           state={claudeState}
-          title={claudeState === "error" ? "Claude Code not found" : "Claude Code"}
+          title={claudeState === "error" ? t("Claude Code not found") : "Claude Code"}
           desc={
             claude === null
-              ? "Looking for claude on this Mac…"
+              ? t("Looking for claude on this Mac…")
               : claude.path
-                ? `${claude.path.replace(/^\/Users\/[^/]+/, "~")} · ${claude.version?.replace(" (Claude Code)", "") ?? "version unknown"}`
-                : "Short tasks still go straight in. Splitting and first steps need Claude Code."
+                ? `${claude.path.replace(/^\/Users\/[^/]+/, "~")} · ${claude.version?.replace(" (Claude Code)", "") ?? t("version unknown")}`
+                : t("Short tasks still go straight in. Splitting and first steps need Claude Code.")
           }
         />
         {claudeState === "error" && (
           <div className="step__actions">
             <button type="button" className="button button--primary button--sm" onClick={() => api.installGuide()}>
-              Install guide
+              {t("Install guide")}
             </button>
             <button type="button" className="button button--secondary button--sm" onClick={() => api.chooseClaude().then((p) => p && refresh())}>
-              Choose file
+              {t("Choose file")}
             </button>
             <button type="button" className="button button--secondary button--sm" onClick={refresh}>
-              Search again
+              {t("Search again")}
             </button>
           </div>
         )}
         <Step
           n={2}
           state={hotkeyState}
-          title="Capture hotkey"
-          desc={hotkeyError ?? "Works from any app — write a thought, press Enter"}
+          title={t("Capture hotkey")}
+          desc={hotkeyError ?? t("Works from any app — write a thought, press Enter")}
           action={
             hotkeyError ? (
               <button type="button" className="button button--secondary button--sm" onClick={() => api.openSettings("general")}>
-                Change
+                {t("Change")}
               </button>
             ) : (
               <kbd>{displayAccelerator(data.settings.hotkey)}</kbd>
@@ -123,18 +124,18 @@ export function Welcome() {
         <Step
           n={3}
           state={toolsState}
-          title="Pick your tools"
+          title={t("Pick your tools")}
           desc={
             <>
-              {localOn.length ? `${localOn.join(", ")} on` : "No tools on"}
-              {mcpOn.length ? ` · ${mcpOn.join(", ")} via MCP` : ""}
+              {localOn.length ? t("{names} on", { names: localOn.join(", ") }) : t("No tools on")}
+              {mcpOn.length ? ` · ${t("{names} via MCP", { names: mcpOn.join(", ") })}` : ""}
               <br />
               {mcp === null ? (
-                <span className="step__note">Checking what's connected in Claude…</span>
+                <span className="step__note">{t("Checking what's connected in Claude…")}</span>
               ) : connected.length ? (
-                <span className="step__note">Connected in Claude: {connected.join(", ")}</span>
+                <span className="step__note">{t("Connected in Claude: {names}", { names: connected.join(", ") })}</span>
               ) : (
-                <span className="step__note">Optional — you can add these anytime</span>
+                <span className="step__note">{t("Optional — you can add these anytime")}</span>
               )}
             </>
           }
@@ -147,7 +148,7 @@ export function Welcome() {
                 api.openSettings("tools");
               }}
             >
-              Choose
+              {t("Choose")}
             </button>
           }
         />
@@ -155,11 +156,11 @@ export function Welcome() {
 
       <div className="welcome__foot">
         <button type="button" className="text-button" onClick={() => api.finishWelcome(false)}>
-          Set up later
+          {t("Set up later")}
         </button>
         <span className="spacer" />
         <button type="button" className="button button--primary" onClick={() => api.finishWelcome(true)}>
-          Start <ArrowRightIcon size={13} />
+          {t("Start")} <ArrowRightIcon size={13} />
         </button>
       </div>
     </div>

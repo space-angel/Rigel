@@ -2895,3 +2895,29 @@ body::-webkit-scrollbar-thumb {
 .review__body {
   overflow-x: clip;
 }
+
+/* 한국어: 넓은 자간은 영문 대문자용이라 한글을 벌려 놓는다. 한국어 화면에서는 자간을 뺀다. */
+html[lang="ko"] :is(.eyebrow,
+  .mono-label,
+  .group__label,
+  kbd,
+  .header__sub,
+  .chip,
+  .section__label,
+  .fs-card__eyebrow,
+  .fs-card__hint,
+  .review__titlebar,
+  .raw__label,
+  .status,
+  .field__label,
+  .shortcut__link,
+  .badge,
+  .shape__note,
+  .due,
+  .row__date,
+  .note-loading,
+  .due-badge,
+  .evidence__weak,
+  .evidence__where) {
+  letter-spacing: 0;
+}

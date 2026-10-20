@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
 import { charCount, classifyQuickInput } from "@shared/quickInput";
 import { AiSparkle, ArrowRightIcon } from "./components/icons";
+import { t } from "./i18n";
 
 const api = window.todoban;
 
@@ -70,7 +71,7 @@ export function QuickInput() {
             autoFocus
             rows={1}
             value={text}
-            placeholder="What's on your mind?"
+            placeholder={t("What's on your mind?")}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={onKeyDown}
           />
@@ -78,16 +79,16 @@ export function QuickInput() {
         <div className="quick__hint">
           {kind === "short" && (
             <span className="quick__kind motion-fade" key="short">
-              <ArrowRightIcon size={12} /> {count} chars · straight into today
+              <ArrowRightIcon size={12} /> {t("{n} chars · straight into today", { n: count })}
             </span>
           )}
           {kind === "long" && (
             <span className="quick__kind quick__kind--ai motion-fade" key="long">
-              <AiSparkle size={12} /> {count} chars · Claude splits it into tasks
+              <AiSparkle size={12} /> {t("{n} chars · Claude splits it into tasks", { n: count })}
             </span>
           )}
           <span className="quick__keys">
-            <kbd>esc</kbd> close <kbd>↵</kbd> {kind === "long" ? "split" : "add"} <kbd>⇧↵</kbd> new line
+            <kbd>esc</kbd> {t("close")} <kbd>↵</kbd> {kind === "long" ? t("split") : t("add")} <kbd>⇧↵</kbd> {t("new line")}
           </span>
         </div>
       </div>

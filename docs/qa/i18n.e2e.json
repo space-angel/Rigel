@@ -1,0 +1,23 @@
+[
+  { "name": "목록 · 한국어", "win": "list", "main": "openList", "until": "__e2e.$('.now-card')", "wait": 500, "snap": true,
+    "run": "return { h1: __e2e.$('h1').textContent, dial: __e2e.$('.dial__label.is-active').textContent, sub: __e2e.$('.header__sub').textContent, capture: __e2e.$('.capture input').placeholder };",
+    "expect": "__e2e.$('h1').textContent === '오늘' && __e2e.$('.dial__label.is-active').textContent === '오늘'" },
+  { "name": "오른쪽 클릭 메뉴 · 한국어", "win": "list",
+    "run": "const d = await window.todoban.getData(); const t = d.todos.find(x => x.title.includes('우테크')); return await window.todoban.todoMenu(t.id);",
+    "expect": "true" },
+  { "name": "다이얼 · 내일 묶음", "win": "list", "run": "__e2e.all('.dial__label').find(l => l.textContent === '내일').dispatchEvent(new MouseEvent('click', { bubbles: true })); return true;", "wait": 600, "snap": true },
+  { "name": "빚기 · 한국어", "win": "list", "main": "shape:면접 준비", "until": "__e2e.$('.shape .tool, .shape__empty')", "wait": 800, "snap": true,
+    "run": "return { h1: __e2e.$('.shape h1').textContent, eyebrows: __e2e.all('.shape .eyebrow').map(e => e.textContent), go: __e2e.$('.shape__foot .button--primary').textContent.trim() };" },
+  { "name": "빠른 입력 · 한국어", "win": "quick", "run": "__e2e.type('textarea', '내일 운동'); return __e2e.$('.quick__hint').textContent;", "wait": 300, "snap": true },
+  { "name": "설정 · 일반 · 한국어", "win": "settings", "main": "openSettings:general", "until": "__e2e.$('.segmented')", "wait": 500, "snap": true,
+    "run": "return __e2e.all('.group__label').map(g => g.textContent);" },
+  { "name": "설정 · 도구 · 한국어", "win": "settings", "run": "__e2e.click(__e2e.byText('도구')); return true;", "wait": 800, "snap": true },
+  { "name": "English 고르기", "win": "settings", "run": "__e2e.click(__e2e.byText('일반')); await new Promise(r => setTimeout(r, 300)); __e2e.click(__e2e.byText('English')); return true;", "wait": 600, "snap": true,
+    "expect": "__e2e.all('.group__label').some(g => g.textContent === 'General')" },
+  { "name": "목록 · 바로 영어로", "win": "list", "main": "openList", "until": "__e2e.$('h1')?.textContent === 'Today'", "wait": 500, "snap": true },
+  { "name": "메뉴 · 영어", "win": "list",
+    "run": "const d = await window.todoban.getData(); const t = d.todos.find(x => x.title.includes('우테크')); return await window.todoban.todoMenu(t.id);",
+    "expect": "true" },
+  { "name": "한국어로 되돌리기", "win": "settings", "run": "__e2e.click(__e2e.byText('한국어')); return true;", "wait": 500,
+    "expect": "__e2e.all('.group__label').some(g => g.textContent === '일반')" }
+]

@@ -69,6 +69,7 @@ export const Settings = z.object({
   tools: ToolSettings.default(DEFAULT_TOOLS),
   // 시작하기 창(D4)을 마쳤는지. 이 필드가 없던 파일은 이미 쓰던 사람이라 true로 읽는다.
   welcomed: z.boolean().default(true),
+  language: z.enum(["ko", "en"]).default("ko"),
   // 목록 고정: 다른 앱을 눌러도 닫히지 않는 떠 있는 창. 옮긴 위치를 기억한다.
   listPin: z.object({ pinned: z.boolean(), x: z.number().nullable(), y: z.number().nullable() }).default({ pinned: false, x: null, y: null }),
 });
@@ -92,6 +93,7 @@ export const DEFAULT_SETTINGS: Settings = {
   lastCarryOverCheck: null,
   tools: DEFAULT_TOOLS,
   welcomed: false,
+  language: "ko",
   listPin: { pinned: false, x: null, y: null },
 };
 

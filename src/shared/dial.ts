@@ -1,3 +1,4 @@
+import { msg } from "./i18n.ts";
 import type { TodoItem } from "./types.ts";
 import { localDate, overdue, todayView } from "./todos.ts";
 
@@ -6,11 +7,11 @@ export const DIAL_VIEWS = ["done", "overdue", "today", "tomorrow", "later"] as c
 export type DialView = (typeof DIAL_VIEWS)[number];
 
 export const DIAL_LABEL: Record<DialView, string> = {
-  done: "Done",
-  overdue: "Overdue",
-  today: "Today",
-  tomorrow: "Tomorrow",
-  later: "Later",
+  done: msg("Done"),
+  overdue: msg("Overdue"),
+  today: msg("Today"),
+  tomorrow: msg("Tomorrow"),
+  later: msg("Later"),
 };
 
 export function addDays(date: string, days: number): string {
