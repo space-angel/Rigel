@@ -1,0 +1,25 @@
+[
+  { "name": "P0-1a 긴 생각을 넣는다 (화요일)", "win": "quick", "run": "__e2e.type('textarea', '이번 주 금요일 토스 PO 면접이라 자기소개 다시 쓰고 포트폴리오 피드백도 반영해야 함'); __e2e.key('textarea', 'Enter'); return true;" },
+  { "name": "P0-1b 확인 창: 준비 할 일의 날짜", "win": "review", "until": "__e2e.all('.draft').length > 0", "timeout": 60000, "wait": 400, "snap": true,
+    "run": "return __e2e.all('.draft').map(d => d.querySelector('.draft__title').value + ' → ' + d.querySelector('.pill').textContent.trim());" },
+  { "name": "P0-1c Add → 목록", "win": "review", "run": "__e2e.click('.review__footer .button--primary'); return true;" },
+  { "name": "P0-1d 목록이 보여 준 곳", "win": "list", "until": "__e2e.$('.is-new')", "wait": 400, "snap": true,
+    "run": "return { dial: __e2e.$('.dial__label.is-active').textContent, newRows: __e2e.all('.is-new .row__title').map(t => t.textContent) };" },
+  { "name": "P0-1e Today로 돌리면", "win": "list", "run": "__e2e.all('.dial__label').find(l => l.textContent === 'Today').dispatchEvent(new MouseEvent('click', { bubbles: true })); await new Promise(r => setTimeout(r, 500)); return { today: __e2e.all('.now-card__title, .row__title').map(t => t.textContent) };", "snap": true },
+
+  { "name": "P0-2a 막연한 한 줄을 넣는다", "win": "quick", "run": "__e2e.type('textarea', '연봉 협상 준비'); __e2e.key('textarea', 'Enter'); return true;" },
+  { "name": "P0-2b 목록에 들어온 모습", "win": "list", "until": "__e2e.$('.is-new')", "wait": 400, "snap": true,
+    "run": "const r = __e2e.$('.is-new'); return { text: r.textContent.trim(), unclear: r.classList.contains('is-unclear') };" },
+  { "name": "P0-2c 20초 뒤 (다른 일을 하다 돌아옴)", "win": "list", "wait": 20000,
+    "run": "const fs = await window.todoban.getFirstSteps(); const d = await window.todoban.getData(); const t = d.todos.find(x => x.title === '연봉 협상 준비'); return { stillUnclear: !t.isClear, preparedFirstSteps: fs.length };", "snap": true },
+  { "name": "P0-2d [조작] 할 일을 누른다", "win": "list", "run": "__e2e.all('.row.is-unclear').find(r => r.textContent.includes('연봉 협상')).dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 })); return true;", "until": "__e2e.$('.shape')" },
+  { "name": "P0-2e [대기] 도구 읽기", "win": "list", "until": "!__e2e.text().includes('Reading')", "timeout": 60000, "snap": true },
+  { "name": "P0-2f [조작] Shape it → [대기] 첫 행동", "win": "list", "run": "__e2e.click('.shape__foot .button--primary'); return true;", "until": "__e2e.$('.result') || __e2e.$('.fs-card')", "timeout": 90000, "snap": true,
+    "run2": "", "note": "" },
+  { "name": "P0-2g 받은 첫 행동", "win": "list", "run": "return __e2e.text('.result') || __e2e.text('.fs-card');" },
+
+  { "name": "P0-3a [조작] Use this step", "win": "list", "run": "const title = __e2e.$('.result__title')?.textContent; __e2e.click(__e2e.byText('Use this step')); return title;", "wait": 700, "snap": true },
+  { "name": "P0-3b 받은 할 일이 어디 있나", "win": "list",
+    "run": "const d = await window.todoban.getData(); const t = d.todos.find(x => x.rawText === '연봉 협상 준비'); const rows = [...document.querySelectorAll('.now-card, .row')]; const i = rows.findIndex(r => r.textContent.includes(t.title)); const el = rows[i]; const s = __e2e.$('.scroll').getBoundingClientRect(); const r = el ? el.getBoundingClientRect() : null; return { title: t.title, now: __e2e.$('.now-card__title').textContent, position: i + 1 + ' / ' + rows.length, visible: !!r && r.top >= s.top && r.bottom <= s.bottom, highlighted: !!el && el.classList.contains('is-new'), attached: t.context.map(c => c.source + ':' + c.label) };" },
+  { "name": "P0-3c 자료를 열려면", "win": "list", "run": "__e2e.$('.scroll').scrollTop = 9999; await new Promise(r => setTimeout(r, 300)); return __e2e.all('.attach__item').map(a => a.getAttribute('aria-label'));", "snap": true }
+]

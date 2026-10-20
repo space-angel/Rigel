@@ -1,0 +1,140 @@
+[
+  {
+    "name": "P0-1a 긴 생각을 넣는다 (화요일)",
+    "win": "quick",
+    "ok": true,
+    "ms": 21,
+    "value": true
+  },
+  {
+    "name": "P0-1b 확인 창: 준비 할 일의 날짜",
+    "win": "review",
+    "ok": true,
+    "ms": 8593,
+    "value": [],
+    "snap": "02-review.png"
+  },
+  {
+    "name": "P0-1c Add → 목록",
+    "win": "review",
+    "ok": true,
+    "ms": 3,
+    "value": true
+  },
+  {
+    "name": "P0-1d 목록이 보여 준 곳",
+    "win": "list",
+    "ok": true,
+    "ms": 832,
+    "value": {
+      "dial": "Today",
+      "newRows": []
+    },
+    "snap": "04-list.png"
+  },
+  {
+    "name": "P0-1e Today로 돌리면",
+    "win": "list",
+    "ok": true,
+    "ms": 925,
+    "value": {
+      "today": [
+        "포폴 올리브영 장표 지표 문장 고치기",
+        "우테크 과제 README 마무리하기",
+        "사일로 발표 자료 3~5번 장표 검토하기",
+        "면접 준비",
+        "이력서 PDF 다시 내보내기"
+      ]
+    },
+    "snap": "05-list.png"
+  },
+  {
+    "name": "P0-2a 막연한 한 줄을 넣는다",
+    "win": "quick",
+    "ok": true,
+    "ms": 7,
+    "value": true
+  },
+  {
+    "name": "P0-2b 목록에 들어온 모습",
+    "win": "list",
+    "ok": true,
+    "ms": 805,
+    "value": {
+      "text": "연봉 협상 준비 Shape",
+      "unclear": true
+    },
+    "snap": "07-list.png"
+  },
+  {
+    "name": "P0-2c 20초 뒤 (다른 일을 하다 돌아옴)",
+    "win": "list",
+    "ok": true,
+    "ms": 20413,
+    "value": {
+      "stillUnclear": true,
+      "preparedFirstSteps": 0
+    },
+    "snap": "08-list.png"
+  },
+  {
+    "name": "P0-2d [조작] 할 일을 누른다",
+    "win": "list",
+    "ok": true,
+    "ms": 262,
+    "value": true
+  },
+  {
+    "name": "P0-2e [대기] 도구 읽기",
+    "win": "list",
+    "ok": true,
+    "ms": 18300,
+    "snap": "10-list.png"
+  },
+  {
+    "name": "P0-2f [조작] Shape it → [대기] 첫 행동",
+    "win": "list",
+    "ok": true,
+    "ms": 4178,
+    "note": "",
+    "value": true,
+    "snap": "11-list.png"
+  },
+  {
+    "name": "P0-2g 받은 첫 행동",
+    "win": "list",
+    "ok": true,
+    "ms": 1,
+    "value": "First step30 min희망 연봉 근거 3가지 적기Made from general knowledge only — nothing in your tools matched these words. Try picking other words.연봉+ Claude 100%"
+  },
+  {
+    "name": "P0-3a [조작] Use this step",
+    "win": "list",
+    "ok": true,
+    "ms": 1115,
+    "value": "희망 연봉 근거 3가지 적기",
+    "snap": "13-list.png"
+  },
+  {
+    "name": "P0-3b 받은 할 일이 어디 있나",
+    "win": "list",
+    "ok": true,
+    "ms": 0,
+    "value": {
+      "title": "희망 연봉 근거 3가지 적기",
+      "now": "포폴 올리브영 장표 지표 문장 고치기",
+      "position": "6 / 6",
+      "visible": false,
+      "highlighted": false,
+      "attached": []
+    }
+  },
+  {
+    "name": "P0-3c 자료를 열려면",
+    "win": "list",
+    "ok": true,
+    "ms": 724,
+    "value": [],
+    "snap": "15-list.png"
+  }
+]
