@@ -7,6 +7,7 @@ import { toAccelerator } from "@shared/hotkey";
 import { IS_MAC, LOCAL_AVAILABLE, showHotkey } from "./platform";
 import type { ClaudeInfo } from "@shared/claude";
 import { authLabel, shortVersion } from "./claudeLabels";
+import { useUpdate } from "./useUpdate";
 import { CheckIcon, EditIcon, FigmaMark, LinkIcon, PlusIcon, Spinner, TerminalIcon, TrashIcon, UserIcon } from "./components/icons";
 import { LOCAL_SOURCES, normalizeMix, type LocalSource } from "@shared/shape";
 import { MCP_SERVICES, MCP_SOURCES, statusOf, type McpSource, type McpStatus } from "@shared/mcp";
@@ -77,6 +78,49 @@ const MODELS = [
   { value: "sonnet", label: "Sonnet" },
   { value: "haiku", label: "Haiku" },
 ];
+
+// 앱 버전과 새 버전. 윈도우는 받아 두었다가 다시 켤 때 바뀌고, 맥은 받기를 눌러 새 설치 파일을 받는다.
+function VersionRow() {
+  const u = useUpdate();
+  if (!u) return null;
+  const desc =
+    u.status === "available"
+      ? t("Version {v} is out", { v: u.version })
+      : u.status === "downloading"
+        ? t("Getting version {v}… {p}%", { v: u.version, p: u.percent })
+        : u.status === "ready"
+          ? t("Version {v} is ready. Restart to finish", { v: u.version })
+          : u.status === "checking"
+            ? t("Checking for a new version")
+            : u.status === "latest"
+              ? t("You're on the latest version")
+              : u.status === "error"
+                ? t("Couldn't check for a new version")
+                : null;
+  return (
+    <div className="setting">
+      <div className="setting__text">
+        <p>
+          {t("Version")} <span className="mono-label">{u.current}</span>
+        </p>
+        {desc && <p className={`setting__desc${u.status === "available" || u.status === "ready" ? " is-ok" : ""}`}>{desc}</p>}
+      </div>
+      {u.status === "available" ? (
+        <button type="button" className="button button--primary button--sm" onClick={() => api.downloadUpdate()}>
+          {t("Get it")}
+        </button>
+      ) : u.status === "ready" ? (
+        <button type="button" className="button button--primary button--sm" onClick={() => api.installUpdate()}>
+          {t("Restart")}
+        </button>
+      ) : (
+        <button type="button" className="button button--secondary button--sm" disabled={u.status === "checking" || u.status === "downloading"} onClick={() => api.checkUpdate()}>
+          {t("Check")}
+        </button>
+      )}
+    </div>
+  );
+}
 
 function GeneralTab({ data }: { data: AppData }) {
   const [info, setInfo] = useState<ClaudeInfo | null>(null);
@@ -217,6 +261,7 @@ function GeneralTab({ data }: { data: AppData }) {
           <p className="setting__text">{t("Open at login")}</p>
           <Toggle on={data.settings.openAtLogin} onChange={(v) => api.act({ type: "setSettings", patch: { openAtLogin: v } })} />
         </div>
+        <VersionRow />
       </Group>
     </div>
   );

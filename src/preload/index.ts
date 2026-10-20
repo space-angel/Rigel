@@ -5,11 +5,23 @@ import type { FirstStepState } from "@shared/firstStep";
 import type { ShapeInput, ToolItem, ToolResult } from "@shared/shape";
 import type { McpSource, McpStatus } from "@shared/mcp";
 import type { ClaudeInfo } from "@shared/claude";
+import type { UpdateState } from "@shared/update";
 
 const api = {
   // darwin | win32 | linux. 단축키 표시·수정 키(⌘/Ctrl)·맥 전용 기능을 화면에서 가른다.
   platform: process.platform,
   getData: (): Promise<AppData> => ipcRenderer.invoke("data:get"),
+  getUpdate: (): Promise<UpdateState> => ipcRenderer.invoke("update:get"),
+  onUpdate: (fn: (s: UpdateState) => void) => {
+    const listener = (_e: unknown, s: UpdateState) => fn(s);
+    ipcRenderer.on("update:changed", listener);
+    return () => {
+      ipcRenderer.removeListener("update:changed", listener);
+    };
+  },
+  checkUpdate: () => ipcRenderer.send("update:check"),
+  downloadUpdate: () => ipcRenderer.send("update:download"),
+  installUpdate: () => ipcRenderer.send("update:install"),
   act: (action: TodoAction): Promise<AppData> => ipcRenderer.invoke("todo:action", action),
   todoMenu: (id: string): Promise<string[]> => ipcRenderer.invoke("todo:menu", id),
   onTodoRequest: (fn: (kind: "edit" | "delete" | "due", id: string) => void) => {

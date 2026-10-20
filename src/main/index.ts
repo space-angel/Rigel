@@ -18,6 +18,7 @@ import { safeServiceUrl, type McpSource } from "@shared/mcp";
 import type { ShapeInput, ToolItem } from "@shared/shape";
 import { openShortcut } from "./shortcutOpener";
 import { runE2E } from "./e2e";
+import { Updater } from "./updater";
 import { claudeAuth, claudeVersion, ensureWorkDir, findClaude, resetRules, resourcePath, rulesStatus } from "./claude/setup";
 
 app.setName("todoBAN");
@@ -79,6 +80,7 @@ let settingsWindow: BrowserWindow | null = null;
 let welcomeWindow: BrowserWindow | null = null;
 let data: AppData;
 // 단축키를 못 쓰는 이유. 화면에 보일 때 지금 언어로 바꾼다.
+let updater: Updater;
 let hotkeyFail: { key: string; accelerator: string } | null = null;
 const tr = (key: string, vars?: Vars) => translate(data.settings.language, key, vars);
 const hotkeyError = () => (hotkeyFail ? tr(hotkeyFail.key, { key: hotkeyFail.accelerator }) : null);
@@ -481,11 +483,20 @@ function registerHotkey(): void {
   if (hotkeyFail) console.error(`[hotkey] ${translate("en", hotkeyFail.key, { key: accelerator })}`);
 }
 
+// 새 버전이 있으면 메뉴바(트레이) 메뉴에 한 줄. 맥은 받기, 윈도우는 다 받았으면 다시 켜기.
+function updateMenuItems(): Electron.MenuItemConstructorOptions[] {
+  const s = updater?.state;
+  if (s?.status === "available") return [{ type: "separator" }, { label: tr("Get version {v}…", { v: s.version }), click: () => openOutside(s.url, () => shell.openExternal(s.url)) }];
+  if (s?.status === "ready") return [{ type: "separator" }, { label: tr("Restart to update to {v}", { v: s.version }), click: () => updater.install() }];
+  return [];
+}
+
 function trayMenu(): Menu {
   return Menu.buildFromTemplate([
     { label: tr("Capture"), accelerator: data.settings.hotkey, click: showQuickWindow },
     { label: tr("Today"), click: toggleListWindow },
     { label: tr("Settings…"), accelerator: "CmdOrCtrl+,", click: () => showSettings() },
+    ...updateMenuItems(),
     ...(hotkeyFail ? [{ type: "separator" as const }, { label: hotkeyError()!, enabled: false }] : []),
     { type: "separator" },
     { label: tr("Quit todoBAN"), role: "quit" },
@@ -569,6 +580,18 @@ app.whenReady().then(() => {
 
   // 한 줄 30자 이하는 그대로 넣고, 긴 입력은 확인 창을 열어 Claude에게 나눠 달라고 한다.
   ipcMain.handle("quick:submit", (_e, text: string) => submitQuick(text));
+
+  updater = new Updater((s) => {
+    for (const w of BrowserWindow.getAllWindows()) w.webContents.send("update:changed", s);
+  });
+  ipcMain.handle("update:get", () => updater.state);
+  ipcMain.on("update:check", () => void updater.check());
+  ipcMain.on("update:download", () => {
+    const s = updater.state;
+    if (s.status === "available") openOutside(s.url, () => shell.openExternal(s.url));
+  });
+  ipcMain.on("update:install", () => updater.install());
+  updater.start();
 
   firstSteps = new FirstStepManager(
     () => data,

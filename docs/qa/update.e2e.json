@@ -1,0 +1,6 @@
+[
+ {"name":"설정 · 버전 줄","win":"settings","main":"openSettings:general","until":"[...document.querySelectorAll('.setting')].some(s => s.textContent.includes('버전') && (s.textContent.includes('나왔어요') || s.textContent.includes('최신')))","timeout":20000,"wait":500,"snap":true,
+  "run":"return null;"},
+ {"name":"버전 줄 글과 버튼","win":"settings","run":"const row = [...document.querySelectorAll('.setting')].find(s => s.querySelector('.mono-label') && s.textContent.includes('버전')); return { text: row?.querySelector('.setting__desc')?.textContent, button: row?.querySelector('button')?.textContent };"},
+ {"name":"목록 · 설정 버튼 점","win":"list","main":"openList","until":"__e2e.$('.header')","wait":500,"run":"return { dot: !!__e2e.$('.icon-button.has-dot'), label: __e2e.$('.icon-button.has-dot')?.getAttribute('aria-label') };"}
+]

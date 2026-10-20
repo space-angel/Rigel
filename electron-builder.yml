@@ -16,6 +16,12 @@ extraResources:
     filter:
       - "**/*"
 asar: true
+# 업데이트: 공개 레포의 GitHub Releases. 앱이 여기서 최신 버전을 확인한다(src/main/updater.ts).
+publish:
+  provider: github
+  owner: space-angel
+  repo: todoban-releases
+  releaseType: release
 # 앱 안의 Chromium 언어 파일은 한국어·영어만(앱 크기를 줄인다)
 electronLanguages:
   - ko
@@ -28,6 +34,7 @@ mac:
     - target: zip
       arch: [arm64, x64]
   category: public.app-category.productivity
+  artifactName: ${productName}-mac-${arch}.${ext}
   icon: build/icon.png
   # 메뉴바 앱: Dock에 뜨지 않는다
   extendInfo:
@@ -36,16 +43,17 @@ mac:
   hardenedRuntime: true
   # 서명·공증은 Apple Developer ID가 있을 때 CSC_LINK·APPLE_ID 등 환경 변수로 켠다(docs/release.md)
   notarize: false
+# 파일 이름에 버전을 넣지 않는다. 다운로드 페이지가 늘 releases/latest/download/<이름>으로 최신을 가리킨다.
 dmg:
-  artifactName: ${productName}-${version}-mac-${arch}.${ext}
+  artifactName: ${productName}-mac-${arch}.${ext}
   writeUpdateInfo: false
 
 win:
   target:
     - target: nsis
-      arch: [x64, arm64]
+      arch: [x64]
   icon: build/icon.png
-  artifactName: ${productName}-${version}-win-${arch}-setup.${ext}
+  artifactName: ${productName}-win-${arch}-setup.${ext}
 nsis:
   # 사용자 폴더에 설치(관리자 권한 없이). 설치 위치를 고를 수 있게 한다.
   oneClick: false

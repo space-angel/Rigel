@@ -18,6 +18,7 @@ import { currentLang, loc, t } from "./i18n";
 import { msg } from "@shared/i18n";
 import { takeHandoff } from "./glow";
 import { sourceColors } from "./components/sourceColors";
+import { hasUpdate, useUpdate } from "./useUpdate";
 
 // 마감 배지. 줄에서는 짧게(D-3), 지금 할 일 카드에서는 말로(3 days left).
 function Due({ item, long }: { item: TodoItem; long?: boolean }) {
@@ -450,6 +451,8 @@ export function TodayList() {
   const [completing, setCompleting] = useState<string[]>([]);
   // 화면 전환 방향(목록 → 빚기는 앞으로, 돌아오면 뒤로)과 창 열기 움직임
   const [viewDir, setViewDir] = useState<"forward" | "back" | null>(null);
+  // 새 버전이 있으면 설정 버튼에 작은 점
+  const update = useUpdate();
   // 시작 힌트: 목록을 열고 6초 동안 아무것도 안 하면, 지금 할 일 카드가 한 번만 “여기서 시작해요”라고 빛난다.
   // 누르거나, 키를 치거나, 목록 위에서 마우스를 움직이면(이미 보고 있다는 뜻) 취소.
   const [nudge, setNudge] = useState(false);
@@ -800,7 +803,7 @@ export function TodayList() {
           >
             <PinIcon size={14} />
           </button>
-          <button type="button" className="icon-button" aria-label={t("Settings")} onClick={() => api.openSettings()}>
+          <button type="button" className={`icon-button${hasUpdate(update) ? " has-dot" : ""}`} aria-label={hasUpdate(update) ? t("Settings · new version") : t("Settings")} onClick={() => api.openSettings()}>
             <SettingsIcon size={14} />
           </button>
         </header>

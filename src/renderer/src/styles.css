@@ -3205,3 +3205,19 @@ html[lang="ko"] :is(.eyebrow,
     opacity: 0.5;
   }
 }
+
+/* 새 버전이 있을 때 설정 버튼의 작은 점(재촉하지 않게 작게, 움직이지 않게) */
+.icon-button.has-dot {
+  position: relative;
+}
+.icon-button.has-dot::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blue-300);
+  box-shadow: 0 0 0 2px var(--ink-2);
+}

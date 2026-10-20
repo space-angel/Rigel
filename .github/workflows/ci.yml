@@ -79,7 +79,12 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: installer-${{ matrix.os }}
+          # 업데이트 정보(latest*.yml)와 블록 맵도 함께. 릴리스에 그대로 올린다.
           path: |
             dist/*.exe
             dist/*.dmg
             dist/*.zip
+            dist/*.yml
+            dist/*.blockmap
+            !dist/builder-debug.yml
+            !dist/builder-effective-config.yaml
