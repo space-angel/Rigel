@@ -6,7 +6,8 @@ import type { Shortcut } from "@shared/types";
 export function openShortcut(s: Shortcut): Promise<"app" | "browser"> {
   return new Promise((resolve) => {
     const fallback = () => shell.openExternal(s.url).then(() => resolve("browser"));
-    if (!s.appBundleId) {
+    // 윈도우·리눅스에는 앱 묶음 ID로 여는 방법이 없다. 링크를 열면 Figma 앱이 설정에 따라 받아 연다.
+    if (!s.appBundleId || process.platform !== "darwin") {
       fallback();
       return;
     }

@@ -1,4 +1,3 @@
-import { spawn } from "node:child_process";
 import { ClaudeError } from "@shared/claude";
 import { CollectManyResult, CollectResult, MCP_SERVICES, collectManyRequest, type CollectTask, type EnrichStatus, WhoamiResult, allowedTools, collectRequest, figmaTarget, parseMcpList, safeServiceUrl, searched, toolPrefix, whoamiRequest, type McpSource, type McpStatus } from "@shared/mcp";
 import type { ToolResult } from "@shared/shape";
@@ -6,7 +5,8 @@ import type { AppData, ContextNote, TodoItem } from "@shared/types";
 import { splitWords } from "@shared/shape";
 import { localDate } from "@shared/todos";
 import { matchShortcutByKeywords } from "@shared/quickInput";
-import { EXTRA_PATHS, ensureWorkDir, findClaude } from "../claude/setup";
+import { ensureWorkDir, findClaude } from "../claude/setup";
+import { claudeEnv, killClaude, spawnClaude } from "../claude/paths";
 
 // MCP 도구는 collect 호출 하나에서만 연다 (7-a 측정).
 // claude.ai 커넥터는 user 설정에서만 보이고, 내장 도구는 MCP 도구를 찾는 ToolSearch만 연다.
@@ -33,7 +33,7 @@ function collectArgs(source: McpSource, model: string | null, kind: "collect" | 
 }
 
 function env() {
-  return { ...process.env, PATH: [...EXTRA_PATHS, process.env.PATH ?? ""].join(":") };
+  return claudeEnv();
 }
 
 // 피그마 프레임은 할 일에 연결된 바로가기, 없으면 낱말이 맞는 바로가기에서 고른다.
@@ -47,18 +47,18 @@ type Line = Record<string, any>;
 // claude를 한 번 실행해 stream-json 줄을 모두 받는다.
 function runOnce(path: string, args: string[], body: string, signal?: AbortSignal, timeoutMs = COLLECT_TIMEOUT_MS): Promise<Line[] | ClaudeError> {
   return new Promise<Line[]>((resolve, reject) => {
-    const child = spawn(path, args, { cwd: ensureWorkDir(), env: env() });
+    const child = spawnClaude(path, args, { cwd: ensureWorkDir(), env: env() });
     let out = "";
     const timer = setTimeout(() => {
-      child.kill("SIGTERM");
+      killClaude(child);
       reject(new ClaudeError("timeout", "collect 시간 초과"));
     }, timeoutMs);
     const onAbort = () => {
-      child.kill("SIGTERM");
+      killClaude(child);
       reject(new ClaudeError("failed", "취소했어요"));
     };
     signal?.addEventListener("abort", onAbort, { once: true });
-    child.stdout.on("data", (d) => (out += d));
+    child.stdout!.on("data", (d) => (out += d));
     child.on("error", (e) => reject(new ClaudeError("notFound", e.message)));
     child.on("close", () => {
       clearTimeout(timer);
@@ -76,8 +76,8 @@ function runOnce(path: string, args: string[], body: string, signal?: AbortSigna
           }),
       );
     });
-    child.stdin.on("error", () => {});
-    child.stdin.end(body);
+    child.stdin!.on("error", () => {});
+    child.stdin!.end(body);
   }).catch((e: ClaudeError) => e);
 }
 
@@ -212,18 +212,18 @@ let statusCache: { at: number; value: Promise<Record<string, McpStatus>> } | nul
 
 function probeInit(path: string): Promise<Record<string, McpStatus>> {
   return new Promise((resolve) => {
-    const child = spawn(path, ["-p", "--output-format", "stream-json", "--verbose", "--no-session-persistence", "--setting-sources", "user,project", "--tools", ""], {
+    const child = spawnClaude(path, ["-p", "--output-format", "stream-json", "--verbose", "--no-session-persistence", "--setting-sources", "user,project", "--tools", ""], {
       cwd: ensureWorkDir(),
       env: env(),
     });
     let buf = "";
     const done = (v: Record<string, McpStatus>) => {
       clearTimeout(timer);
-      child.kill("SIGTERM");
+      killClaude(child);
       resolve(v);
     };
     const timer = setTimeout(() => done({}), 15_000);
-    child.stdout.on("data", (d) => {
+    child.stdout!.on("data", (d) => {
       buf += d;
       const line = buf.split("\n").find((l) => l.includes('"subtype":"init"'));
       if (!line) return;
@@ -235,8 +235,8 @@ function probeInit(path: string): Promise<Record<string, McpStatus>> {
       }
     });
     child.on("error", () => done({}));
-    child.stdin.on("error", () => {});
-    child.stdin.end("status");
+    child.stdin!.on("error", () => {});
+    child.stdin!.end("status");
   });
 }
 
@@ -246,10 +246,10 @@ function normalizeStatus(s: string): McpStatus {
 
 function mcpList(path: string): Promise<Record<string, McpStatus>> {
   return new Promise((resolve) => {
-    const child = spawn(path, ["mcp", "list"], { env: env() });
+    const child = spawnClaude(path, ["mcp", "list"], { env: env() });
     let out = "";
-    const timer = setTimeout(() => child.kill("SIGTERM"), 30_000);
-    child.stdout.on("data", (d) => (out += d));
+    const timer = setTimeout(() => killClaude(child), 30_000);
+    child.stdout!.on("data", (d) => (out += d));
     child.on("error", () => resolve({}));
     child.on("close", () => {
       clearTimeout(timer);

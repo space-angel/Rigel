@@ -8,6 +8,7 @@ import { SourceIcon, sourceName } from "./components/SourceIcon";
 import { Spinner } from "./components/icons";
 import { localDate } from "@shared/todos";
 import { currentLang, t } from "./i18n";
+import { modKey } from "./platform";
 import { AiSparkle, ChevronDownIcon, CloseIcon, PlusIcon, RefreshIcon, TerminalIcon, WarningIcon } from "./components/icons";
 
 const api = window.todoban;
@@ -188,7 +189,7 @@ export function Review() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") api.cancelReview();
-      if (e.key === "Enter" && e.metaKey && state?.status === "ready") commit();
+      if (e.key === "Enter" && modKey(e) && state?.status === "ready") commit();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);

@@ -4,7 +4,7 @@ import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } 
 import { CSS } from "@dnd-kit/utilities";
 import type { AppData, Shortcut, TodoItem } from "@shared/types";
 import { localDate, pendingCarryOver, todayView } from "@shared/todos";
-import { displayAccelerator } from "@shared/hotkey";
+import { modKey, modLabel, showHotkey } from "./platform";
 import type { FirstStepState } from "@shared/firstStep";
 import { AiSparkle, ArrowRightIcon, CalendarIcon, CheckIcon, ChevronRightIcon, FigmaMark, MoreIcon, PinIcon, PlayIcon, SettingsIcon } from "./components/icons";
 import { FirstStepCard } from "./FirstStepCard";
@@ -735,13 +735,13 @@ export function TodayList() {
     else if (e.key === " " && current) complete(current);
     else if (e.key === "Enter" && current && !current.isClear && !current.completedAt) (dial === "today" ? askFirstStep(current) : shape(current));
     else if (e.key === "Enter" && current && shortcutOf(current)) api.openShortcut(current.shortcutId!);
-    else if (e.key === "," && e.metaKey) api.openSettings();
-    else if (e.key === "Backspace" && e.metaKey && current) remove(current);
+    else if (e.key === "," && modKey(e)) api.openSettings();
+    else if (e.key === "Backspace" && modKey(e) && current) remove(current);
     // 한글 입력 중에도 되도록 글자 대신 키 자리(code)로 본다.
-    else if (e.code === "KeyE" && e.metaKey && current) setEditingId(current.id);
-    else if (e.code === "KeyD" && e.metaKey && current && !current.completedAt) setDuePickId(current.id);
-    else if (e.code === "KeyZ" && e.metaKey && undo) restore();
-    else if (e.key === "n" && e.metaKey) captureRef.current?.focus();
+    else if (e.code === "KeyE" && modKey(e) && current) setEditingId(current.id);
+    else if (e.code === "KeyD" && modKey(e) && current && !current.completedAt) setDuePickId(current.id);
+    else if (e.code === "KeyZ" && modKey(e) && undo) restore();
+    else if (e.key === "n" && modKey(e)) captureRef.current?.focus();
     else if (e.key === "Escape") api.hideList();
     else return;
     e.preventDefault();
@@ -975,7 +975,7 @@ export function TodayList() {
             <div className="toast motion-sheet" data-motion={state} role="status">
               <span className="toast__text">{t("Deleted “{title}”", { title: u.title })}</span>
               <button type="button" className="toast__undo" onClick={restore}>
-                {t("Undo")} <kbd>⌘Z</kbd>
+                {t("Undo")} <kbd>{modLabel("Z")}</kbd>
               </button>
             </div>
           )}
@@ -997,7 +997,7 @@ export function TodayList() {
               }
             }}
           />
-          {!draft && <kbd>{displayAccelerator(data.settings.hotkey)}</kbd>}
+          {!draft && <kbd>{showHotkey(data.settings.hotkey)}</kbd>}
           <button type="button" className="capture__send" aria-label={t("Add")} disabled={!draft.trim()} onClick={submitDraft}>
             <ArrowRightIcon size={14} />
           </button>

@@ -2,28 +2,29 @@ import { app } from "electron";
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
 import { join } from "node:path";
 
-// 맥 앱은 터미널의 PATH를 읽지 않는다. 그래서 claude를 직접 찾고, 실행할 때 PATH를 보강한다.
-export const EXTRA_PATHS = ["/opt/homebrew/bin", "/usr/local/bin", join(homedir(), ".local/bin")];
+import { claudeCandidates, claudeEnv, killClaude, spawnClaude } from "./paths";
 
-const CANDIDATES = [
-  join(homedir(), ".local/bin/claude"),
-  "/opt/homebrew/bin/claude",
-  "/usr/local/bin/claude",
-  join(homedir(), ".claude/local/claude"),
-];
+// 앱은 터미널의 PATH를 읽지 않는다. 그래서 claude를 정해 둔 자리(맥·윈도우 각각)에서 직접 찾고, 실행할 때 PATH를 보강한다.
+const CANDIDATES = claudeCandidates();
 
 export function resourcePath(...parts: string[]): string {
   return app.isPackaged ? join(process.resourcesPath, ...parts) : join(__dirname, "../../resources", ...parts);
 }
 
+// 정해 둔 자리에 없으면 셸에 물어본다. 맥은 로그인 셸(zsh)의 PATH, 윈도우는 where.
+const SHELL_LOOKUP = process.platform === "win32" ? "where claude" : 'zsh -lc "command -v claude"';
 function loginShellLookup(): Promise<string | null> {
   return new Promise((resolve) => {
-    execFile("/bin/zsh", ["-lc", "command -v claude"], { timeout: 5000 }, (err, stdout) => {
-      const p = stdout.trim();
-      resolve(!err && p && existsSync(p) ? p : null);
+    const [cmd, args] = process.platform === "win32" ? ["where.exe", ["claude"]] : ["/bin/zsh", ["-lc", "command -v claude"]];
+    execFile(cmd, args, { timeout: 5000, env: claudeEnv(), windowsHide: true }, (err, stdout) => {
+      // where는 여러 줄을 돌려줄 수 있다(claude, claude.cmd). 실제로 있는 첫 파일을 쓴다.
+      const p = stdout
+        .split(/\r?\n/)
+        .map((l) => l.trim())
+        .find((l) => l && existsSync(l));
+      resolve(!err && p ? p : null);
     });
   });
 }
@@ -41,7 +42,7 @@ export async function findClaude(configured: string | null): Promise<ClaudeLooku
   const found = CANDIDATES.find((p) => existsSync(p));
   if (found) return { path: found, searched: CANDIDATES };
   const viaShell = await loginShellLookup();
-  return { path: viaShell, searched: [...CANDIDATES, 'zsh -lc "command -v claude"'] };
+  return { path: viaShell, searched: [...CANDIDATES, SHELL_LOOKUP] };
 }
 
 const sha = (s: string) => createHash("sha256").update(s).digest("hex");
@@ -86,8 +87,12 @@ export function ensureWorkDir(): string {
 
 export function claudeVersion(path: string): Promise<string | null> {
   return new Promise((resolve) => {
-    const env = { ...process.env, PATH: [...EXTRA_PATHS, process.env.PATH ?? ""].join(":") };
-    execFile(path, ["--version"], { timeout: 10_000, env }, (err, stdout) => resolve(err ? null : stdout.trim()));
+    const child = spawnClaude(path, ["--version"], { env: claudeEnv() });
+    let out = "";
+    const timer = setTimeout(() => (killClaude(child), resolve(null)), 10_000);
+    child.stdout?.on("data", (d) => (out += d));
+    child.on("error", () => (clearTimeout(timer), resolve(null)));
+    child.on("close", (code) => (clearTimeout(timer), resolve(code === 0 ? out.trim() : null)));
   });
 }
 

@@ -1,5 +1,8 @@
-// 메뉴바용 템플릿 아이콘(둥근 사각형 + 체크)을 PNG로 그린다. 외부 패키지 없이 알파만 쓴다.
-// 실행: node scripts/make-tray-icon.ts → resources/trayTemplate.png, trayTemplate@2x.png
+// 아이콘을 PNG로 그린다(외부 패키지 없이).
+// - 맥 메뉴바: 템플릿 아이콘(둥근 사각형 테두리 + 체크, 알파만) → resources/trayTemplate.png, @2x
+// - 윈도우 트레이: 파란 둥근 사각형 + 흰 체크(밝은·어두운 작업 표시줄 모두에서 보이게) → resources/tray-win.png, tray-win@2x.png
+// - 앱 아이콘(배포용, 1024px) → build/icon.png
+// 실행: node scripts/make-tray-icon.ts
 import { writeFileSync, mkdirSync } from "node:fs";
 import { deflateSync } from "node:zlib";
 
@@ -21,13 +24,21 @@ function chunk(type: string, data: Buffer): Buffer {
   return Buffer.concat([len, td, crc]);
 }
 
+type RGBA = [number, number, number, number];
 function png(size: number, alpha: (x: number, y: number) => number): Buffer {
+  return pngRGBA(size, (x, y) => [0, 0, 0, alpha(x, y)]);
+}
+function pngRGBA(size: number, color: (x: number, y: number) => RGBA): Buffer {
   const raw = Buffer.alloc(size * (size * 4 + 1));
   for (let y = 0; y < size; y++) {
     raw[y * (size * 4 + 1)] = 0;
     for (let x = 0; x < size; x++) {
       const i = y * (size * 4 + 1) + 1 + x * 4;
-      raw[i + 3] = Math.round(alpha(x, y) * 255);
+      const [r, g, b, a] = color(x, y);
+      raw[i] = r;
+      raw[i + 1] = g;
+      raw[i + 2] = b;
+      raw[i + 3] = Math.round(a * 255);
     }
   }
   const ihdr = Buffer.alloc(13);
@@ -70,7 +81,37 @@ function render(size: number): Buffer {
   });
 }
 
+// 색 아이콘: 둥근 사각형을 파랑(위→아래 그라데이션)으로 채우고 체크는 흰색. pad는 가장자리 여백(16 기준).
+function renderColor(size: number, pad: number, radius: number, stroke: number): Buffer {
+  const s = size / 16;
+  const N = 4;
+  const top: RGBA = [94, 152, 254, 1];
+  const bottom: RGBA = [47, 107, 255, 1];
+  return pngRGBA(size, (x, y) => {
+    let fill = 0;
+    let mark = 0;
+    for (let i = 0; i < N; i++)
+      for (let j = 0; j < N; j++) {
+        const px = (x + (i + 0.5) / N) / s;
+        const py = (y + (j + 0.5) / N) / s;
+        if (roundRectDist(px, py, pad, pad, 16 - pad, 16 - pad, radius) <= 0) fill++;
+        if (Math.min(segDist(px, py, 4.9, 8.2, 7.1, 10.4), segDist(px, py, 7.1, 10.4, 11.2, 5.9)) <= stroke) mark++;
+      }
+    const a = fill / (N * N);
+    const m = Math.min(mark / (N * N), a);
+    const t = y / size;
+    const bg = top.map((c, k) => c + (bottom[k]! - c) * t);
+    // 흰 체크를 파랑 위에 덮는다
+    return [Math.round(bg[0]! + (255 - bg[0]!) * (m / (a || 1))), Math.round(bg[1]! + (255 - bg[1]!) * (m / (a || 1))), Math.round(bg[2]! + (255 - bg[2]!) * (m / (a || 1))), a];
+  });
+}
+
 mkdirSync(new URL("../resources/", import.meta.url), { recursive: true });
+mkdirSync(new URL("../build/", import.meta.url), { recursive: true });
 writeFileSync(new URL("../resources/trayTemplate.png", import.meta.url), render(16));
 writeFileSync(new URL("../resources/trayTemplate@2x.png", import.meta.url), render(32));
-console.log("resources/trayTemplate.png, trayTemplate@2x.png");
+writeFileSync(new URL("../resources/tray-win.png", import.meta.url), renderColor(16, 1, 3.5, 1.1));
+writeFileSync(new URL("../resources/tray-win@2x.png", import.meta.url), renderColor(32, 1, 3.5, 1.1));
+// 앱 아이콘: macOS 아이콘 격자처럼 가장자리를 10%쯤 비운다
+writeFileSync(new URL("../build/icon.png", import.meta.url), renderColor(1024, 1.6, 3.6, 0.95));
+console.log("resources/trayTemplate(@2x).png, tray-win(@2x).png, build/icon.png");

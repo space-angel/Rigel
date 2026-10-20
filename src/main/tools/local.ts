@@ -161,8 +161,10 @@ export async function collectLocal(todo: TodoItem, words: string[], data: AppDat
   const on = data.settings.tools.local;
   const jobs: Promise<ToolResult>[] = [];
   if (on.figma) jobs.push(Promise.resolve(wrap("figma", figma(todo, words, data))));
-  if (on.calendar) jobs.push(calendar(words).then((x) => wrap("calendar", x)));
-  if (on.files) jobs.push(files(words).then((x) => wrap("files", x)));
+  // 캘린더(osascript)와 파일 찾기(Spotlight mdfind)는 맥에만 있다
+  const mac = process.platform === "darwin";
+  if (on.calendar && mac) jobs.push(calendar(words).then((x) => wrap("calendar", x)));
+  if (on.files && mac) jobs.push(files(words).then((x) => wrap("files", x)));
   if (on.todoban) jobs.push(Promise.resolve(wrap("todoban", todoban(todo, words, data))));
   return Promise.all(jobs);
 }

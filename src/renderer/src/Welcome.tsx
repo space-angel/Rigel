@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { AppData } from "@shared/types";
-import { displayAccelerator } from "@shared/hotkey";
-import { LOCAL_SOURCES } from "@shared/shape";
+import { LOCAL_AVAILABLE, showHotkey } from "./platform";
 import { MCP_SERVICES, MCP_SOURCES, statusOf, type McpStatus } from "@shared/mcp";
 import { ArrowRightIcon, CheckIcon, Spinner } from "./components/icons";
 import { sourceName } from "./components/SourceIcon";
@@ -65,7 +64,7 @@ export function Welcome() {
   if (!data) return <div ref={rootRef} />;
   const claudeState = claude === null ? "wait" : claude.path ? "done" : "error";
   const hotkeyState = hotkeyError ? "error" : "done";
-  const localOn = LOCAL_SOURCES.filter((s) => data.settings.tools.local[s]).map((s) => sourceName(s));
+  const localOn = LOCAL_AVAILABLE.filter((s) => data.settings.tools.local[s]).map((s) => sourceName(s));
   const connected = mcp ? MCP_SOURCES.filter((s) => statusOf(mcp, s) === "connected").map((s) => sourceName(s)) : [];
   const mcpOn = MCP_SOURCES.filter((s) => data.settings.tools.mcp[s]).map((s) => sourceName(s));
   const toolsState = toolsSeen ? "done" : "todo";
@@ -117,7 +116,7 @@ export function Welcome() {
                 {t("Change")}
               </button>
             ) : (
-              <kbd>{displayAccelerator(data.settings.hotkey)}</kbd>
+              <kbd>{showHotkey(data.settings.hotkey)}</kbd>
             )
           }
         />

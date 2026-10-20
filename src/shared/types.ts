@@ -1,3 +1,4 @@
+import { defaultHotkey } from "./hotkey.ts";
 import { z } from "zod";
 
 // 할 날짜와 날짜 비교는 모두 로컬 날짜 문자열(YYYY-MM-DD)로 한다.
@@ -87,7 +88,7 @@ export const AppData = z.object({
 export type AppData = z.infer<typeof AppData>;
 
 export const DEFAULT_SETTINGS: Settings = {
-  hotkey: "Alt+Space",
+  hotkey: defaultHotkey(typeof process !== "undefined" ? process.platform : "darwin"),
   claudePath: null,
   model: "sonnet",
   themeId: "default",

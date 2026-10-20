@@ -18,9 +18,13 @@ import { safeServiceUrl, type McpSource } from "@shared/mcp";
 import type { ShapeInput, ToolItem } from "@shared/shape";
 import { openShortcut } from "./shortcutOpener";
 import { runE2E } from "./e2e";
-import { claudeVersion, ensureWorkDir, findClaude, resetRules, rulesStatus } from "./claude/setup";
+import { claudeVersion, ensureWorkDir, findClaude, resetRules, resourcePath, rulesStatus } from "./claude/setup";
 
 app.setName("todoBAN");
+const IS_MAC = process.platform === "darwin";
+const IS_WIN = process.platform === "win32";
+// 윈도우는 알림·작업 표시줄이 앱을 이 ID로 묶는다(배포 설정의 appId와 같아야 한다).
+if (IS_WIN) app.setAppUserModelId("com.todoban.app");
 // 개발 중 확인용: 실제 데이터 대신 다른 폴더를 쓰고, 실행하자마자 목록이나 빠른 입력창을 띄운다.
 if (process.env.TODOBAN_USER_DATA) app.setPath("userData", process.env.TODOBAN_USER_DATA);
 const SHOW_ON_START = process.env.TODOBAN_SHOW_ON_START; // "list" | "quick"
@@ -82,7 +86,9 @@ const hotkeyError = () => (hotkeyFail ? tr(hotkeyFail.key, { key: hotkeyFail.acc
 function updateTray(): void {
   const today = localDate();
   const { open } = todayView(data.todos, today, pendingCarryOver(data, today));
-  tray?.setTitle(open.length ? ` ${open.length}` : "", { fontType: "monospacedDigit" });
+  // 맥은 메뉴바 아이콘 옆에 숫자, 윈도우 트레이는 글자를 못 붙여서 툴팁으로
+  if (IS_MAC) tray?.setTitle(open.length ? ` ${open.length}` : "", { fontType: "monospacedDigit" });
+  else tray?.setToolTip(open.length ? `todoBAN · ${tr("{n} open", { n: open.length })}` : "todoBAN");
 }
 
 function broadcast(): void {
@@ -113,6 +119,13 @@ function act(action: TodoAction): AppData {
   broadcast();
   if (listWindow?.isVisible() || E2E) maybePrefetch();
   return data;
+}
+
+// 일반 창(설정·확인·시작하기)의 테두리. 맥은 신호등 버튼을 안쪽에 둔 제목 없는 창,
+// 윈도우는 제목 표시줄을 숨기고 최소화·닫기 버튼을 오른쪽 위에 겹친다(내용 위쪽 여백이 그 자리를 비워 둔다).
+function windowChrome(): Partial<Electron.BrowserWindowConstructorOptions> {
+  if (IS_MAC) return { titleBarStyle: "hiddenInset", trafficLightPosition: { x: 16, y: 16 } };
+  return { titleBarStyle: "hidden", titleBarOverlay: { color: "#15181d", symbolColor: "#c9ced8", height: 36 } };
 }
 
 function createPopupWindow(view: "list" | "quick", width: number, height: number): BrowserWindow {
@@ -158,10 +171,12 @@ function fitHeight(win: BrowserWindow | null, height: number, max: number): void
   const b = win.getBounds();
   if (b.height === h) return;
   const t0 = performance.now();
-  win.setBounds({ ...b, height: h });
+  // 아래에서 연 목록(윈도우 작업 표시줄 위)은 아래 끝을 붙인 채 위로 자란다
+  const bottom = win === listWindow && listAnchorBottom !== null && !listPinned() ? listAnchorBottom : null;
+  win.setBounds({ ...b, height: h, ...(bottom !== null && { y: Math.round(bottom - h) }) });
   const t1 = performance.now();
   // 투명 창의 그림자는 모양이 바뀌면 다시 계산해야 이전 크기의 그림자가 남지 않는다.
-  win.invalidateShadow();
+  win.invalidateShadow?.();
   if (PERF) perfLog.push({ t: Date.now() - perfStart, what: `setBounds ${b.height}→${h}`, ms: t1 - t0 }, { t: Date.now() - perfStart, what: "invalidateShadow", ms: performance.now() - t1 });
 }
 
@@ -186,14 +201,27 @@ function applyListPin(): void {
   } else positionListWindow();
 }
 
+// 목록은 트레이 아이콘에 붙어서 연다. 맥은 위 메뉴바 아래로, 윈도우는 보통 아래 작업 표시줄이라 그 위로 연다.
+// 아래에서 열면 창이 커질 때 아래 끝을 붙인 채 위로 자란다(listAnchorBottom).
+let listAnchorBottom: number | null = null;
 function positionListWindow(): void {
   if (!tray || !listWindow) return;
   const t = tray.getBounds();
-  const display = screen.getDisplayNearestPoint({ x: t.x, y: t.y });
-  const { width } = listWindow.getBounds();
+  const display = screen.getDisplayNearestPoint({ x: t.x || 0, y: t.y || 0 });
+  const { width, height } = listWindow.getBounds();
   const area = display.workArea;
-  const x = Math.round(Math.min(Math.max(t.x + t.width / 2 - width / 2, area.x + 8), area.x + area.width - width - 8));
-  listWindow.setPosition(x, Math.round(t.y + t.height + 2));
+  // 트레이 자리를 모르면(일부 윈도우 환경) 화면 오른쪽 아래에 둔다
+  const known = t.width > 0 && t.height > 0;
+  const cx = known ? t.x + t.width / 2 : area.x + area.width - width / 2 - 12;
+  const x = Math.round(Math.min(Math.max(cx - width / 2, area.x + 8), area.x + area.width - width - 8));
+  const below = known && t.y < display.bounds.y + display.bounds.height / 2;
+  if (below) {
+    listAnchorBottom = null;
+    listWindow.setPosition(x, Math.round(Math.max(t.y + t.height + 2, area.y)));
+  } else {
+    listAnchorBottom = area.y + area.height - 8;
+    listWindow.setPosition(x, Math.round(listAnchorBottom - height));
+  }
 }
 
 function toggleListWindow(): void {
@@ -205,7 +233,7 @@ function toggleListWindow(): void {
   quickWindow?.hide();
   applyListPin();
   listWindow.show();
-  listWindow.invalidateShadow();
+  listWindow.invalidateShadow?.();
   listWindow.focus();
   listWindow.webContents.send("list:opened");
   settleShadow(listWindow);
@@ -232,16 +260,16 @@ function followShadow(win: BrowserWindow | null, ms: number): void {
     if (win.isDestroyed() || Date.now() > until) {
       if (shadowTimer) clearInterval(shadowTimer);
       shadowTimer = null;
-      if (!win.isDestroyed()) win.invalidateShadow();
+      if (!win.isDestroyed()) win.invalidateShadow?.();
       return;
     }
-    win.invalidateShadow();
+    win.invalidateShadow?.();
   }, 16);
 }
 
 // 여는 움직임(240ms)이 끝난 뒤 그림자를 다시 계산한다. 움직이는 중 모양으로 그림자가 남지 않게.
 function settleShadow(win: BrowserWindow): void {
-  setTimeout(() => !win.isDestroyed() && win.invalidateShadow(), 280);
+  setTimeout(() => !win.isDestroyed() && win.invalidateShadow?.(), 280);
 }
 
 // 빠른 입력창은 마우스가 있는 화면의 가운데보다 조금 위에 띄운다.
@@ -257,7 +285,7 @@ function showQuickWindow(): void {
   quickWindow.setPosition(Math.round(area.x + (area.width - width) / 2), Math.round(area.y + area.height * 0.22));
   app.focus({ steal: true });
   quickWindow.show();
-  quickWindow.invalidateShadow();
+  quickWindow.invalidateShadow?.();
   quickWindow.focus();
   settleShadow(quickWindow);
   quickWindow.webContents.send("quick:opened");
@@ -276,8 +304,7 @@ function createReviewWindow(): BrowserWindow {
     useContentSize: true,
     show: false,
     title: tr("Review"),
-    titleBarStyle: "hiddenInset",
-    trafficLightPosition: { x: 16, y: 16 },
+    ...windowChrome(),
     resizable: false,
     minimizable: false,
     maximizable: false,
@@ -353,8 +380,7 @@ function showSettings(tab: "general" | "tools" | "shortcuts" | "shortcuts-new" =
       useContentSize: true,
       show: false,
       title: tr("Settings"),
-      titleBarStyle: "hiddenInset",
-      trafficLightPosition: { x: 16, y: 16 },
+      ...windowChrome(),
       resizable: false,
       minimizable: false,
       maximizable: false,
@@ -396,8 +422,7 @@ function showWelcome(): void {
     useContentSize: true,
     show: false,
     title: tr("Welcome"),
-    titleBarStyle: "hiddenInset",
-    trafficLightPosition: { x: 16, y: 16 },
+    ...windowChrome(),
     resizable: false,
     minimizable: false,
     maximizable: false,
@@ -426,7 +451,7 @@ function addAndReveal(action: TodoAction): void {
     quickWindow?.hide();
     applyListPin();
     listWindow.show();
-    listWindow.invalidateShadow();
+    listWindow.invalidateShadow?.();
     listWindow.focus();
   }
   listWindow.webContents.send("list:opened", { highlight: added });
@@ -460,12 +485,25 @@ function trayMenu(): Menu {
   return Menu.buildFromTemplate([
     { label: tr("Capture"), accelerator: data.settings.hotkey, click: showQuickWindow },
     { label: tr("Today"), click: toggleListWindow },
-    { label: tr("Settings…"), accelerator: "Command+,", click: () => showSettings() },
+    { label: tr("Settings…"), accelerator: "CmdOrCtrl+,", click: () => showSettings() },
     ...(hotkeyFail ? [{ type: "separator" as const }, { label: hotkeyError()!, enabled: false }] : []),
     { type: "separator" },
     { label: tr("Quit todoBAN"), role: "quit" },
   ]);
 }
+
+// 로그인 안내에서 여는 터미널. 맥은 터미널 앱, 윈도우는 명령 프롬프트.
+function openTerminal(): void {
+  if (IS_WIN) openOutside("Terminal", () => void shell.openPath(process.env.ComSpec ?? "C:\\Windows\\System32\\cmd.exe"));
+  else openOutside("Terminal", () => shell.openPath("/System/Applications/Utilities/Terminal.app"));
+}
+
+// 한 번만 뜬다. 다시 실행하면 새로 띄우지 않고 떠 있는 앱의 목록을 연다(트레이 아이콘이 둘 생기지 않게).
+// 자동 점검·화면 확인용 실행은 각자 데이터 폴더를 쓰므로 막지 않는다.
+if (!process.env.TODOBAN_USER_DATA && !app.requestSingleInstanceLock()) app.quit();
+app.on("second-instance", () => {
+  if (listWindow && !listWindow.isVisible()) toggleListWindow();
+});
 
 app.whenReady().then(() => {
   app.dock?.hide();
@@ -524,7 +562,7 @@ app.whenReady().then(() => {
     const b = listWindow?.getBounds();
     act({ type: "setSettings", patch: { listPin: { pinned, x: pinned ? (b?.x ?? null) : null, y: pinned ? (b?.y ?? null) : null } } });
     applyListPin();
-    listWindow?.invalidateShadow();
+    listWindow?.invalidateShadow?.();
   });
   ipcMain.on("quick:resize", (_e, height: number) => fitHeight(quickWindow, height, QUICK_MAX_HEIGHT));
   ipcMain.on("quick:hide", () => quickWindow?.hide());
@@ -594,12 +632,13 @@ app.whenReady().then(() => {
   ipcMain.on("tools:openMcpGuide", (_e, kind: "terminal" | "connectors" = "terminal") =>
     kind === "connectors"
       ? openOutside("claude.ai connectors", () => shell.openExternal("https://claude.ai/settings/connectors"))
-      : openOutside("Terminal", () => shell.openPath("/System/Applications/Utilities/Terminal.app")),
+      : openTerminal(),
   );
   // 파일 미리보기(Quick Look). 열 수 있는 파일과 같은 범위만.
   ipcMain.on("tools:quicklook", (_e, path: string) => {
     if (!openablePaths.has(path) && !data.todos.some((t) => t.context.some((n) => n.path === path))) return;
-    openOutside(`Quick Look ${path}`, () => execFile("/usr/bin/qlmanage", ["-p", path], () => {}));
+    // 윈도우에는 훑어보기가 없어서 파일을 연다
+    openOutside(`Quick Look ${path}`, () => (IS_MAC ? execFile("/usr/bin/qlmanage", ["-p", path], () => {}) : void shell.openPath(path)));
   });
   ipcMain.on("tools:open", (_e, open: ToolItem["open"]) => {
     if (!open) return;
@@ -617,7 +656,7 @@ app.whenReady().then(() => {
     } else if (open.kind === "file" && (openablePaths.has(open.path) || data.todos.some((t) => t.context.some((n) => n.path === open.path))))
       // 열 수 있는 파일은 Files 도구가 찾아 준 경로와, 할 일에 붙여 둔 경로뿐이다.
       openOutside(open.path, () => shell.openPath(open.path));
-    else if (open.kind === "calendar") openOutside("Calendar", () => shell.openPath("/System/Applications/Calendar.app"));
+    else if (open.kind === "calendar" && IS_MAC) openOutside("Calendar", () => shell.openPath("/System/Applications/Calendar.app"));
   });
 
   ipcMain.on("settings:open", (_e, tab?: "general" | "tools" | "shortcuts") => showSettings(tab));
@@ -693,13 +732,15 @@ app.whenReady().then(() => {
     endReview();
     addAndReveal({ type: "add", title: firstLine(rawText), rawText });
   });
-  ipcMain.on("review:openTerminal", () => openOutside("Terminal", () => shell.openPath("/System/Applications/Utilities/Terminal.app")));
+  ipcMain.on("review:openTerminal", () => openTerminal());
 
   // 화면 확인용 실행에서는 메뉴바 아이콘과 전역 단축키를 만들지 않는다.
   // 만들면 쓰고 있는 todoBAN과 겹쳐서, 사용자의 입력이 확인용 앱으로 들어간다.
   if (!HEADLESS) {
-    const icon = nativeImage.createFromPath(join(__dirname, "../../resources/trayTemplate.png"));
-    icon.setTemplateImage(true);
+    // 맥은 메뉴바 색을 따르는 템플릿 아이콘, 윈도우는 밝은·어두운 작업 표시줄 모두에서 보이는 색 아이콘.
+    // 배포한 앱에서도 찾도록 resourcePath로 읽는다.
+    const icon = nativeImage.createFromPath(resourcePath(IS_MAC ? "trayTemplate.png" : "tray-win.png"));
+    if (IS_MAC) icon.setTemplateImage(true);
     tray = new Tray(icon);
     tray.setToolTip("todoBAN");
     tray.on("click", toggleListWindow);
@@ -816,7 +857,7 @@ app.whenReady().then(() => {
       const { width, height } = win.getBounds();
       win.setBounds({ x: -width - 400, y: 120, width, height });
       win.showInactive();
-      win.invalidateShadow();
+      win.invalidateShadow?.();
       await new Promise((r) => setTimeout(r, 900));
       const id = win.getMediaSourceId().split(":")[1]!;
       await new Promise((r) => execFile("/usr/sbin/screencapture", ["-x", "-l", id, join(WINDOW_SHOT, `${name}.png`)], r));

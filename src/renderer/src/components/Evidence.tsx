@@ -3,6 +3,7 @@ import { useState, type ReactNode } from "react";
 import type { ToolItem } from "@shared/shape";
 import { SourceIcon, sourceName } from "./SourceIcon";
 import { t } from "../i18n";
+import { IS_MAC } from "../platform";
 import { ChevronDownIcon } from "./icons";
 
 const api = window.todoban;
@@ -81,7 +82,7 @@ export function Evidence({
             {matched.length ? t("Matched: {words}", { words: matched.join(" · ") }) : words.length ? t("None of your words appear here — check before using it") : t("Picked without words")}
           </p>
           <div className="evidence__actions">
-            {item?.open?.kind === "file" && (
+            {item?.open?.kind === "file" && IS_MAC && (
               <button type="button" className="button button--secondary button--sm" onClick={() => api.quickLook((item.open as { path: string }).path)}>
                 {t("Quick Look")}
               </button>

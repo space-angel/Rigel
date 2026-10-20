@@ -6,6 +6,8 @@ import type { ShapeInput, ToolItem, ToolResult } from "@shared/shape";
 import type { McpSource, McpStatus } from "@shared/mcp";
 
 const api = {
+  // darwin | win32 | linux. 단축키 표시·수정 키(⌘/Ctrl)·맥 전용 기능을 화면에서 가른다.
+  platform: process.platform,
   getData: (): Promise<AppData> => ipcRenderer.invoke("data:get"),
   act: (action: TodoAction): Promise<AppData> => ipcRenderer.invoke("todo:action", action),
   todoMenu: (id: string): Promise<string[]> => ipcRenderer.invoke("todo:menu", id),

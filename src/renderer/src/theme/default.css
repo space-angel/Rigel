@@ -89,5 +89,5 @@
   --dur-l: 320ms;
 
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Pretendard Variable", Pretendard, system-ui, sans-serif;
-  --font-mono: "Geist Mono", "SF Mono", ui-monospace, Menlo, monospace;
+  --font-mono: "Geist Mono", "SF Mono", ui-monospace, Menlo, "Cascadia Mono", Consolas, monospace;
 }

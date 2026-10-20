@@ -3,7 +3,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { AppData, Shortcut } from "@shared/types";
 import { FIGMA_BUNDLE_ID } from "@shared/types";
 import { figmaLinkInfo } from "@shared/todos";
-import { displayAccelerator, toAccelerator } from "@shared/hotkey";
+import { toAccelerator } from "@shared/hotkey";
+import { IS_MAC, LOCAL_AVAILABLE, showHotkey } from "./platform";
 import { CheckIcon, EditIcon, FigmaMark, LinkIcon, PlusIcon, Spinner, TerminalIcon, TrashIcon, UserIcon } from "./components/icons";
 import { LOCAL_SOURCES, normalizeMix, type LocalSource } from "@shared/shape";
 import { MCP_SERVICES, MCP_SOURCES, statusOf, type McpSource, type McpStatus } from "@shared/mcp";
@@ -36,7 +37,7 @@ function HotkeyRecorder({ value }: { value: string }) {
         setRecording(false);
         return;
       }
-      const acc = toAccelerator(e);
+      const acc = toAccelerator(e, IS_MAC);
       if (!acc) return;
       setRecording(false);
       api.act({ type: "setSettings", patch: { hotkey: acc } }).then(() => api.hotkeyStatus().then(setError));
@@ -50,7 +51,7 @@ function HotkeyRecorder({ value }: { value: string }) {
 
   return (
     <div className="hotkey">
-      <kbd className={recording ? "is-recording" : ""}>{recording ? t("Press keys…") : displayAccelerator(value)}</kbd>
+      <kbd className={recording ? "is-recording" : ""}>{recording ? t("Press keys…") : showHotkey(value)}</kbd>
       <button type="button" className="button button--secondary button--sm" onClick={() => setRecording((r) => !r)}>
         {recording ? t("Cancel") : t("Record")}
       </button>
@@ -331,7 +332,7 @@ function ToolsTab({ data }: { data: AppData }) {
   useEffect(() => api.onSettingsFocus(() => Date.now() - checkedRef.current > 10_000 && check(true)), []);
 
   const save = (patch: Partial<typeof tools>) => api.act({ type: "setSettings", patch: { tools: { ...tools, ...patch } } });
-  const on = [...LOCAL_SOURCES.filter((s) => tools.local[s]), ...MCP_SOURCES.filter((s) => tools.mcp[s])];
+  const on = [...LOCAL_AVAILABLE.filter((s) => tools.local[s]), ...MCP_SOURCES.filter((s) => tools.mcp[s])];
   const [rules, setRules] = useState<{ customized: boolean; missing: string[] } | null>(null);
   useEffect(() => {
     api.rulesStatus().then(setRules);
@@ -383,7 +384,7 @@ function ToolsTab({ data }: { data: AppData }) {
   return (
     <div className="settings__body">
       <Group label={t("Local · fast")}>
-        {LOCAL_SOURCES.map((s) => (
+        {LOCAL_AVAILABLE.map((s) => (
           <div className="setting" key={s}>
             <span className="setting__icon">
               <SourceIcon source={s} size={13} />
