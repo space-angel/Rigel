@@ -2428,3 +2428,50 @@ body::-webkit-scrollbar-thumb {
   opacity: 1;
   background: var(--white-10);
 }
+
+/* 마감 고르기: 목록 아래 입력 바 위에 뜨는 작은 카드 */
+.due-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 12px 8px;
+  padding: 14px;
+  border-radius: var(--radius-r4);
+  border: 1px solid transparent;
+  background:
+    var(--surface-hero) padding-box,
+    linear-gradient(var(--ink-2), var(--ink-2)) padding-box,
+    var(--border-hero) border-box;
+  box-shadow: var(--shadow-hero-sm), 0 12px 30px rgb(0 0 0 / 35%);
+}
+.due-picker__head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.due-picker__title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  font-weight: 600;
+}
+.due-picker__quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.due-picker__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.due-picker__row .field__input {
+  flex: 1;
+  color-scheme: dark;
+}
+.due-picker__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

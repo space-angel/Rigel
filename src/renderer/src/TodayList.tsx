@@ -10,6 +10,7 @@ import { AiSparkle, ArrowRightIcon, CalendarIcon, CheckIcon, ChevronRightIcon, F
 import { FirstStepCard } from "./FirstStepCard";
 import { ShapePanel } from "./Shape";
 import { Attachments } from "./components/Attachments";
+import { DuePicker } from "./components/DuePicker";
 import { dueBadge, dueLabel } from "@shared/due";
 
 // 마감 배지. 줄에서는 짧게(D-3), 지금 할 일 카드에서는 말로(3 days left).
@@ -308,6 +309,8 @@ export function TodayList() {
   const [undo, setUndo] = useState<TodoItem | null>(null);
   // 방금 넣은 할 일. 목록이 열릴 때 그 묶음으로 다이얼을 돌리고, 잠깐 빛나게 한다.
   const [highlight, setHighlight] = useState<string[]>([]);
+  // 마감을 고르는 중인 할 일 (메뉴의 Pick a date…, ⌘D)
+  const [duePickId, setDuePickId] = useState<string | null>(null);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dataRef = useRef<AppData | null>(null);
   dataRef.current = data;
@@ -328,6 +331,7 @@ export function TodayList() {
     // ⋯ 메뉴나 오른쪽 클릭 메뉴에서 고르면 메인이 알려 준다.
     const offRequest = api.onTodoRequest((kind, id) => {
       if (kind === "edit") setEditingId(id);
+      else if (kind === "due") setDuePickId(id);
       else {
         const t = dataRef.current?.todos.find((x) => x.id === id);
         if (t) removeRef.current(t);
@@ -459,6 +463,7 @@ export function TodayList() {
     else if (e.key === "Backspace" && e.metaKey && current) remove(current);
     // 한글 입력 중에도 되도록 글자 대신 키 자리(code)로 본다.
     else if (e.code === "KeyE" && e.metaKey && current) setEditingId(current.id);
+    else if (e.code === "KeyD" && e.metaKey && current && !current.completedAt) setDuePickId(current.id);
     else if (e.code === "KeyZ" && e.metaKey && undo) restore();
     else if (e.key === "n" && e.metaKey) captureRef.current?.focus();
     else if (e.key === "Escape") api.hideList();
@@ -635,6 +640,20 @@ export function TodayList() {
           )}
         </div>
 
+        {duePickId && data.todos.some((t) => t.id === duePickId) && (
+          <DuePicker
+            item={data.todos.find((t) => t.id === duePickId)!}
+            onPick={(date) => {
+              act({ type: "setDue", id: duePickId, dueDate: date });
+              setDuePickId(null);
+              rootRef.current?.focus();
+            }}
+            onClose={() => {
+              setDuePickId(null);
+              rootRef.current?.focus();
+            }}
+          />
+        )}
         {undo && (
           <div className="toast" role="status">
             <span className="toast__text">

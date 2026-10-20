@@ -70,7 +70,8 @@ const PREP = /준비|연습|정리|쓰기|쓰고|써야|작성|보기|읽|만들
 
 // 짧은 입력에서 할 날짜와 마감을 정한다.
 // - “금요일까지 …”, “금요일 면접 준비” → 마감 금요일, 할 날짜 오늘
-// - “금요일 결혼식 가기”, “내일 운동” → 할 날짜 그날, 마감 없음
+// - “금요일 면접”, “금요일 결혼식 가기” → 행사 그 자체: 할 날짜 그날, 마감도 그날 (나누기 규칙과 같게)
+// - “내일 운동” → 할 날짜 그날, 마감 없음
 // - 날짜 말이 없으면 할 날짜 오늘, 마감 없음
 export function readDates(text: string, today: string): { plannedDate: string; dueDate: string | null } {
   const found = findDate(text, today);
@@ -78,6 +79,7 @@ export function readDates(text: string, today: string): { plannedDate: string; d
   const after = text.slice(found.end, found.end + 6);
   const isDeadline = /^\s*까지/.test(after) || (EVENT.test(text) && PREP.test(text));
   if (isDeadline) return { plannedDate: today, dueDate: found.date };
+  if (EVENT.test(text)) return { plannedDate: found.date, dueDate: found.date };
   return { plannedDate: found.date, dueDate: null };
 }
 
@@ -103,4 +105,19 @@ export function dueBadge(due: string, today: string): { text: string; tone: "lat
   if (n === 0) return { text: "D-day", tone: "soon" };
   if (n < 7) return { text: `D-${n}`, tone: n === 1 ? "soon" : "calm" };
   return { text: at(due).toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase(), tone: "calm" };
+}
+
+// 마감 고르기 메뉴와 날짜 고르기 창에서 쓰는 빠른 선택지
+export function deadlineOptions(today: string): { label: string; date: string }[] {
+  const wd = at(today).getDay();
+  const fri = (5 - wd + 7) % 7 || 7; // 오늘이 금요일이면 다음 주 금요일
+  const mon = (1 - wd + 7) % 7 || 7;
+  const name = (d: string) => at(d).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  return [
+    { label: "Today", date: today },
+    { label: "Tomorrow", date: plus(today, 1) },
+    { label: `This Friday · ${name(plus(today, fri))}`, date: plus(today, fri) },
+    { label: `Next Monday · ${name(plus(today, mon))}`, date: plus(today, mon) },
+    { label: `In a week · ${name(plus(today, 7))}`, date: plus(today, 7) },
+  ].filter((o, i, all) => all.findIndex((x) => x.date === o.date) === i);
 }

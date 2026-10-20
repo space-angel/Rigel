@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { daysBetween, dueBadge, dueLabel, readDates } from "./due.ts";
+import { daysBetween, deadlineOptions, dueBadge, dueLabel, readDates } from "./due.ts";
 
 const tue = "2026-10-20"; // 화요일
 
@@ -12,8 +12,12 @@ test("마감: “까지”나 행사 + 준비면 마감은 그날, 할 날짜는
   assert.deepEqual(readDates("11/2 마감 README 쓰기", tue), { plannedDate: tue, dueDate: "2026-11-02" });
 });
 
+test("행사 그 자체는 할 날짜·마감 모두 그날 (나누기 규칙과 같게)", () => {
+  assert.deepEqual(readDates("금요일 결혼식 가기", tue), { plannedDate: "2026-10-23", dueDate: "2026-10-23" });
+  assert.deepEqual(readDates("금요일 면접", tue), { plannedDate: "2026-10-23", dueDate: "2026-10-23" });
+});
+
 test("할 날짜: 그날 하는 일은 그날로, 마감 없음", () => {
-  assert.deepEqual(readDates("금요일 결혼식 가기", tue), { plannedDate: "2026-10-23", dueDate: null });
   assert.deepEqual(readDates("내일 운동", tue), { plannedDate: "2026-10-21", dueDate: null });
   assert.deepEqual(readDates("모레 장보기", tue), { plannedDate: "2026-10-22", dueDate: null });
 });
@@ -49,4 +53,12 @@ test("줄 배지", () => {
   assert.equal(dueBadge("2026-10-21", tue).tone, "soon");
   assert.equal(dueBadge("2026-11-02", tue).text, "NOV 2");
   assert.equal(dueBadge("2026-10-18", tue).tone, "late");
+});
+
+test("마감 빠른 선택지", () => {
+  assert.deepEqual(deadlineOptions(tue).map((o) => o.date), [tue, "2026-10-21", "2026-10-23", "2026-10-26", "2026-10-27"]);
+  // 금요일이면 “이번 주 금요일”은 다음 주 금요일
+  assert.equal(deadlineOptions("2026-10-23")[2]!.date, "2026-10-30");
+  // 일요일이면 내일과 다음 주 월요일이 같은 날 → 한 번만
+  assert.equal(deadlineOptions("2026-10-25").filter((o) => o.date === "2026-10-26").length, 1);
 });

@@ -1,0 +1,43 @@
+[
+  {
+    "name": "목록",
+    "win": "list",
+    "main": "openList",
+    "wait": 600
+  },
+  {
+    "name": "메뉴 항목에 Deadline",
+    "win": "list",
+    "run": "const d = await window.todoban.getData(); const t = d.todos.find(x => x.title.includes('우테크')); return await window.todoban.todoMenu(t.id);"
+  },
+  {
+    "name": "⌘D → 날짜 고르기 창",
+    "win": "list",
+    "run": "__e2e.key('.window', 'ArrowDown'); await new Promise(r => setTimeout(r, 200)); __e2e.key('.window', 'd', { code: 'KeyD', metaKey: true }); return true;",
+    "until": "__e2e.$('.due-picker')",
+    "wait": 300,
+    "snap": true
+  },
+  {
+    "name": "This Friday 누르기",
+    "win": "list",
+    "run": "__e2e.click(__e2e.all('.due-picker .word')[2]); return true;",
+    "wait": 500,
+    "snap": true,
+    "expect": "!__e2e.$('.due-picker') && __e2e.all('.row').some(r => r.textContent.includes('우테크') && r.querySelector('.due-badge')?.textContent === 'D-3')"
+  },
+  {
+    "name": "짧은 입력 · 금요일 면접",
+    "win": "quick",
+    "run": "__e2e.type('textarea', '금요일 면접'); __e2e.key('textarea', 'Enter'); return true;",
+    "wait": 200
+  },
+  {
+    "name": "Tomorrow·Later 쪽에 D-3",
+    "win": "list",
+    "until": "__e2e.$('.is-new')",
+    "wait": 500,
+    "snap": true,
+    "expect": "__e2e.$('.is-new .due-badge')?.textContent === 'D-3'"
+  }
+]

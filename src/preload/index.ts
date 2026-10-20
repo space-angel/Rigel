@@ -9,14 +9,17 @@ const api = {
   getData: (): Promise<AppData> => ipcRenderer.invoke("data:get"),
   act: (action: TodoAction): Promise<AppData> => ipcRenderer.invoke("todo:action", action),
   todoMenu: (id: string): Promise<string[]> => ipcRenderer.invoke("todo:menu", id),
-  onTodoRequest: (fn: (kind: "edit" | "delete", id: string) => void) => {
+  onTodoRequest: (fn: (kind: "edit" | "delete" | "due", id: string) => void) => {
     const edit = (_e: unknown, id: string) => fn("edit", id);
     const del = (_e: unknown, id: string) => fn("delete", id);
+    const due = (_e: unknown, id: string) => fn("due", id);
     ipcRenderer.on("todo:requestEdit", edit);
     ipcRenderer.on("todo:requestDelete", del);
+    ipcRenderer.on("todo:requestDue", due);
     return () => {
       ipcRenderer.removeListener("todo:requestEdit", edit);
       ipcRenderer.removeListener("todo:requestDelete", del);
+      ipcRenderer.removeListener("todo:requestDue", due);
     };
   },
   onData: (fn: (data: AppData) => void) => {

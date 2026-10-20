@@ -5,7 +5,7 @@ import { execFile } from "node:child_process";
 import { FIGMA_BUNDLE_ID, type AppData, type TodoAction } from "@shared/types";
 import { applyAction, localDate, pendingCarryOver, todayView } from "@shared/todos";
 import { addDays } from "@shared/dial";
-import { readDates } from "@shared/due";
+import { deadlineOptions, readDates } from "@shared/due";
 import { classifyQuickInput, firstLine, matchShortcutByKeywords } from "@shared/quickInput";
 import { loadData, saveData } from "./store";
 import type { ReviewDraft } from "@shared/review";
@@ -389,12 +389,28 @@ app.whenReady().then(() => {
       { label: "Move to Today", enabled: !t.completedAt && !(t.plannedDate !== null && t.plannedDate <= today), click: () => act({ type: "moveToToday", id }) },
       { label: "Move to Tomorrow", enabled: !t.completedAt && t.plannedDate !== tomorrow, click: () => act({ type: "schedule", id, plannedDate: tomorrow }) },
       { label: "Move to Later", enabled: !t.completedAt && t.plannedDate !== null, click: () => act({ type: "schedule", id, plannedDate: null }) },
-      ...(t.dueDate ? [{ label: "Clear deadline", click: () => act({ type: "setDue", id, dueDate: null }) }] : []),
+      {
+        label: t.dueDate ? `Deadline · ${t.dueDate.slice(5).replace("-", "/")}` : "Deadline",
+        enabled: !t.completedAt,
+        submenu: [
+          ...deadlineOptions(today).map((o) => ({
+            label: o.label,
+            type: "checkbox" as const,
+            checked: t.dueDate === o.date,
+            click: () => act({ type: "setDue", id, dueDate: o.date }),
+          })),
+          { type: "separator" as const },
+          { label: "Pick a date…", accelerator: "CommandOrControl+D", registerAccelerator: false, click: () => send("todo:requestDue") },
+          ...(t.dueDate ? [{ label: "Clear deadline", click: () => act({ type: "setDue", id, dueDate: null }) }] : []),
+        ],
+      },
       { type: "separator" },
       { label: "Delete", accelerator: "CommandOrControl+Backspace", registerAccelerator: false, click: () => send("todo:requestDelete") },
     ];
     if (!E2E) Menu.buildFromTemplate(items).popup({ window: listWindow });
-    return items.filter((i) => i.label).map((i) => `${i.label}${i.enabled === false ? " (off)" : ""}`);
+    return items
+      .filter((i) => i.label)
+      .map((i) => `${i.label}${i.enabled === false ? " (off)" : ""}${Array.isArray(i.submenu) ? ` [${i.submenu.filter((x) => x.label).map((x) => x.label).join(" | ")}]` : ""}`);
   });
 
   // 렌더러가 내용 높이를 알려 주면 창 높이를 맞춘다. 창 밖의 투명한 영역이 클릭을 가로채지 않게 하려는 것.

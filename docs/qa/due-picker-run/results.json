@@ -1,0 +1,52 @@
+[
+  {
+    "name": "목록",
+    "win": "list",
+    "ok": true,
+    "ms": 601
+  },
+  {
+    "name": "메뉴 항목에 Deadline",
+    "win": "list",
+    "ok": true,
+    "ms": 14,
+    "value": [
+      "Edit title",
+      "Move to Today (off)",
+      "Move to Tomorrow",
+      "Move to Later",
+      "Deadline [Today | Tomorrow | This Friday · Fri, Oct 23 | Next Monday · Mon, Oct 26 | In a week · Tue, Oct 27 | Pick a date…]",
+      "Delete"
+    ]
+  },
+  {
+    "name": "⌘D → 날짜 고르기 창",
+    "win": "list",
+    "ok": true,
+    "ms": 883,
+    "value": true,
+    "snap": "03-list.png"
+  },
+  {
+    "name": "This Friday 누르기",
+    "win": "list",
+    "ok": true,
+    "ms": 851,
+    "value": true,
+    "snap": "04-list.png"
+  },
+  {
+    "name": "짧은 입력 · 금요일 면접",
+    "win": "quick",
+    "ok": true,
+    "ms": 220,
+    "value": true
+  },
+  {
+    "name": "Tomorrow·Later 쪽에 D-3",
+    "win": "list",
+    "ok": true,
+    "ms": 846,
+    "snap": "06-list.png"
+  }
+]

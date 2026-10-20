@@ -146,9 +146,15 @@ export function applyAction(data: AppData, action: TodoAction, now: Date = new D
       break;
     }
     case "setDue": {
+      // 마감이 할 날짜보다 앞이면(또는 할 날짜가 없으면) 준비는 그 전에 해야 하니 할 날짜를 오늘로 당긴다.
       const t = find(action.id);
       if (!t) return data;
       t.dueDate = action.dueDate;
+      if (action.dueDate && !t.completedAt && (t.plannedDate === null || t.plannedDate > action.dueDate)) {
+        const last = todayView(todos, today).open.at(-1);
+        t.plannedDate = today;
+        t.order = orderBetween(last?.order ?? null, null);
+      }
       break;
     }
     case "attach": {

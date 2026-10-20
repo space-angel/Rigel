@@ -208,3 +208,16 @@ test("자료 붙이기: 같은 출처는 바꾸고 다른 출처는 더한다", 
   d = applyAction(d, { type: "attach", id, notes: [note("notion", "b")] }, now);
   assert.deepEqual(d.todos[0]!.context.map((n) => `${n.source}:${n.label}`), ["files:자기소개서.pdf", "notion:b"]);
 });
+
+test("마감 정하기: 할 날짜보다 앞이면 할 날짜를 오늘로 당긴다", () => {
+  let d = applyAction(emptyData(), { type: "add", title: "엘리스 지원서", plannedDate: null }, now);
+  const id = d.todos[0]!.id;
+  d = applyAction(d, { type: "setDue", id, dueDate: "2026-10-23" }, now);
+  assert.equal(d.todos[0]!.dueDate, "2026-10-23");
+  assert.equal(d.todos[0]!.plannedDate, today, "나중 → 오늘");
+  d = applyAction(d, { type: "schedule", id, plannedDate: "2026-10-22" }, now);
+  d = applyAction(d, { type: "setDue", id, dueDate: "2026-10-30" }, now);
+  assert.equal(d.todos[0]!.plannedDate, "2026-10-22", "마감이 뒤면 할 날짜는 그대로");
+  d = applyAction(d, { type: "setDue", id, dueDate: null }, now);
+  assert.equal(d.todos[0]!.dueDate, null);
+});
