@@ -136,7 +136,7 @@ function GeneralTab({ data }: { data: AppData }) {
           <input
             className={`field__input${info && !info.path ? " is-error" : ""}`}
             value={path}
-            placeholder={info?.path && !data.settings.claudePath ? info.path : "~/.local/bin/claude"}
+            placeholder={info?.path && !data.settings.claudePath ? info.path : IS_MAC ? "~/.local/bin/claude" : "%USERPROFILE%\\.local\\bin\\claude.exe"}
             onChange={(e) => setPath(e.target.value)}
             onBlur={savePath}
             onKeyDown={(e) => e.key === "Enter" && savePath()}
@@ -467,7 +467,7 @@ function ToolsTab({ data }: { data: AppData }) {
         </section>
       )}
       <div className="tip">
-        <UserIcon size={14} /> {t("Local tools send titles only — links, paths and file contents stay on your Mac. MCP tools are read by Claude Code itself; a Figma frame sends its file key.")}
+        <UserIcon size={14} /> {t("Local tools send titles only — links, paths and file contents stay on this computer. MCP tools are read by Claude Code itself; a Figma frame sends its file key.")}
       </div>
     </div>
   );

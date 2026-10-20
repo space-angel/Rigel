@@ -307,7 +307,7 @@ export const KO: Record<string, string> = {
   Open: "열기",
   Language: "언어",
   "Menus and screens change right away": "바꾸면 메뉴와 화면에 바로 적용돼요",
-  "Open at login": "Mac을 켜면 자동으로 열기",
+  "Open at login": "컴퓨터를 켜면 자동으로 열기",
   "Find first steps ahead": "첫 행동 미리 찾기",
   "When the top task needs a first step, Claude finds one before you ask. Uses a little more of your Claude plan.": "맨 위 할 일에 첫 행동이 필요하면 묻기 전에 미리 찾아 둬요. Claude 사용량을 조금 더 써요.",
 
@@ -353,7 +353,7 @@ export const KO: Record<string, string> = {
     "Claude Code가 내 Claude 계정으로 읽어요. 서비스마다 워크스페이스 하나만 볼 수 있어요. 한 번 읽을 때 10초쯤 걸리고 Claude 사용량이 들어요. Notion은 AI 검색이 없는 요금제라면 뜻이 아니라 낱말로 찾아요.",
   "Sign in": "로그인",
   "Default mix": "기본 자료 비율",
-  "Local tools send titles only — links, paths and file contents stay on your Mac. MCP tools are read by Claude Code itself; a Figma frame sends its file key.":
+  "Local tools send titles only — links, paths and file contents stay on this computer. MCP tools are read by Claude Code itself; a Figma frame sends its file key.":
     "이 기기 도구는 이름만 보내요. 링크, 파일 위치, 파일 내용은 이 기기 밖으로 나가지 않아요. MCP 도구는 Claude Code가 직접 읽고, Figma 프레임은 파일 키를 보내요.",
 
   // 설정 · 바로가기
