@@ -377,11 +377,11 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
               })}
             </div>
           )}
-          {found.some((r) => r.item?.text) && (
+          {found.some((r) => r.item?.text || r.item?.preview) && (
             <div className="found">
               <span className="eyebrow">What we found · tap to check</span>
               {found
-                .filter((r) => r.item?.text)
+                .filter((r) => r.item?.text || r.item?.preview)
                 .map((r) => (
                   <Evidence key={r.source} source={r.source} label={r.item!.label} item={r.item!} words={onWords} />
                 ))}

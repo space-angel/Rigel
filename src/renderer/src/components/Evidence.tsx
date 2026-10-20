@@ -40,7 +40,9 @@ export function Evidence({
 }) {
   const [open, setOpen] = useState(false);
   const name = SOURCE_NAME[source as SourceId] ?? source;
-  const text = item?.text ?? "";
+  // MCP는 Claude가 읽은 문장, 로컬 파일은 맥 안에서 읽은 줄(보내지 않음)
+  const text = item?.text || item?.preview || "";
+  const isFile = item?.open?.kind === "file";
   const hay = `${item?.label ?? label} ${text}`.toLowerCase();
   const matched = words.filter((w) => hay.includes(w.toLowerCase()));
   const weak = Boolean(item) && words.length > 0 && matched.length === 0;
@@ -58,18 +60,30 @@ export function Evidence({
       {open && (
         <div className="evidence__body">
           <p className="evidence__where">
-            {name}
-            {item?.workspace ? ` · ${item.workspace}` : ""}
-            {item?.where ? ` / ${item.where}` : ""}
+            {isFile ? item?.where : name}
+            {!isFile && item?.workspace ? ` · ${item.workspace}` : ""}
+            {!isFile && item?.where ? ` / ${item.where}` : ""}
+            {isFile && item?.modified ? ` · edited ${item.modified.slice(5).replace("-", "/")}` : ""}
           </p>
           {text ? <blockquote className="evidence__quote">{highlight(text, words)}</blockquote> : <p className="evidence__note">{LOCAL_NOTE[source] ?? "Only the title was used"}</p>}
+          {isFile && (
+            <p className="evidence__note">
+              {item?.matchedIn === "content" ? "Found in the text, not the name. " : item?.matchedIn === "both" ? "Found in the name and the text. " : "Found in the name. "}
+              Only the file name is sent to Claude.
+            </p>
+          )}
           <p className={`evidence__match${weak ? " is-weak" : ""}`}>
             {matched.length ? `Matched: ${matched.join(" · ")}` : words.length ? "None of your words appear here — check before using it" : "Picked without words"}
           </p>
           <div className="evidence__actions">
+            {item?.open?.kind === "file" && (
+              <button type="button" className="button button--secondary button--sm" onClick={() => api.quickLook((item.open as { path: string }).path)}>
+                Quick Look
+              </button>
+            )}
             {item?.open && (
               <button type="button" className="button button--secondary button--sm" onClick={() => api.openToolItem(item.open)}>
-                Open in {name.replace(" frame", "")}
+                {isFile ? "Open file" : `Open in ${name.replace(" frame", "")}`}
               </button>
             )}
             {onLeaveOut && (

@@ -1,14 +1,15 @@
 import { execFile } from "node:child_process";
-import { statSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
-import { basename } from "node:path";
+import { basename, dirname } from "node:path";
+import { NATURAL_MAX_WORDS, evidenceLines, firstLines, isDocumentPath, rankFiles, spotlightQuery } from "@shared/fileMatch";
 import type { AppData, TodoItem } from "@shared/types";
 import { localDate } from "@shared/todos";
 import type { LocalSource, ToolItem, ToolResult } from "@shared/shape";
 
 // LOCAL 도구: 앱이 맥 안에서 직접 읽는다. 결과는 제목 한 줄만 Claude에게 보내고, 링크나 경로는 맥 안에서만 쓴다.
-// 캘린더는 처음 읽을 때 캘린더 앱을 깨우느라 느려서 3초, 나머지는 1초 안에 끝나야 한다.
-const TIMEOUT_MS: Record<LocalSource, number> = { figma: 1000, calendar: 3000, files: 1000, todoban: 1000 };
+// 캘린더는 처음 읽을 때 캘린더 앱을 깨우느라 느려서 3초, 파일은 내용 검색이라 2.5초, 나머지는 1초 안에 끝나야 한다.
+const TIMEOUT_MS: Record<LocalSource, number> = { figma: 1000, calendar: 3000, files: 2500, todoban: 1000 };
 
 function score(text: string, words: string[]): number {
   const t = text.toLowerCase();
@@ -54,21 +55,55 @@ function run(cmd: string, args: string[], timeout: number): Promise<{ stdout: st
   });
 }
 
-// 최근 7일에 연 문서 중 이름에 낱말이 들어간 것. 이름만 보낸다.
+// Files: 이름이나 내용에 낱말이 들어 있고 최근 30일에 열었거나 고친 문서(Spotlight).
+// 근거 줄은 맥 안에서 읽어 화면에만 보여 주고, Claude에게는 파일 이름만 보낸다.
+const TEXT_EXT = /\.(txt|md|markdown|csv|json|html?|org|tex)$/i;
+const TEXTUTIL_EXT = /\.(docx?|rtf|rtfd|odt|webarchive)$/i;
+
+async function readText(p: string): Promise<string | null> {
+  try {
+    if (statSync(p).size > 2_000_000) return null;
+    if (TEXT_EXT.test(p)) return readFileSync(p, "utf8").slice(0, 200_000);
+    if (TEXTUTIL_EXT.test(p)) {
+      const r = await run("/usr/bin/textutil", ["-convert", "txt", "-stdout", p], 1500);
+      return r.failed ? null : r.stdout.slice(0, 200_000);
+    }
+  } catch {}
+  return null;
+}
+
 async function files(words: string[]): Promise<ToolItem | null | "slow"> {
-  const names = words.slice(0, 4).map((w) => `kMDItemDisplayName == "*${w.replace(/["\\*]/g, "")}*"cd`);
-  if (!names.length) return null;
-  const query = `(${names.join(" || ")}) && kMDItemLastUsedDate >= $time.today(-7)`;
-  const r = await run("/usr/bin/mdfind", ["-onlyin", homedir(), query], TIMEOUT_MS.files);
-  if (r.timedOut) return "slow";
-  const paths = r.stdout
-    .split("\n")
-    .filter((p) => p && !/\/(Library|node_modules|\.[^/]+)\//.test(p))
-    .slice(0, 50);
-  const scored = paths.map((p) => ({ p, s: score(basename(p), words), m: mtime(p) }));
-  scored.sort((a, b) => b.s - a.s || b.m - a.m);
-  const top = scored[0];
-  return top ? { source: "files", label: basename(top.p), date: null, open: { kind: "file", path: top.p } } : null;
+  const query = spotlightQuery(words);
+  if (!query) return null;
+  const since = Date.now() - 30 * 86_400_000;
+  const natural = words.filter((w) => w.length > 1).slice(0, NATURAL_MAX_WORDS);
+  const [r, ...nat] = await Promise.all([
+    run("/usr/bin/mdfind", ["-onlyin", homedir(), query], TIMEOUT_MS.files),
+    ...natural.map((w) => run("/usr/bin/mdfind", ["-onlyin", homedir(), w], TIMEOUT_MS.files)),
+  ]);
+  if (r.timedOut && nat.every((x) => x.timedOut)) return "slow";
+  const fromNatural = nat
+    .flatMap((x) => x.stdout.split("\n").slice(0, 3000))
+    .filter(isDocumentPath)
+    .filter((p) => mtime(p) >= since);
+  const paths = [...new Set([...r.stdout.split("\n").filter(isDocumentPath), ...fromNatural])].slice(0, 60);
+  // 최근 것부터 12개만 내용을 읽는다(시간 제한 안에 끝나게).
+  const recent = paths.map((p) => ({ p, m: mtime(p) })).sort((x, y) => y.m - x.m).slice(0, 12);
+  const cands = await Promise.all(recent.map(async ({ p, m }) => ({ path: p, name: basename(p).normalize("NFC"), modified: m, content: await readText(p) })));
+  const top = rankFiles(cands, words)[0];
+  if (!top) return null;
+  const quote = top.content ? (evidenceLines(top.content, words) ?? firstLines(top.content)) : null;
+  const home = homedir();
+  return {
+    source: "files",
+    label: top.name,
+    date: null,
+    open: { kind: "file", path: top.path },
+    where: dirname(top.path).replace(home, "~"),
+    ...(quote && { preview: quote }),
+    matchedIn: top.inName && top.inContent ? "both" : top.inName ? "name" : "content",
+    ...(top.modified && { modified: localDate(new Date(top.modified)) }),
+  };
 }
 
 function mtime(p: string): number {

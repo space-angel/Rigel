@@ -12,7 +12,11 @@ export interface ToolItem {
   source: ToolSource;
   label: string;
   text?: string; // MCP 도구가 읽은 근거 문장 (150자 이내). LOCAL 도구는 없음
-  where?: string; // 어디서 왔는지 (노션 경로, 리니어 팀·상태, 피그마 페이지)
+  where?: string; // 어디서 왔는지 (노션 경로, 리니어 팀·상태, 피그마 페이지, 파일 폴더)
+  // 로컬 파일 근거: 화면에만 보여 주고 Claude에게 보내지 않는다.
+  preview?: string; // 낱말이 들어간 줄(없으면 첫 몇 줄)
+  matchedIn?: "name" | "content" | "both";
+  modified?: string; // 마지막으로 고친 날 (YYYY-MM-DD)
   workspace?: string; // MCP 도구가 읽은 워크스페이스 이름
   date: string | null; // 일정이나 끝낸 날짜 (YYYY-MM-DD)
   open:

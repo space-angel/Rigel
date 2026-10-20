@@ -1,0 +1,149 @@
+[
+  {
+    "name": "연봉 협상 준비 · 빚기 열기",
+    "win": "list",
+    "ok": true,
+    "ms": 1673,
+    "value": true
+  },
+  {
+    "name": "연봉 협상 준비 · 파일 카드",
+    "win": "list",
+    "ok": true,
+    "ms": 4,
+    "value": {
+      "card": " 연봉협상_체크리스트.md"
+    }
+  },
+  {
+    "name": "연봉 협상 준비 · 근거 펼치기",
+    "win": "list",
+    "ok": true,
+    "ms": 640,
+    "value": {
+      "where": "~/todoban-qa-files · edited 10/20",
+      "quote": "연봉 협상 체크리스트 · 준비 · 희망 연봉 근거: 이전 연봉, 시장 평균(잡플래닛 PM 3년 차), 맡을 범위",
+      "notes": [
+        "Found in the name and the text. Only the file name is sent to Claude."
+      ],
+      "match": "Matched: 연봉 · 협상 · 준비",
+      "buttons": [
+        "Quick Look",
+        "Open file"
+      ]
+    },
+    "snap": "03-list.png"
+  },
+  {
+    "name": "연봉 협상 준비 · Quick Look",
+    "win": "list",
+    "ok": true,
+    "ms": 1,
+    "value": true
+  },
+  {
+    "name": "연봉 협상 준비 · 돌아가기",
+    "win": "list",
+    "ok": true,
+    "ms": 305,
+    "value": true
+  },
+  {
+    "name": "토스 자기소개 1분 버전 쓰기 · 빚기 열기",
+    "win": "list",
+    "ok": true,
+    "ms": 2548,
+    "value": true
+  },
+  {
+    "name": "토스 자기소개 1분 버전 쓰기 · 파일 카드",
+    "win": "list",
+    "ok": true,
+    "ms": 0,
+    "value": {
+      "card": " 메모 3.txt"
+    }
+  },
+  {
+    "name": "토스 자기소개 1분 버전 쓰기 · 근거 펼치기",
+    "win": "list",
+    "ok": true,
+    "ms": 660,
+    "value": {
+      "where": "~/todoban-qa-files · edited 10/20",
+      "quote": "금요일 토스 면접: 자기소개 1분 버전을 PM 경험 → 강점 → 지원 동기 순으로 다시 쓰기 · 은행 들르기",
+      "notes": [
+        "Found in the text, not the name. Only the file name is sent to Claude."
+      ],
+      "match": "Matched: 토스 · 자기소개 · 1분 · 버전 · 쓰기",
+      "buttons": [
+        "Quick Look",
+        "Open file"
+      ]
+    },
+    "snap": "08-list.png"
+  },
+  {
+    "name": "토스 자기소개 1분 버전 쓰기 · Quick Look",
+    "win": "list",
+    "ok": true,
+    "ms": 1,
+    "value": true
+  },
+  {
+    "name": "토스 자기소개 1분 버전 쓰기 · 돌아가기",
+    "win": "list",
+    "ok": true,
+    "ms": 304,
+    "value": true
+  },
+  {
+    "name": "회의 안건 정리 · 빚기 열기",
+    "win": "list",
+    "ok": true,
+    "ms": 1832,
+    "value": true
+  },
+  {
+    "name": "회의 안건 정리 · 파일 카드",
+    "win": "list",
+    "ok": true,
+    "ms": 0,
+    "value": {
+      "card": " 회의록.docx"
+    }
+  },
+  {
+    "name": "회의 안건 정리 · 근거 펼치기",
+    "win": "list",
+    "ok": true,
+    "ms": 659,
+    "value": {
+      "where": "~/todoban-qa-files · edited 10/20",
+      "quote": "다음 주 회의 안건 · 연봉 협상 일정은 인사팀과 다음 주 수요일로 잡기",
+      "notes": [
+        "Found in the name and the text. Only the file name is sent to Claude."
+      ],
+      "match": "Matched: 회의 · 안건",
+      "buttons": [
+        "Quick Look",
+        "Open file"
+      ]
+    },
+    "snap": "13-list.png"
+  },
+  {
+    "name": "회의 안건 정리 · Quick Look",
+    "win": "list",
+    "ok": true,
+    "ms": 1,
+    "value": true
+  },
+  {
+    "name": "회의 안건 정리 · 돌아가기",
+    "win": "list",
+    "ok": true,
+    "ms": 303,
+    "value": true
+  }
+]

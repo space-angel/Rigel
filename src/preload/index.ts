@@ -75,6 +75,7 @@ const api = {
   acceptFirstStep: (id: string, opts: { toToday?: boolean } = {}) => ipcRenderer.send("firstStep:accept", id, opts),
   collectTools: (todoId: string, words: string[]): Promise<ToolResult[]> => ipcRenderer.invoke("tools:collect", todoId, words),
   openToolItem: (open: ToolItem["open"]) => ipcRenderer.send("tools:open", open),
+  quickLook: (path: string) => ipcRenderer.send("tools:quicklook", path),
   collectMcp: (todoId: string, source: McpSource, words: string[]): Promise<ToolResult> => ipcRenderer.invoke("tools:collectMcp", todoId, source, words),
   cancelMcp: (todoId: string) => ipcRenderer.send("tools:cancelMcp", todoId),
   mcpStatus: (fresh?: boolean): Promise<Record<string, McpStatus>> => ipcRenderer.invoke("tools:mcpStatus", fresh),

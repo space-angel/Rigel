@@ -1,0 +1,92 @@
+[
+  {
+    "name": "연봉 협상 준비 · 빚기 열기",
+    "win": "list",
+    "main": "shape:연봉 협상 준비",
+    "run": "window.__t0 = performance.now(); return true;",
+    "until": "__e2e.$('.shape') && !__e2e.text().includes('Reading your tools')",
+    "timeout": 20000
+  },
+  {
+    "name": "연봉 협상 준비 · 파일 카드",
+    "win": "list",
+    "run": "const c = __e2e.all('.tool').find(x => x.textContent.includes('Files')); return { card: c?.querySelector('.tool__item')?.textContent };"
+  },
+  {
+    "name": "연봉 협상 준비 · 근거 펼치기",
+    "win": "list",
+    "run": "const b = __e2e.all('.found .evidence__row')[0]; if (b) __e2e.click(b); await new Promise(r => setTimeout(r, 300)); const e = __e2e.$('.found .evidence.is-open'); return e ? { where: e.querySelector('.evidence__where')?.textContent, quote: e.querySelector('.evidence__quote')?.textContent, notes: [...e.querySelectorAll('.evidence__note')].map(n => n.textContent), match: e.querySelector('.evidence__match')?.textContent, buttons: [...e.querySelectorAll('.evidence__actions button')].map(b => b.textContent) } : null;",
+    "snap": true
+  },
+  {
+    "name": "연봉 협상 준비 · Quick Look",
+    "win": "list",
+    "run": "const b = __e2e.byText('Quick Look', '.found button'); if (b) __e2e.click(b); return Boolean(b);"
+  },
+  {
+    "name": "연봉 협상 준비 · 돌아가기",
+    "win": "list",
+    "run": "__e2e.click('.back'); return true;",
+    "wait": 300
+  },
+  {
+    "name": "토스 자기소개 1분 버전 쓰기 · 빚기 열기",
+    "win": "list",
+    "main": "shape:토스 자기소개 1분 버전 쓰기",
+    "run": "window.__t0 = performance.now(); return true;",
+    "until": "__e2e.$('.shape') && !__e2e.text().includes('Reading your tools')",
+    "timeout": 20000
+  },
+  {
+    "name": "토스 자기소개 1분 버전 쓰기 · 파일 카드",
+    "win": "list",
+    "run": "const c = __e2e.all('.tool').find(x => x.textContent.includes('Files')); return { card: c?.querySelector('.tool__item')?.textContent };"
+  },
+  {
+    "name": "토스 자기소개 1분 버전 쓰기 · 근거 펼치기",
+    "win": "list",
+    "run": "const b = __e2e.all('.found .evidence__row')[0]; if (b) __e2e.click(b); await new Promise(r => setTimeout(r, 300)); const e = __e2e.$('.found .evidence.is-open'); return e ? { where: e.querySelector('.evidence__where')?.textContent, quote: e.querySelector('.evidence__quote')?.textContent, notes: [...e.querySelectorAll('.evidence__note')].map(n => n.textContent), match: e.querySelector('.evidence__match')?.textContent, buttons: [...e.querySelectorAll('.evidence__actions button')].map(b => b.textContent) } : null;",
+    "snap": true
+  },
+  {
+    "name": "토스 자기소개 1분 버전 쓰기 · Quick Look",
+    "win": "list",
+    "run": "const b = __e2e.byText('Quick Look', '.found button'); if (b) __e2e.click(b); return Boolean(b);"
+  },
+  {
+    "name": "토스 자기소개 1분 버전 쓰기 · 돌아가기",
+    "win": "list",
+    "run": "__e2e.click('.back'); return true;",
+    "wait": 300
+  },
+  {
+    "name": "회의 안건 정리 · 빚기 열기",
+    "win": "list",
+    "main": "shape:회의 안건 정리",
+    "run": "window.__t0 = performance.now(); return true;",
+    "until": "__e2e.$('.shape') && !__e2e.text().includes('Reading your tools')",
+    "timeout": 20000
+  },
+  {
+    "name": "회의 안건 정리 · 파일 카드",
+    "win": "list",
+    "run": "const c = __e2e.all('.tool').find(x => x.textContent.includes('Files')); return { card: c?.querySelector('.tool__item')?.textContent };"
+  },
+  {
+    "name": "회의 안건 정리 · 근거 펼치기",
+    "win": "list",
+    "run": "const b = __e2e.all('.found .evidence__row')[0]; if (b) __e2e.click(b); await new Promise(r => setTimeout(r, 300)); const e = __e2e.$('.found .evidence.is-open'); return e ? { where: e.querySelector('.evidence__where')?.textContent, quote: e.querySelector('.evidence__quote')?.textContent, notes: [...e.querySelectorAll('.evidence__note')].map(n => n.textContent), match: e.querySelector('.evidence__match')?.textContent, buttons: [...e.querySelectorAll('.evidence__actions button')].map(b => b.textContent) } : null;",
+    "snap": true
+  },
+  {
+    "name": "회의 안건 정리 · Quick Look",
+    "win": "list",
+    "run": "const b = __e2e.byText('Quick Look', '.found button'); if (b) __e2e.click(b); return Boolean(b);"
+  },
+  {
+    "name": "회의 안건 정리 · 돌아가기",
+    "win": "list",
+    "run": "__e2e.click('.back'); return true;",
+    "wait": 300
+  }
+]

@@ -516,6 +516,11 @@ app.whenReady().then(() => {
       ? openOutside("claude.ai connectors", () => shell.openExternal("https://claude.ai/settings/connectors"))
       : openOutside("Terminal", () => shell.openPath("/System/Applications/Utilities/Terminal.app")),
   );
+  // 파일 미리보기(Quick Look). 열 수 있는 파일과 같은 범위만.
+  ipcMain.on("tools:quicklook", (_e, path: string) => {
+    if (!openablePaths.has(path) && !data.todos.some((t) => t.context.some((n) => n.path === path))) return;
+    openOutside(`Quick Look ${path}`, () => execFile("/usr/bin/qlmanage", ["-p", path], () => {}));
+  });
   ipcMain.on("tools:open", (_e, open: ToolItem["open"]) => {
     if (!open) return;
     hideLooseList();
