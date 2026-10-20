@@ -75,11 +75,11 @@ export function QuickInput() {
           )}
           {kind === "long" && (
             <span className="quick__kind quick__kind--ai">
-              <AiSparkle size={14} /> {count}자 · 지금은 첫 줄을 한 할 일로 넣어요
+              <AiSparkle size={14} /> {count}자 · Claude가 할 일로 나눠요
             </span>
           )}
           <span className="quick__keys">
-            <kbd>Esc</kbd> 닫기 <kbd>Enter</kbd> 넣기 <kbd>⇧ Enter</kbd> 줄바꿈
+            <kbd>Esc</kbd> 닫기 <kbd>Enter</kbd> {kind === "long" ? "나누기" : "넣기"} <kbd>⇧ Enter</kbd> 줄바꿈
           </span>
         </div>
       </div>

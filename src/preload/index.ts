@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import type { AppData, TodoAction } from "@shared/types";
+import type { ReviewDraft, ReviewState } from "@shared/review";
 
 const api = {
   getData: (): Promise<AppData> => ipcRenderer.invoke("data:get"),
@@ -30,6 +31,20 @@ const api = {
   resizeQuick: (height: number) => ipcRenderer.send("quick:resize", height),
   hideQuick: () => ipcRenderer.send("quick:hide"),
   submitQuick: (text: string): Promise<{ ok: boolean; kind?: "short" | "long" }> => ipcRenderer.invoke("quick:submit", text),
+  getReview: (): Promise<ReviewState | null> => ipcRenderer.invoke("review:get"),
+  onReview: (fn: (s: ReviewState) => void) => {
+    const listener = (_e: unknown, s: ReviewState) => fn(s);
+    ipcRenderer.on("review:state", listener);
+    return () => {
+      ipcRenderer.removeListener("review:state", listener);
+    };
+  },
+  retryReview: () => ipcRenderer.send("review:retry"),
+  cancelReview: () => ipcRenderer.send("review:cancel"),
+  commitReview: (drafts: ReviewDraft[]) => ipcRenderer.send("review:commit", drafts),
+  insertRawReview: () => ipcRenderer.send("review:insertRaw"),
+  openTerminal: () => ipcRenderer.send("review:openTerminal"),
+  resizeReview: (height: number) => ipcRenderer.send("review:resize", height),
 };
 
 export type TodoBanApi = typeof api;

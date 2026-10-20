@@ -64,3 +64,26 @@ test("할 날짜가 지난 할 일도 오늘 목록에 보인다", () => {
   d.todos[0]!.plannedDate = "2026-10-19";
   assert.equal(todayView(d.todos, today).open.length, 1);
 });
+
+test("확인 창에서 넣은 할 일은 오늘과 나중 각각 맨 아래에 순서대로 붙는다", () => {
+  let d = applyAction(emptyData(), { type: "add", title: "기존" }, now);
+  d = applyAction(
+    d,
+    {
+      type: "addMany",
+      rawText: "원문",
+      items: [
+        { title: "a", plannedDate: today, isClear: true, shortcutId: null },
+        { title: "b", plannedDate: null, isClear: false, shortcutId: null },
+        { title: "  ", plannedDate: today, isClear: true, shortcutId: null },
+        { title: "c", plannedDate: today, isClear: true, shortcutId: "s" },
+      ],
+    },
+    now,
+  );
+  const v = todayView(d.todos, today);
+  assert.deepEqual(v.open.map((t) => t.title), ["기존", "a", "c"]);
+  assert.deepEqual(v.later.map((t) => t.title), ["b"]);
+  assert.equal(v.open[2]!.shortcutId, "s");
+  assert.equal(v.open[1]!.rawText, "원문");
+});

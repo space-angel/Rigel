@@ -66,6 +66,31 @@ export function applyAction(data: AppData, action: TodoAction, now: Date = new D
       });
       break;
     }
+    case "addMany": {
+      // 확인 창에서 넣은 할 일. 오늘과 나중 각각의 맨 아래에 순서대로 붙인다.
+      let lastToday = todayView(todos, today).open.at(-1)?.order ?? null;
+      let lastLater = todayView(todos, today).later.at(-1)?.order ?? null;
+      for (const item of action.items) {
+        const title = item.title.trim();
+        if (!title) continue;
+        const forToday = item.plannedDate !== null && item.plannedDate <= today;
+        const order = orderBetween(forToday ? lastToday : lastLater, null);
+        if (forToday) lastToday = order;
+        else lastLater = order;
+        todos.push({
+          id: newId(),
+          title,
+          plannedDate: item.plannedDate,
+          order,
+          completedAt: null,
+          createdAt: now.toISOString(),
+          rawText: action.rawText,
+          isClear: item.isClear,
+          shortcutId: item.shortcutId,
+        });
+      }
+      break;
+    }
     case "toggle": {
       const t = find(action.id);
       if (!t) return data;
