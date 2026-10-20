@@ -7,17 +7,10 @@
   "wait": 800
  },
  {
-  "name": "흐르는 빛 끔 (기준) · 가만히 5초",
-  "win": "list",
-  "run": "\nconst setMode = (m) => { localStorage.setItem('todoban.glow', m); document.documentElement.dataset.glow = m; };\nconst measure = async (ms, during) => {\n  await window.todoban.perfMetrics();\n  const frames = []; let last = performance.now(); let on = true;\n  const tick = (t) => { frames.push(t - last); last = t; if (on) requestAnimationFrame(tick); };\n  requestAnimationFrame(tick);\n  const stop = during ? during() : null;\n  await new Promise(r => setTimeout(r, ms));\n  on = false; if (stop) stop();\n  const m = await window.todoban.perfMetrics();\n  const sum = (type) => Number(m.filter(x => x.type === type).reduce((a, x) => a + x.cpu, 0).toFixed(1));\n  const f = frames.slice(2).sort((a, b) => a - b); if (!f.length) return { gpu: sum('GPU'), renderer: sum('Tab'), fps: 0, note: 'not painting' };\n  const p = (q) => Number(f[Math.floor(q * (f.length - 1))].toFixed(1));\n  return { gpu: sum('GPU'), renderer: sum('Tab'), fps: Math.round(frames.length / (ms / 1000)), p95: p(0.95), over20ms: f.filter(x => x > 20).length };\n};\nconst card = () => __e2e.$('.now-card');\nconst st = document.createElement('style'); st.textContent = '.hero-glow__flow{animation:none!important}'; document.head.append(st); const r = await measure(5000); st.remove(); return r;",
-  "snap": false,
-  "timeout": 25000
- },
- {
-  "name": "흐르는 빛 · 가만히 5초",
+  "name": "기준 · 가만히 5초",
   "win": "list",
   "run": "\nconst setMode = (m) => { localStorage.setItem('todoban.glow', m); document.documentElement.dataset.glow = m; };\nconst measure = async (ms, during) => {\n  await window.todoban.perfMetrics();\n  const frames = []; let last = performance.now(); let on = true;\n  const tick = (t) => { frames.push(t - last); last = t; if (on) requestAnimationFrame(tick); };\n  requestAnimationFrame(tick);\n  const stop = during ? during() : null;\n  await new Promise(r => setTimeout(r, ms));\n  on = false; if (stop) stop();\n  const m = await window.todoban.perfMetrics();\n  const sum = (type) => Number(m.filter(x => x.type === type).reduce((a, x) => a + x.cpu, 0).toFixed(1));\n  const f = frames.slice(2).sort((a, b) => a - b); if (!f.length) return { gpu: sum('GPU'), renderer: sum('Tab'), fps: 0, note: 'not painting' };\n  const p = (q) => Number(f[Math.floor(q * (f.length - 1))].toFixed(1));\n  return { gpu: sum('GPU'), renderer: sum('Tab'), fps: Math.round(frames.length / (ms / 1000)), p95: p(0.95), over20ms: f.filter(x => x > 20).length };\n};\nconst card = () => __e2e.$('.now-card');\nreturn await measure(5000);",
-  "snap": true,
+  "snap": false,
   "timeout": 25000
  },
  {

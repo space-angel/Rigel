@@ -743,9 +743,10 @@ app.whenReady().then(() => {
     const windows = { list: () => listWindow, quick: () => quickWindow, review: () => reviewWindow, settings: () => settingsWindow, welcome: () => welcomeWindow };
     listWindow.webContents.once("did-finish-load", () =>
       setTimeout(async () => {
-        // 성능 측정: 실제로 그려야 프레임을 잴 수 있으므로 화면 왼쪽 위에 포커스 없이 띄운다.
+        // 성능 측정: 실제로 그려야 프레임을 잴 수 있으므로 포커스 없이 띄운다.
+        // 화면 밖(왼쪽)에 두어 쓰고 있는 화면을 가리지 않고, 마우스나 다른 창이 측정에 섞이지 않게 한다.
         if (PERF && listWindow) {
-          listWindow.setPosition(0, 40);
+          listWindow.setPosition(-listWindow.getBounds().width - 400, 40);
           listWindow.showInactive();
           ipcMain.handle("perf:main", () => perfLog.splice(0));
           // 프로세스별 CPU 사용률(직전 호출 이후 평균). GPU 프로세스가 글로우 같은 합성 비용을 보여 준다.

@@ -1,7 +1,0 @@
-[
- {"name":"목록 · 파란 칸 아래 카드 테두리가 비친다","win":"list","main":"openList","until":"__e2e.$('.now-card')","wait":900,"snap":true,
-  "run":"const c = __e2e.$('.now-card'), s = __e2e.$('.ratio__seg--ready').getBoundingClientRect(), r = c.getBoundingClientRect(); return { lx: c.style.getPropertyValue('--lx'), ls: c.style.getPropertyValue('--ls'), lo: c.style.getPropertyValue('--lo'), segLeftInCard: Math.round(s.left - r.left), segWidth: Math.round(s.width) };",
-  "expect":"Math.abs(parseFloat(__e2e.$('.now-card').style.getPropertyValue('--lx')) - (__e2e.$('.ratio__seg--ready').getBoundingClientRect().left - __e2e.$('.now-card').getBoundingClientRect().left)) <= 1"},
- {"name":"하나 체크 → 비율이 바뀌면 비치는 자리도 따라간다","win":"list","run":"__e2e.key('.window', ' '); await new Promise(r => setTimeout(r, 1400)); const c = __e2e.$('.now-card'), s = __e2e.$('.ratio__seg--ready').getBoundingClientRect(), r = c.getBoundingClientRect(); return { lx: c.style.getPropertyValue('--lx'), ls: c.style.getPropertyValue('--ls'), segLeftInCard: Math.round(s.left - r.left), segWidth: Math.round(s.width) };","snap":true,
-  "expect":"Math.abs(parseFloat(__e2e.$('.now-card').style.getPropertyValue('--ls')) * 100 - __e2e.$('.ratio__seg--ready').getBoundingClientRect().width) <= 1"}
-]

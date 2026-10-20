@@ -224,16 +224,10 @@ function NowCard({
         edit.onMenu();
       }}
     >
-      {/* 움직이는 글로우 층. 요소 하나에 움직임 하나: flow는 늘 은은하게 흐르는 빛, blob은 순간의 빛(힌트·이어받기·생각 중·도착), press는 손끝 빛. */}
+      {/* 움직이는 글로우 층. 요소 하나에 움직임 하나: blob은 순간의 빛(힌트·이어받기·생각 중·도착), press는 손끝 빛. */}
       <span className="hero-glow" aria-hidden="true">
-        <span className="hero-glow__spill" />
-        <span className="hero-glow__flow" />
         <span className="hero-glow__blob" />
         <span className="hero-glow__press" />
-      </span>
-      {/* 위 비율 막대의 파란 칸이 비치는 테두리 */}
-      <span className="hero-edge" aria-hidden="true">
-        <span className="hero-edge__light" />
       </span>
       {handoff && (
         <span className="hero-ring" aria-hidden="true">
@@ -541,45 +535,6 @@ export function TodayList() {
     });
     ro.observe(inner);
     return () => ro.disconnect();
-  }, [hasData, Boolean(shaping)]);
-
-  // 주변 빛: 위 비율 막대의 파란 칸(바로 시작)이 광원이 되어, 지금 할 일 카드의 윗 테두리와 윗쪽 안에 그 자리만큼 파랗게 비친다.
-  // 칸이 움직이거나 크기가 바뀌면(비율이 바뀔 때 280ms 동안) 따라간다. CSS 변수 → transform만 바뀐다.
-  useLayoutEffect(() => {
-    const root = shellRef.current;
-    if (!root) return;
-    const update = () => {
-      const card = root.querySelector<HTMLElement>(".now-card");
-      if (!card) return;
-      const src = root.querySelector<HTMLElement>(".ratio__seg--ready, .ratio__seg--planned");
-      if (!src) {
-        card.style.setProperty("--lo", "0");
-        return;
-      }
-      const c = card.getBoundingClientRect();
-      const s = src.getBoundingClientRect();
-      // 광원에서 멀수록 약하게 (카드 윗변까지 거리)
-      const gap = Math.max(0, c.top - s.bottom);
-      card.style.setProperty("--lx", `${Math.round(s.left - c.left)}px`);
-      card.style.setProperty("--ls", `${(s.width / 100).toFixed(3)}`);
-      card.style.setProperty("--lo", `${Math.max(0.25, 1 - gap / 80).toFixed(2)}`);
-    };
-    update();
-    const ro = new ResizeObserver(update);
-    const watch = () => {
-      ro.disconnect();
-      root.querySelectorAll(".ratio__seg, .now-card").forEach((el) => ro.observe(el));
-    };
-    watch();
-    const mo = new MutationObserver(() => {
-      watch();
-      update();
-    });
-    mo.observe(root, { childList: true, subtree: true });
-    return () => {
-      ro.disconnect();
-      mo.disconnect();
-    };
   }, [hasData, Boolean(shaping)]);
 
   // 키보드로 고른 줄이 목록 영역 밖으로 나가면 그 줄이 보이도록 스크롤한다.
