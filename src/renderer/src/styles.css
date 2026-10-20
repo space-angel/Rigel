@@ -2988,3 +2988,131 @@ html[lang="ko"] :is(.eyebrow,
   .evidence__where) {
   letter-spacing: 0;
 }
+
+/* ===== 움직이는 글로우 (실험, 설정 → 일반 → 글로우 실험) =====
+   바닥의 고정 글로우(--shadow-hero)는 그대로 두고, 그 위에 빛 덩어리 하나를 얹어 transform·opacity로만 움직인다.
+   층: hero-glow(카드 모양으로 자름) > rise(이어받기) > follow(따라오기) > blob(숨쉬기·생각 중) */
+.now-card {
+  isolation: isolate;
+}
+.hero-glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+.hero-glow__rise,
+.hero-glow__follow {
+  position: absolute;
+  inset: 0;
+}
+.hero-glow__blob {
+  position: absolute;
+  left: -15%;
+  right: -15%;
+  bottom: -70px;
+  height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(94 152 254 / 60%), rgb(94 152 254 / 0%));
+  opacity: 0;
+}
+
+/* 숨쉬기: 5초에 한 번 천천히 밝아졌다 어두워진다 */
+@keyframes glow-breathe {
+  0%, 100% { opacity: 0.2; transform: scale(0.92); }
+  50% { opacity: 0.8; transform: scale(1.04); }
+}
+:is([data-glow="breathe"], [data-glow="all"]) .hero-glow__blob {
+  animation: glow-breathe 5s ease-in-out infinite;
+}
+
+/* 따라오기: 마우스를 올리면 빛이 조금 늦게 따라온다 */
+:is([data-glow="follow"], [data-glow="all"]) .hero-glow__follow {
+  transform: translate3d(0, 0, 0);
+  transition: transform 520ms var(--ease-out);
+}
+:is([data-glow="follow"], [data-glow="all"]) .now-card:is(:hover, .is-hover) .hero-glow__follow {
+  transform: translate3d(calc(var(--gx, 0px) * 0.8), var(--gy, 0px), 0);
+  transition-duration: 380ms;
+}
+[data-glow="follow"] .hero-glow__blob {
+  transition: opacity var(--dur-m) var(--ease-out);
+}
+[data-glow="follow"] .now-card:is(:hover, .is-hover) .hero-glow__blob {
+  opacity: 0.75;
+}
+
+/* 이어받기: 다음 할 일이 지금 할 일이 되면 빛이 아래에서 올라오고, 테두리를 한 바퀴 돈다 */
+@keyframes glow-rise {
+  from { opacity: 0; transform: translate3d(0, 60px, 0); }
+  45% { opacity: 1; }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes glow-rise-blob {
+  0% { opacity: 0; }
+  40% { opacity: 1; }
+  100% { opacity: 0.35; }
+}
+:is([data-glow="handoff"], [data-glow="all"]) .now-card.is-handoff .hero-glow__rise {
+  animation: glow-rise 900ms var(--ease-out) both;
+}
+[data-glow="handoff"] .now-card.is-handoff .hero-glow__blob {
+  animation: glow-rise-blob 1400ms var(--ease-out) both;
+}
+.hero-ring {
+  display: none;
+  position: absolute;
+  inset: -1px;
+  padding: 1px;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+  /* 테두리 1px만 남기고 가린다 */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+:is([data-glow="handoff"], [data-glow="all"]) .hero-ring {
+  display: block;
+  animation: ring-fade 1100ms var(--ease-out) both;
+}
+.hero-ring__spin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 200%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: conic-gradient(from 0deg, transparent 0 70%, rgb(150 190 255 / 0%) 72%, rgb(170 205 255 / 95%) 88%, transparent 96%);
+  animation: ring-spin 1000ms var(--ease-in-out, ease-in-out) both;
+}
+@keyframes ring-spin {
+  from { transform: rotate(-90deg); }
+  to { transform: rotate(270deg); }
+}
+@keyframes ring-fade {
+  0% { opacity: 0; }
+  15%, 75% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* 생각 중: Claude가 이 카드의 첫 행동을 찾는 동안 빛이 좌우로 흐른다 (고정 말고는 모든 방식에서) */
+@keyframes glow-think {
+  from { opacity: 0.55; transform: translate3d(-30%, 0, 0) scale(0.9); }
+  to { opacity: 0.95; transform: translate3d(30%, 0, 0) scale(1.05); }
+}
+html:not([data-glow="static"]) .now-card.is-thinking .hero-glow__blob {
+  animation: glow-think 1.6s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-glow__blob,
+  .hero-glow__rise,
+  .hero-ring,
+  .hero-ring__spin {
+    animation: none !important;
+    transition: none !important;
+  }
+}

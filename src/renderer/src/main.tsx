@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import type { Lang } from "@shared/i18n";
 import { setLang } from "./i18n";
+import { watchGlow } from "./glow";
 import "pretendard/dist/web/variable/pretendardvariable.css";
 import "./theme/default.css";
 import "./styles.css";
@@ -25,6 +26,7 @@ const screens = {
   "settings-shortcuts-new": () => <Settings initialTab="shortcuts" openSheet />,
 } as const;
 const screen = screens[view as keyof typeof screens] ?? screens.list;
+watchGlow();
 
 // 화면 언어는 창 맨 위에서 데이터를 받아 맞춘다. 바뀌면 아래 화면 전체를 다시 그린다(같은 묶음 안에서 화면보다 먼저).
 function Root() {

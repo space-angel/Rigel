@@ -11,6 +11,7 @@ import { MixBar } from "./components/MixBar";
 import { SourceIcon, sourceName } from "./components/SourceIcon";
 import { LANGS } from "@shared/i18n";
 import { currentLang, t } from "./i18n";
+import { GLOW_MODES, getGlow, setGlow, type GlowMode } from "./glow";
 
 const api = window.todoban;
 type Tab = "general" | "tools" | "shortcuts";
@@ -74,6 +75,37 @@ const MODELS = [
   { value: "sonnet", label: "Sonnet" },
   { value: "haiku", label: "Haiku" },
 ];
+
+// 글로우 실험: 지금 할 일 카드의 빛을 어떻게 움직일지 직접 보고 고른다. 이 Mac에만 저장된다.
+const GLOW_LABEL: Record<GlowMode, string> = { static: msg("Static"), breathe: msg("Breathe"), follow: msg("Follow"), handoff: msg("Handoff"), all: msg("All") };
+function GlowSetting() {
+  const [mode, setMode] = useState<GlowMode>(getGlow);
+  return (
+    <div className="setting setting--stack">
+      <div className="setting__text">
+        <p>{t("Glow (experiment)")}</p>
+        <p className="setting__desc">{t("How the Now card glows. Check a task or ask for a first step to see it move.")}</p>
+      </div>
+      <div className="segmented" role="radiogroup" aria-label={t("Glow (experiment)")}>
+        {GLOW_MODES.map((m) => (
+          <button
+            type="button"
+            key={m}
+            role="radio"
+            aria-checked={mode === m}
+            className={`segmented__item${mode === m ? " is-active" : ""}`}
+            onClick={() => {
+              setGlow(m);
+              setMode(m);
+            }}
+          >
+            {t(GLOW_LABEL[m])}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function GeneralTab({ data }: { data: AppData }) {
   const [info, setInfo] = useState<{ path: string | null; searched: string[]; version: string | null } | null>(null);
@@ -197,6 +229,7 @@ function GeneralTab({ data }: { data: AppData }) {
             ))}
           </div>
         </div>
+        <GlowSetting />
         <div className="setting">
           <p className="setting__text">{t("Open at login")}</p>
           <Toggle on={data.settings.openAtLogin} onChange={(v) => api.act({ type: "setSettings", patch: { openAtLogin: v } })} />

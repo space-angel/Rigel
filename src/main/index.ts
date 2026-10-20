@@ -748,6 +748,8 @@ app.whenReady().then(() => {
           listWindow.setPosition(0, 40);
           listWindow.showInactive();
           ipcMain.handle("perf:main", () => perfLog.splice(0));
+          // 프로세스별 CPU 사용률(직전 호출 이후 평균). GPU 프로세스가 글로우 같은 합성 비용을 보여 준다.
+          ipcMain.handle("perf:metrics", () => app.getAppMetrics().map((m) => ({ type: m.type, cpu: Number(m.cpu.percentCPUUsage.toFixed(1)) })));
           // 그림자까지 포함해 창을 찍는다(macOS screencapture -l).
           ipcMain.handle("perf:capture", (_e, file: string) => {
             const id = listWindow!.getMediaSourceId().split(":")[1]!;

@@ -16,6 +16,7 @@ import { useFlip } from "./components/useFlip";
 import { dueBadge, dueLabel } from "@shared/due";
 import { currentLang, loc, t } from "./i18n";
 import { msg } from "@shared/i18n";
+import { takeHandoff } from "./glow";
 
 // 마감 배지. 줄에서는 짧게(D-3), 지금 할 일 카드에서는 말로(3 days left).
 function Due({ item, long }: { item: TodoItem; long?: boolean }) {
@@ -170,6 +171,7 @@ function NowCard({
   edit,
   isNew,
   completing,
+  thinking,
 }: {
   item: TodoItem;
   shortcut?: Shortcut;
@@ -180,18 +182,40 @@ function NowCard({
   edit: EditProps;
   isNew?: boolean;
   completing?: boolean;
+  thinking?: boolean;
 }) {
   const click = useSingleClick(item.isClear || edit.editing ? undefined : onShape);
+  const [handoff] = useState(() => takeHandoff(item.id));
+  // 따라오기: 카드 가운데에서 마우스까지의 거리를 CSS 변수로 넘긴다. 빛은 transform으로만 움직인다.
+  const follow = (e: React.PointerEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--gx", `${Math.round(e.clientX - r.left - r.width / 2)}px`);
+    e.currentTarget.style.setProperty("--gy", `${Math.round((e.clientY - r.bottom) * 0.7)}px`);
+  };
   return (
     <div
       data-flip-id={item.id}
-      className={`now-card${selected ? " is-selected" : ""}${isNew ? " is-new" : ""}${completing ? " is-completing" : ""}`}
+      className={`now-card${selected ? " is-selected" : ""}${isNew ? " is-new" : ""}${completing ? " is-completing" : ""}${thinking ? " is-thinking" : ""}${handoff ? " is-handoff" : ""}`}
+      onPointerMove={follow}
       {...click}
       onContextMenu={(e) => {
         e.preventDefault();
         edit.onMenu();
       }}
     >
+      {/* 움직이는 글로우 층(실험). 바깥부터 이어받기 → 따라오기 → 숨쉬기·생각 중을 맡아 transform이 겹치지 않는다. */}
+      <span className="hero-glow" aria-hidden="true">
+        <span className="hero-glow__rise">
+          <span className="hero-glow__follow">
+            <span className="hero-glow__blob" />
+          </span>
+        </span>
+      </span>
+      {handoff && (
+        <span className="hero-ring" aria-hidden="true">
+          <span className="hero-ring__spin" />
+        </span>
+      )}
       <div className="now-card__top">
         <span className="now-card__eyebrow">
           <span className="eyebrow">{t("Now")}</span>
@@ -801,8 +825,8 @@ export function TodayList() {
             <SortableContext items={open.map((t) => t.id)} strategy={verticalListSortingStrategy}>
               <div className="list">
                 {now && (
-                  <SortableItem id={now.id}>
-                    <NowCard item={now} shortcut={shortcutOf(now)} selected={selected === 0} onToggle={() => complete(now)} completing={completing.includes(now.id)} onFirstStep={() => askFirstStep(now)} onShape={() => shape(now)} edit={edit(now)} isNew={highlight.includes(now.id)} />
+                  <SortableItem key={now.id} id={now.id}>
+                    <NowCard item={now} shortcut={shortcutOf(now)} selected={selected === 0} onToggle={() => complete(now)} completing={completing.includes(now.id)} onFirstStep={() => askFirstStep(now)} onShape={() => shape(now)} edit={edit(now)} isNew={highlight.includes(now.id)} thinking={stepOf(now.id)?.status === "loading"} />
                   </SortableItem>
                 )}
                 {now && stepCard(now)}

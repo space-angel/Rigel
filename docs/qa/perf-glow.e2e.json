@@ -1,0 +1,72 @@
+[
+ {
+  "name": "준비",
+  "win": "list",
+  "main": "openList",
+  "until": "__e2e.$('.now-card')",
+  "wait": 1500
+ },
+ {
+  "name": "고정 (기준)",
+  "win": "list",
+  "run": "\nconst setMode = (m) => { localStorage.setItem('todoban.glow', m); document.documentElement.dataset.glow = m; };\nconst measure = async (ms, during) => {\n  await window.todoban.perfMetrics();\n  const frames = []; let last = performance.now(); let on = true;\n  const tick = (t) => { frames.push(t - last); last = t; if (on) requestAnimationFrame(tick); };\n  requestAnimationFrame(tick);\n  const stop = during ? during() : null;\n  await new Promise(r => setTimeout(r, ms));\n  on = false; if (stop) stop();\n  const m = await window.todoban.perfMetrics();\n  const sum = (type) => Number(m.filter(x => x.type === type).reduce((a, x) => a + x.cpu, 0).toFixed(1));\n  const f = frames.slice(2).sort((a, b) => a - b);\n  const p = (q) => Number(f[Math.floor(q * (f.length - 1))].toFixed(1));\n  return { gpu: sum('GPU'), renderer: sum('Tab'), main: sum('Browser'), fps: Math.round(frames.length / (ms / 1000)), p95: p(0.95), over20ms: f.filter(x => x > 20).length };\n};\nsetMode('static'); await new Promise(r => setTimeout(r, 300)); return await measure(5000);",
+  "snap": false,
+  "timeout": 20000
+ },
+ {
+  "name": "숨쉬기",
+  "win": "list",
+  "run": "\nconst setMode = (m) => { localStorage.setItem('todoban.glow', m); document.documentElement.dataset.glow = m; };\nconst measure = async (ms, during) => {\n  await window.todoban.perfMetrics();\n  const frames = []; let last = performance.now(); let on = true;\n  const tick = (t) => { frames.push(t - last); last = t; if (on) requestAnimationFrame(tick); };\n  requestAnimationFrame(tick);\n  const stop = during ? during() : null;\n  await new Promise(r => setTimeout(r, ms));\n  on = false; if (stop) stop();\n  const m = await window.todoban.perfMetrics();\n  const sum = (type) => Number(m.filter(x => x.type === type).reduce((a, x) => a + x.cpu, 0).toFixed(1));\n  const f = frames.slice(2).sort((a, b) => a - b);\n  const p = (q) => Number(f[Math.floor(q * (f.length - 1))].toFixed(1));\n  return { gpu: sum('GPU'), renderer: sum('Tab'), main: sum('Browser'), fps: Math.round(frames.length / (ms / 1000)), p95: p(0.95), over20ms: f.filter(x => x > 20).length };\n};\nsetMode('breathe'); await new Promise(r => setTimeout(r, 300)); return await measure(5000);",
+  "snap": true,
+  "timeout": 20000
+ },
+ {
+  "name": "따라오기 · 마우스를 계속 움직이는 동안",
+  "win": "list",
+  "run": "\nconst setMode = (m) => { localStorage.setItem('todoban.glow', m); document.documentElement.dataset.glow = m; };\nconst measure = async (ms, during) => {\n  await window.todoban.perfMetrics();\n  const frames = []; let last = performance.now(); let on = true;\n  const tick = (t) => { frames.push(t - last); last = t; if (on) requestAnimationFrame(tick); };\n  requestAnimationFrame(tick);\n  const stop = during ? during() : null;\n  await new Promise(r => setTimeout(r, ms));\n  on = false; if (stop) stop();\n  const m = await window.todoban.perfMetrics();\n  const sum = (type) => Number(m.filter(x => x.type === type).reduce((a, x) => a + x.cpu, 0).toFixed(1));\n  const f = frames.slice(2).sort((a, b) => a - b);\n  const p = (q) => Number(f[Math.floor(q * (f.length - 1))].toFixed(1));\n  return { gpu: sum('GPU'), renderer: sum('Tab'), main: sum('Browser'), fps: Math.round(frames.length / (ms / 1000)), p95: p(0.95), over20ms: f.filter(x => x > 20).length };\n};\nsetMode('follow'); const c = __e2e.$('.now-card'); c.classList.add('is-hover'); await new Promise(r => setTimeout(r, 300)); const r = c.getBoundingClientRect(); let i = 0; const res = await measure(5000, () => { const id = setInterval(() => { i++; const x = r.left + r.width * (0.5 + 0.45 * Math.sin(i / 12)); const y = r.top + r.height * (0.5 + 0.4 * Math.cos(i / 9)); c.dispatchEvent(new PointerEvent('pointermove', { clientX: x, clientY: y, bubbles: true })); }, 16); return () => clearInterval(id); }); c.classList.remove('is-hover'); return res;",
+  "snap": true,
+  "timeout": 20000
+ },
+ {
+  "name": "생각 중 · Claude가 찾는 동안",
+  "win": "list",
+  "run": "\nconst setMode = (m) => { localStorage.setItem('todoban.glow', m); document.documentElement.dataset.glow = m; };\nconst measure = async (ms, during) => {\n  await window.todoban.perfMetrics();\n  const frames = []; let last = performance.now(); let on = true;\n  const tick = (t) => { frames.push(t - last); last = t; if (on) requestAnimationFrame(tick); };\n  requestAnimationFrame(tick);\n  const stop = during ? during() : null;\n  await new Promise(r => setTimeout(r, ms));\n  on = false; if (stop) stop();\n  const m = await window.todoban.perfMetrics();\n  const sum = (type) => Number(m.filter(x => x.type === type).reduce((a, x) => a + x.cpu, 0).toFixed(1));\n  const f = frames.slice(2).sort((a, b) => a - b);\n  const p = (q) => Number(f[Math.floor(q * (f.length - 1))].toFixed(1));\n  return { gpu: sum('GPU'), renderer: sum('Tab'), main: sum('Browser'), fps: Math.round(frames.length / (ms / 1000)), p95: p(0.95), over20ms: f.filter(x => x > 20).length };\n};\nsetMode('handoff'); const c = __e2e.$('.now-card'); c.classList.add('is-thinking'); await new Promise(r => setTimeout(r, 300)); const res = await measure(5000); c.classList.remove('is-thinking'); return res;",
+  "snap": true,
+  "timeout": 20000
+ },
+ {
+  "name": "모두 · 가만히 있을 때",
+  "win": "list",
+  "run": "\nconst setMode = (m) => { localStorage.setItem('todoban.glow', m); document.documentElement.dataset.glow = m; };\nconst measure = async (ms, during) => {\n  await window.todoban.perfMetrics();\n  const frames = []; let last = performance.now(); let on = true;\n  const tick = (t) => { frames.push(t - last); last = t; if (on) requestAnimationFrame(tick); };\n  requestAnimationFrame(tick);\n  const stop = during ? during() : null;\n  await new Promise(r => setTimeout(r, ms));\n  on = false; if (stop) stop();\n  const m = await window.todoban.perfMetrics();\n  const sum = (type) => Number(m.filter(x => x.type === type).reduce((a, x) => a + x.cpu, 0).toFixed(1));\n  const f = frames.slice(2).sort((a, b) => a - b);\n  const p = (q) => Number(f[Math.floor(q * (f.length - 1))].toFixed(1));\n  return { gpu: sum('GPU'), renderer: sum('Tab'), main: sum('Browser'), fps: Math.round(frames.length / (ms / 1000)), p95: p(0.95), over20ms: f.filter(x => x > 20).length };\n};\nsetMode('all'); await new Promise(r => setTimeout(r, 300)); return await measure(5000);",
+  "snap": false,
+  "timeout": 20000
+ },
+ {
+  "name": "고정 · 같은 체크 2초 (비교용)",
+  "win": "list",
+  "run": "\nconst setMode = (m) => { localStorage.setItem('todoban.glow', m); document.documentElement.dataset.glow = m; };\nconst measure = async (ms, during) => {\n  await window.todoban.perfMetrics();\n  const frames = []; let last = performance.now(); let on = true;\n  const tick = (t) => { frames.push(t - last); last = t; if (on) requestAnimationFrame(tick); };\n  requestAnimationFrame(tick);\n  const stop = during ? during() : null;\n  await new Promise(r => setTimeout(r, ms));\n  on = false; if (stop) stop();\n  const m = await window.todoban.perfMetrics();\n  const sum = (type) => Number(m.filter(x => x.type === type).reduce((a, x) => a + x.cpu, 0).toFixed(1));\n  const f = frames.slice(2).sort((a, b) => a - b);\n  const p = (q) => Number(f[Math.floor(q * (f.length - 1))].toFixed(1));\n  return { gpu: sum('GPU'), renderer: sum('Tab'), main: sum('Browser'), fps: Math.round(frames.length / (ms / 1000)), p95: p(0.95), over20ms: f.filter(x => x > 20).length };\n};\nsetMode('static'); await new Promise(r => setTimeout(r, 300)); return await measure(2000, () => { __e2e.key('.window', ' '); return null; });",
+  "snap": false,
+  "timeout": 20000
+ },
+ {
+  "name": "이어받기 · 지금 할 일을 체크해서 다음 할 일이 이어받는 2초",
+  "win": "list",
+  "run": "\nconst setMode = (m) => { localStorage.setItem('todoban.glow', m); document.documentElement.dataset.glow = m; };\nconst measure = async (ms, during) => {\n  await window.todoban.perfMetrics();\n  const frames = []; let last = performance.now(); let on = true;\n  const tick = (t) => { frames.push(t - last); last = t; if (on) requestAnimationFrame(tick); };\n  requestAnimationFrame(tick);\n  const stop = during ? during() : null;\n  await new Promise(r => setTimeout(r, ms));\n  on = false; if (stop) stop();\n  const m = await window.todoban.perfMetrics();\n  const sum = (type) => Number(m.filter(x => x.type === type).reduce((a, x) => a + x.cpu, 0).toFixed(1));\n  const f = frames.slice(2).sort((a, b) => a - b);\n  const p = (q) => Number(f[Math.floor(q * (f.length - 1))].toFixed(1));\n  return { gpu: sum('GPU'), renderer: sum('Tab'), main: sum('Browser'), fps: Math.round(frames.length / (ms / 1000)), p95: p(0.95), over20ms: f.filter(x => x > 20).length };\n};\nsetMode('handoff'); await new Promise(r => setTimeout(r, 300)); return await measure(2000, () => { __e2e.key('.window', ' '); return null; });",
+  "snap": false,
+  "timeout": 20000
+ },
+ {
+  "name": "이어받기 · 한 번 더",
+  "win": "list",
+  "run": "\nconst setMode = (m) => { localStorage.setItem('todoban.glow', m); document.documentElement.dataset.glow = m; };\nconst measure = async (ms, during) => {\n  await window.todoban.perfMetrics();\n  const frames = []; let last = performance.now(); let on = true;\n  const tick = (t) => { frames.push(t - last); last = t; if (on) requestAnimationFrame(tick); };\n  requestAnimationFrame(tick);\n  const stop = during ? during() : null;\n  await new Promise(r => setTimeout(r, ms));\n  on = false; if (stop) stop();\n  const m = await window.todoban.perfMetrics();\n  const sum = (type) => Number(m.filter(x => x.type === type).reduce((a, x) => a + x.cpu, 0).toFixed(1));\n  const f = frames.slice(2).sort((a, b) => a - b);\n  const p = (q) => Number(f[Math.floor(q * (f.length - 1))].toFixed(1));\n  return { gpu: sum('GPU'), renderer: sum('Tab'), main: sum('Browser'), fps: Math.round(frames.length / (ms / 1000)), p95: p(0.95), over20ms: f.filter(x => x > 20).length };\n};\nsetMode('handoff'); await new Promise(r => setTimeout(r, 300)); return await measure(2000, () => { __e2e.key('.window', ' '); return null; });",
+  "snap": false,
+  "timeout": 20000
+ },
+ {
+  "name": "이어받기 · 테두리를 도는 중",
+  "win": "list",
+  "run": "setTimeout(() => {}, 0); localStorage.setItem('todoban.glow','handoff'); document.documentElement.dataset.glow='handoff'; __e2e.key('.window', ' '); await new Promise(r => setTimeout(r, 820)); return { handoff: !!__e2e.$('.now-card.is-handoff'), ring: !!__e2e.$('.hero-ring'), title: __e2e.$('.now-card__title')?.textContent };",
+  "snap": true,
+  "expect": "__e2e.$('.now-card.is-handoff')"
+ }
+]

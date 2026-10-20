@@ -280,6 +280,13 @@ export const KO: Record<string, string> = {
   "Reset to default": "기본으로 되돌리기",
   Open: "열기",
   Language: "언어",
+  "Glow (experiment)": "글로우 실험",
+  "How the Now card glows. Check a task or ask for a first step to see it move.": "지금 할 일 카드의 빛이 어떻게 움직일지 골라요. 할 일을 체크하거나 첫 행동을 물어보면 움직이는 걸 볼 수 있어요.",
+  Static: "고정",
+  Breathe: "숨쉬기",
+  Follow: "따라오기",
+  Handoff: "이어받기",
+  All: "모두",
   "Menus and screens change right away": "바꾸면 메뉴와 화면에 바로 적용돼요",
   "Open at login": "Mac을 켜면 자동으로 열기",
 
