@@ -1,0 +1,55 @@
+[
+ {
+  "name": "준비",
+  "win": "list",
+  "main": "openList",
+  "until": "__e2e.all('.sortable').length > 3",
+  "wait": 600
+ },
+ {
+  "name": "아래로 2000px 끌어도 목록 끝에서 멈춘다",
+  "win": "list",
+  "run": "\nconst P = (el, t, x, y) => (t === 'pointerdown' ? el : document).dispatchEvent(new PointerEvent(t, { clientX: x, clientY: y, bubbles: true, button: 0, buttons: t === 'pointerup' ? 0 : 1, isPrimary: true, pointerId: 1 }));\nconst wait = (ms) => new Promise(r => setTimeout(r, ms));\nconst titles = () => [...__e2e.all('.list .now-card__title, .list .row__title')].map(e => e.textContent);\nconst drag = async (el, dy, steps = 50) => { const r = el.getBoundingClientRect(); const x = r.left + 60, y0 = r.top + r.height / 2; P(el, 'pointerdown', x, y0); for (let i = 1; i <= steps; i++) { P(el, 'pointermove', x, y0 + dy * i / steps); await wait(25); } return { x, y: y0 + dy }; };\nconst sc = __e2e.$('.scroll'); const el = __e2e.all('.sortable')[1]; const end = await drag(el, 2000, 80); await wait(1200); const a = { ok: __e2e.$('.sortable.is-dragging').getBoundingClientRect().bottom <= __e2e.$('.list').getBoundingClientRect().bottom + 1 && sc.scrollHeight < 1500, scrollTop: Math.round(sc.scrollTop), maxScroll: sc.scrollHeight - sc.clientHeight, dragBottom: Math.round(__e2e.$('.sortable.is-dragging').getBoundingClientRect().bottom), listBottom: Math.round(__e2e.$('.list').getBoundingClientRect().bottom) }; P(el, 'pointerup', end.x, end.y); await wait(500); if (!a.ok) throw new Error('끌린 줄이 목록 밖으로 나감 ' + JSON.stringify(a)); return { ...a, order: titles() };",
+  "timeout": 20000,
+  "snap": true
+ },
+ {
+  "name": "위로 끝까지 끌면 맨 위(지금 할 일 자리)에서 멈춘다",
+  "win": "list",
+  "run": "\nconst P = (el, t, x, y) => (t === 'pointerdown' ? el : document).dispatchEvent(new PointerEvent(t, { clientX: x, clientY: y, bubbles: true, button: 0, buttons: t === 'pointerup' ? 0 : 1, isPrimary: true, pointerId: 1 }));\nconst wait = (ms) => new Promise(r => setTimeout(r, ms));\nconst titles = () => [...__e2e.all('.list .now-card__title, .list .row__title')].map(e => e.textContent);\nconst drag = async (el, dy, steps = 50) => { const r = el.getBoundingClientRect(); const x = r.left + 60, y0 = r.top + r.height / 2; P(el, 'pointerdown', x, y0); for (let i = 1; i <= steps; i++) { P(el, 'pointermove', x, y0 + dy * i / steps); await wait(25); } return { x, y: y0 + dy }; };\nconst sc = __e2e.$('.scroll'); sc.scrollTop = 0; await wait(200); const items = __e2e.all('.sortable'); const el = items[items.length - 1]; const end = await drag(el, -2000, 80); await wait(800); const a = { ok: __e2e.$('.sortable.is-dragging').getBoundingClientRect().top >= __e2e.$('.list').getBoundingClientRect().top - 1, dragTop: Math.round(__e2e.$('.sortable.is-dragging').getBoundingClientRect().top), listTop: Math.round(__e2e.$('.list').getBoundingClientRect().top) }; P(el, 'pointerup', end.x, end.y); await wait(500); if (!a.ok) throw new Error('끌린 줄이 목록 위로 나감 ' + JSON.stringify(a)); return { ...a, first: titles()[0], selectedIsFirst: !!__e2e.$('.now-card.is-selected') };",
+  "timeout": 20000,
+  "snap": false
+ },
+ {
+  "name": "놓은 직후의 클릭은 첫 행동 만들기를 열지 않는다",
+  "win": "list",
+  "run": "\nconst P = (el, t, x, y) => (t === 'pointerdown' ? el : document).dispatchEvent(new PointerEvent(t, { clientX: x, clientY: y, bubbles: true, button: 0, buttons: t === 'pointerup' ? 0 : 1, isPrimary: true, pointerId: 1 }));\nconst wait = (ms) => new Promise(r => setTimeout(r, ms));\nconst titles = () => [...__e2e.all('.list .now-card__title, .list .row__title')].map(e => e.textContent);\nconst drag = async (el, dy, steps = 50) => { const r = el.getBoundingClientRect(); const x = r.left + 60, y0 = r.top + r.height / 2; P(el, 'pointerdown', x, y0); for (let i = 1; i <= steps; i++) { P(el, 'pointermove', x, y0 + dy * i / steps); await wait(25); } return { x, y: y0 + dy }; };\nconst el = __e2e.all('.sortable').find(x => x.querySelector('.is-unclear')); const end = await drag(el, 60, 10); P(el, 'pointerup', end.x, end.y); el.querySelector('.row, .now-card').dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 })); await wait(500); return { shapeOpened: !!__e2e.$('.shape') };",
+  "timeout": 20000,
+  "snap": false,
+  "expect": "!__e2e.$('.shape')"
+ },
+ {
+  "name": "끄는 중 Esc는 끌기만 취소하고 목록은 그대로",
+  "win": "list",
+  "run": "\nconst P = (el, t, x, y) => (t === 'pointerdown' ? el : document).dispatchEvent(new PointerEvent(t, { clientX: x, clientY: y, bubbles: true, button: 0, buttons: t === 'pointerup' ? 0 : 1, isPrimary: true, pointerId: 1 }));\nconst wait = (ms) => new Promise(r => setTimeout(r, ms));\nconst titles = () => [...__e2e.all('.list .now-card__title, .list .row__title')].map(e => e.textContent);\nconst drag = async (el, dy, steps = 50) => { const r = el.getBoundingClientRect(); const x = r.left + 60, y0 = r.top + r.height / 2; P(el, 'pointerdown', x, y0); for (let i = 1; i <= steps; i++) { P(el, 'pointermove', x, y0 + dy * i / steps); await wait(25); } return { x, y: y0 + dy }; };\nconst before = titles(); const el = __e2e.all('.sortable')[1]; const end = await drag(el, 120, 12); __e2e.$('.window').dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true })); document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true })); await wait(400); P(el, 'pointerup', end.x, end.y); await wait(400); if (JSON.stringify(before) !== JSON.stringify(titles())) throw new Error('Esc로 취소했는데 순서가 바뀜'); return { same: JSON.stringify(before) === JSON.stringify(titles()), visible: document.visibilityState, dragging: !!__e2e.$('.sortable.is-dragging') };",
+  "timeout": 20000,
+  "snap": false,
+  "expect": "document.visibilityState === 'visible' && !__e2e.$('.sortable.is-dragging')"
+ },
+ {
+  "name": "놓은 할 일을 키보드 선택이 따라간다",
+  "win": "list",
+  "run": "\nconst P = (el, t, x, y) => (t === 'pointerdown' ? el : document).dispatchEvent(new PointerEvent(t, { clientX: x, clientY: y, bubbles: true, button: 0, buttons: t === 'pointerup' ? 0 : 1, isPrimary: true, pointerId: 1 }));\nconst wait = (ms) => new Promise(r => setTimeout(r, ms));\nconst titles = () => [...__e2e.all('.list .now-card__title, .list .row__title')].map(e => e.textContent);\nconst drag = async (el, dy, steps = 50) => { const r = el.getBoundingClientRect(); const x = r.left + 60, y0 = r.top + r.height / 2; P(el, 'pointerdown', x, y0); for (let i = 1; i <= steps; i++) { P(el, 'pointermove', x, y0 + dy * i / steps); await wait(25); } return { x, y: y0 + dy }; };\nconst el = __e2e.all('.sortable')[1]; const title = el.textContent; const end = await drag(el, 140, 14); P(el, 'pointerup', end.x, end.y); await wait(600); const sel = __e2e.$('.list .is-selected'); return { moved: title.slice(0, 12), selected: sel?.textContent.slice(0, 12) };",
+  "timeout": 20000,
+  "snap": false,
+  "expect": "true"
+ },
+ {
+  "name": "드래그한 뒤에도 그냥 클릭은 잘 된다",
+  "win": "list",
+  "run": "\nconst P = (el, t, x, y) => (t === 'pointerdown' ? el : document).dispatchEvent(new PointerEvent(t, { clientX: x, clientY: y, bubbles: true, button: 0, buttons: t === 'pointerup' ? 0 : 1, isPrimary: true, pointerId: 1 }));\nconst wait = (ms) => new Promise(r => setTimeout(r, ms));\nconst titles = () => [...__e2e.all('.list .now-card__title, .list .row__title')].map(e => e.textContent);\nconst drag = async (el, dy, steps = 50) => { const r = el.getBoundingClientRect(); const x = r.left + 60, y0 = r.top + r.height / 2; P(el, 'pointerdown', x, y0); for (let i = 1; i <= steps; i++) { P(el, 'pointermove', x, y0 + dy * i / steps); await wait(25); } return { x, y: y0 + dy }; };\nawait wait(400); const el = __e2e.all('.sortable').find(x => x.querySelector('.is-unclear')); el.querySelector('.row, .now-card').dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 })); await wait(600); return { shapeOpened: !!__e2e.$('.shape') };",
+  "timeout": 20000,
+  "snap": false,
+  "expect": "!!__e2e.$('.shape')"
+ }
+]

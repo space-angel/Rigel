@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent, type DragStartEvent, type Modifier } from "@dnd-kit/core";
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { AppData, Shortcut, TodoItem } from "@shared/types";
@@ -148,13 +148,17 @@ function MoreButton({ onMenu }: { onMenu: () => void }) {
 }
 
 // 정리 안 된 할 일은 한 번 누르면 빚기를 연다. 더블클릭(제목 고치기)과 겹치지 않게 잠깐 기다린다.
+// 끌어서 놓은 직후의 클릭은 무시한다. 끈 줄 위에서 손을 떼면 브라우저가 클릭도 보내서, 옮기기만 했는데 빚기 화면이 열렸다.
+let lastDragEnd = 0;
+const justDragged = () => Date.now() - lastDragEnd < 300;
+
 function useSingleClick(fn: (() => void) | undefined) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => void (timer.current && clearTimeout(timer.current)), []);
   if (!fn) return {};
   return {
     onClick: (e: React.MouseEvent) => {
-      if (e.detail > 1) return;
+      if (e.detail > 1 || justDragged()) return;
       timer.current = setTimeout(fn, 220);
     },
     onDoubleClickCapture: () => timer.current && clearTimeout(timer.current),
@@ -416,6 +420,16 @@ export function TodayList() {
   // 끌어서 순서를 바꾸는 중에는 dnd-kit이 움직이므로 FLIP을 쉰다.
   const dragging = useRef(false);
   useFlip(scrollRef, dragging);
+  const listRef = useRef<HTMLDivElement>(null);
+  const dragBounds = useRef<{ top: number; height: number; listHeight: number; scrollTop: number } | null>(null);
+  // dnd-kit은 이 값에 자동 스크롤로 움직인 만큼을 나중에 더한다. 그만큼 미리 빼서 막아야 스크롤해도 목록 안에 머문다.
+  const keepInList: Modifier = ({ transform }) => {
+    const b = dragBounds.current;
+    if (!b) return { ...transform, x: 0 };
+    const scrolled = (scrollRef.current?.scrollTop ?? b.scrollTop) - b.scrollTop;
+    const y = Math.min(Math.max(transform.y, -b.top - scrolled), b.listHeight - b.height - b.top - scrolled);
+    return { ...transform, x: 0, y };
+  };
   // 제자리에서 고치는 중인 할 일, 방금 지워서 되살릴 수 있는 할 일
   const [editingId, setEditingId] = useState<string | null>(null);
   const [undo, setUndo] = useState<TodoItem | null>(null);
@@ -660,17 +674,40 @@ export function TodayList() {
     return st && <FirstStepCard key={`${st.todoId}-${st.status}-${st.question ?? ""}`} state={st} originalTitle={t.title} />;
   };
 
+  // 끄는 동안 줄이 목록 위아래 끝을 넘지 못하게, 옆으로는 움직이지 않게 막는다.
+  // 막지 않으면 끌린 줄이 스크롤 영역을 늘리고, 자동 스크롤이 그걸 따라 내려가며 끝없이 내려갔다.
+  // 목록 안에서의 자리(시작할 때 잰 위쪽 거리)를 기준으로 막아서, 자동 스크롤이 움직여도 같은 범위다.
+  const onDragStart = ({ active }: DragStartEvent) => {
+    dragging.current = true;
+    // 시작하는 순간에는 dnd-kit이 아직 자리를 재기 전이라, 화면의 요소에서 직접 잰다.
+    const listEl = listRef.current;
+    const node = listEl?.querySelector(`[data-flip-id="${window.CSS.escape(String(active.id))}"]`)?.closest(".sortable");
+    const list = listEl?.getBoundingClientRect();
+    const rect = node?.getBoundingClientRect();
+    dragBounds.current = list && rect ? { top: rect.top - list.top, height: rect.height, listHeight: list.height, scrollTop: scrollRef.current?.scrollTop ?? 0 } : null;
+  };
   const onDragEnd = ({ active, over }: DragEndEvent) => {
+    lastDragEnd = Date.now();
+    dragBounds.current = null;
     // 놓은 뒤 순서가 저장되며 한 번 더 그려진다. 그때까지 FLIP을 쉰다.
     setTimeout(() => (dragging.current = false), 300);
     if (!over || active.id === over.id) return;
     const ids = open.map((t) => t.id);
     const moved = arrayMove(ids, ids.indexOf(String(active.id)), ids.indexOf(String(over.id)));
     const i = moved.indexOf(String(active.id));
+    // 키보드로 고른 자리도 옮긴 할 일을 따라간다.
+    setSelected(i);
     act({ type: "reorder", id: String(active.id), beforeId: moved[i - 1] ?? null, afterId: moved[i + 1] ?? null });
+  };
+  const onDragCancel = () => {
+    lastDragEnd = Date.now();
+    dragBounds.current = null;
+    setTimeout(() => (dragging.current = false), 300);
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
+    // 끄는 중의 Esc는 끌기만 취소한다(dnd-kit이 처리). 목록을 닫지 않는다.
+    if (dragging.current && e.key === "Escape") return;
     if (shaping) {
       if (e.key === "Escape") {
         setViewDir("back");
@@ -868,9 +905,9 @@ export function TodayList() {
             />
           )}
 
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={() => (dragging.current = true)} onDragEnd={onDragEnd} onDragCancel={() => (dragging.current = false)}>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} modifiers={[keepInList]} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={onDragCancel}>
             <SortableContext items={open.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-              <div className="list">
+              <div className="list" ref={listRef}>
                 {now && (
                   <SortableItem key={now.id} id={now.id}>
                     <NowCard item={now} shortcut={shortcutOf(now)} selected={selected === 0} onToggle={() => complete(now)} completing={completing.includes(now.id)} onFirstStep={() => askFirstStep(now)} onShape={() => shape(now)} edit={edit(now)} isNew={highlight.includes(now.id)} thinking={stepOf(now.id)?.status === "loading"} nudge={nudge} />
