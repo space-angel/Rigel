@@ -2887,3 +2887,11 @@ body::-webkit-scrollbar-thumb {
 :is(.swap--next, .swap--prev) > :nth-child(3) { animation-delay: 60ms; }
 :is(.swap--next, .swap--prev) > :nth-child(4) { animation-delay: 90ms; }
 :is(.swap--next, .swap--prev) > :nth-child(n + 5) { animation-delay: 120ms; }
+
+/* 옆으로 미끄러져 들어오는 움직임(목록 교체·화면 전환)이 잠깐 오른쪽으로 넘치면 가로 스크롤바(15px)가 생겼다 사라지며
+   목록 높이가 출렁였다. 세로로만 스크롤한다. */
+.scroll,
+.shape__body,
+.review__body {
+  overflow-x: clip;
+}

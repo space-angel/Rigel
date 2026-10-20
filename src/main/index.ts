@@ -129,14 +129,22 @@ function createPopupWindow(view: "list" | "quick", width: number, height: number
   return win;
 }
 
+// 성능 측정용(TODOBAN_PERF=1): 창 크기 바꾸기·그림자 다시 계산에 걸린 시간을 남긴다.
+const PERF = process.env.TODOBAN_PERF === "1";
+export const perfLog: { t: number; what: string; ms: number }[] = [];
+const perfStart = Date.now();
+
 function fitHeight(win: BrowserWindow | null, height: number, max: number): void {
   if (!win) return;
   const h = Math.min(Math.max(Math.ceil(height), 80), max);
   const b = win.getBounds();
   if (b.height === h) return;
+  const t0 = performance.now();
   win.setBounds({ ...b, height: h });
+  const t1 = performance.now();
   // 투명 창의 그림자는 모양이 바뀌면 다시 계산해야 이전 크기의 그림자가 남지 않는다.
   win.invalidateShadow();
+  if (PERF) perfLog.push({ t: Date.now() - perfStart, what: `setBounds ${b.height}→${h}`, ms: t1 - t0 }, { t: Date.now() - perfStart, what: "invalidateShadow", ms: performance.now() - t1 });
 }
 
 const listPinned = () => Boolean(data?.settings.listPin.pinned);
@@ -194,6 +202,22 @@ function resizeAnimated(win: BrowserWindow, w: number, h: number): void {
 
 function systemPrefersReducedMotion(): boolean {
   return process.platform === "darwin" && systemPreferences.getAnimationSettings().prefersReducedMotion;
+}
+
+let shadowTimer: ReturnType<typeof setInterval> | null = null;
+function followShadow(win: BrowserWindow | null, ms: number): void {
+  if (!win || HEADLESS) return;
+  if (shadowTimer) clearInterval(shadowTimer);
+  const until = Date.now() + Math.min(ms, 600);
+  shadowTimer = setInterval(() => {
+    if (win.isDestroyed() || Date.now() > until) {
+      if (shadowTimer) clearInterval(shadowTimer);
+      shadowTimer = null;
+      if (!win.isDestroyed()) win.invalidateShadow();
+      return;
+    }
+    win.invalidateShadow();
+  }, 16);
 }
 
 // 여는 움직임(240ms)이 끝난 뒤 그림자를 다시 계산한다. 움직이는 중 모양으로 그림자가 남지 않게.
@@ -456,6 +480,8 @@ app.whenReady().then(() => {
 
   // 렌더러가 내용 높이를 알려 주면 창 높이를 맞춘다. 창 밖의 투명한 영역이 클릭을 가로채지 않게 하려는 것.
   ipcMain.on("list:resize", (_e, height: number) => fitHeight(listWindow, height, LIST_MAX_HEIGHT));
+  // 카드 높이가 움직이는 동안(ms) 창 그림자를 프레임마다 다시 계산한다. 안 하면 시작할 때의 모양으로 그림자가 남는다.
+  ipcMain.on("list:animating", (_e, ms: number) => followShadow(listWindow, ms));
   // Esc: 고정했으면 닫지 않고 그대로 둔다(닫기는 메뉴바 아이콘이나 고정 풀기로).
   ipcMain.on("list:hide", () => hideLooseList());
   ipcMain.on("list:pin", (_e, pinned: boolean) => {
@@ -693,6 +719,17 @@ app.whenReady().then(() => {
     const windows = { list: () => listWindow, quick: () => quickWindow, review: () => reviewWindow, settings: () => settingsWindow, welcome: () => welcomeWindow };
     listWindow.webContents.once("did-finish-load", () =>
       setTimeout(async () => {
+        // 성능 측정: 실제로 그려야 프레임을 잴 수 있으므로 화면 왼쪽 위에 포커스 없이 띄운다.
+        if (PERF && listWindow) {
+          listWindow.setPosition(0, 40);
+          listWindow.showInactive();
+          ipcMain.handle("perf:main", () => perfLog.splice(0));
+          // 그림자까지 포함해 창을 찍는다(macOS screencapture -l).
+          ipcMain.handle("perf:capture", (_e, file: string) => {
+            const id = listWindow!.getMediaSourceId().split(":")[1]!;
+            return new Promise((r) => execFile("/usr/sbin/screencapture", ["-x", "-l", id, file], () => r(true)));
+          });
+        }
         const out = process.env.TODOBAN_E2E_OUT ?? join(app.getPath("userData"), "e2e");
         await runE2E(E2E, out, {
           window: (w) => windows[w](),

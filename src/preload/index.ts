@@ -37,6 +37,9 @@ const api = {
     };
   },
   resizeList: (height: number) => ipcRenderer.send("list:resize", height),
+  listAnimating: (ms: number) => ipcRenderer.send("list:animating", ms),
+  perfCapture: (file: string): Promise<boolean> => ipcRenderer.invoke("perf:capture", file),
+  perfMain: (): Promise<{ t: number; what: string; ms: number }[]> => ipcRenderer.invoke("perf:main"),
   hideList: () => ipcRenderer.send("list:hide"),
   pinList: (pinned: boolean) => ipcRenderer.send("list:pin", pinned),
   onQuickOpened: (fn: () => void) => {

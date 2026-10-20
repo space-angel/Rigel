@@ -399,6 +399,7 @@ export function TodayList() {
       }
       const current = shell.getBoundingClientRect().height || from;
       api.resizeList(Math.max(current, to));
+      api.listAnimating(280);
       shell.style.transition = "none";
       shell.style.height = `${current}px`;
       void shell.offsetHeight;
