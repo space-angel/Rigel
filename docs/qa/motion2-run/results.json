@@ -1,0 +1,91 @@
+[
+  {
+    "name": "목록",
+    "win": "list",
+    "ok": true,
+    "ms": 701
+  },
+  {
+    "name": "체크 · 시작 직후(80ms) 움직임",
+    "win": "list",
+    "ok": true,
+    "ms": 688,
+    "value": [
+      "stroke 0+120",
+      "color 0+240",
+      "step-forward 220+200",
+      "bloom 0+520",
+      "cb-fill 140+180",
+      "cb-sweep 0+180",
+      "cb-mark 160+180",
+      "fade 0+180"
+    ],
+    "snap": "02-list.png"
+  },
+  {
+    "name": "체크 · 300ms (빛·밀려 나감)",
+    "win": "list",
+    "ok": true,
+    "ms": 354,
+    "value": true,
+    "snap": "03-list.png"
+  },
+  {
+    "name": "체크 끝 → 아래 줄이 올라옴(FLIP)",
+    "win": "list",
+    "ok": true,
+    "ms": 455,
+    "value": {
+      "flip": 0,
+      "shellHeightTransition": false
+    }
+  },
+  {
+    "name": "다이얼 → Later: 목록이 오른쪽에서 + 카드 높이",
+    "win": "list",
+    "ok": true,
+    "ms": 818,
+    "value": {
+      "before": 604,
+      "mid": 421.90625,
+      "styleHeight": "422px",
+      "names": [
+        "height",
+        "transform",
+        "fill",
+        "swap-next"
+      ]
+    },
+    "snap": "05-list.png"
+  },
+  {
+    "name": "다이얼 → 끝",
+    "win": "list",
+    "ok": true,
+    "ms": 749,
+    "value": {
+      "after": 406.296875,
+      "styleHeight": "auto"
+    },
+    "snap": "06-list.png"
+  },
+  {
+    "name": "다이얼 ← Today: 왼쪽에서",
+    "win": "list",
+    "ok": true,
+    "ms": 44,
+    "value": [
+      "height",
+      "transform",
+      "fill",
+      "swap-prev"
+    ]
+  },
+  {
+    "name": "빚기 화면 · 도구 카드 차례로",
+    "win": "list",
+    "ok": true,
+    "ms": 1208,
+    "value": true
+  }
+]

@@ -79,7 +79,7 @@ export function Welcome() {
       <h1>Welcome to todoBAN</h1>
       <p className="welcome__sub">Write what's on your mind. Shape the first step with your own words and tools.</p>
 
-      <div className={`steps hero-${hero}`}>
+      <div className={`steps stagger hero-${hero}`}>
         <Step
           n={1}
           state={claudeState}

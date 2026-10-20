@@ -130,7 +130,7 @@ function DraftRow({
 
 function Notice({ title, children }: { title: string; children?: React.ReactNode }) {
   return (
-    <div className="notice">
+    <div className="notice motion-rise">
       <WarningIcon size={16} />
       <div className="notice__body">
         <p className="notice__title">{title}</p>
@@ -217,7 +217,7 @@ export function Review() {
 
         {state.status === "loading" && (
           // B2: 나누는 동안 할 일 카드가 될 빈 글래스 카드들이 흩어져 떠 있다.
-          <div className="splitting">
+          <div className="splitting motion-fade">
             <div className="splitting__pill">
               <AiSparkle size={12} /> {slow ? "Taking a little longer…" : "Splitting into tasks…"}
             </div>
@@ -268,7 +268,7 @@ export function Review() {
               </h2>
             )}
             {(state.mentions ?? []).length > 0 && (
-              <p className="review__mention">
+              <p className="review__mention motion-fade">
                 Your thought mentions {state.mentions.map(serviceName).join(" and ")}. Turn {state.mentions.length === 1 ? "it" : "them"} on in{" "}
                 <button type="button" className="link" onClick={() => api.openSettings("tools")}>
                   Settings → Tools

@@ -258,7 +258,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
               </div>
             )}
           </div>
-          <div className="result__actions">
+          <div className="result__actions motion-rise" style={{ "--i": 3 } as React.CSSProperties}>
             {todo.plannedDate !== today && (
               <label className="pill-question">
                 Swap into today
@@ -342,7 +342,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
               </button>
             </p>
           ) : (
-            <div className="tools">
+            <div className="tools stagger">
               {tools.map((r) => {
                 const loading = r.status === "loading";
                 const on = (r.status === "ok" && selected.includes(r.source)) || (loading && wanted(r.source));
@@ -362,7 +362,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
                       <span className="tool__name">{SOURCE_NAME[r.source]}</span>
                       <span className={`toggle toggle--sm${on ? " is-on" : ""}`} />
                     </span>
-                    <span className="tool__item">
+                    <span className="tool__item motion-fade" key={r.status + (r.item?.label ?? "")}>
                       {loading && <Spinner size={10} />}{" "}
                       {r.item?.label ?? (r.source === "figma" && r.status === "empty" && data.shortcuts.length === 0 ? "No shortcuts yet" : TOOL_DESC[r.status])}
                     </span>
@@ -379,7 +379,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
             </div>
           )}
           {found.some((r) => r.item?.text || r.item?.preview) && (
-            <div className="found">
+            <div className="found motion-rise" style={{ "--i": 2 } as React.CSSProperties}>
               <span className="eyebrow">What we found · tap to check</span>
               {found
                 .filter((r) => r.item?.text || r.item?.preview)

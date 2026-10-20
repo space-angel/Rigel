@@ -12,6 +12,7 @@ import { ShapePanel } from "./Shape";
 import { Attachments } from "./components/Attachments";
 import { DuePicker } from "./components/DuePicker";
 import { Presence } from "./components/Presence";
+import { useFlip } from "./components/useFlip";
 import { dueBadge, dueLabel } from "@shared/due";
 
 // 마감 배지. 줄에서는 짧게(D-3), 지금 할 일 카드에서는 말로(3 days left).
@@ -48,7 +49,13 @@ function Checkbox({ checked, onToggle, variant = "default" }: { checked: boolean
         onToggle();
       }}
     >
-      {checked && <CheckIcon size={11} />}
+      {/* 체크: 파란 빛이 동그라미를 한 바퀴 채우고(sweep) 안이 차오른 뒤 체크가 그려진다. 작은 SVG 선만 다시 그린다. */}
+      <span className="cb__fill" />
+      <svg viewBox="0 0 20 20" aria-hidden="true">
+        <circle className="cb__ring" cx="10" cy="10" r="8.75" />
+        <circle className="cb__sweep" cx="10" cy="10" r="8.75" pathLength={1} />
+        <path className="cb__mark" d="M6.2 10.4l2.6 2.6 5.2-5.6" pathLength={1} />
+      </svg>
     </button>
   );
 }
@@ -174,6 +181,7 @@ function NowCard({
   const click = useSingleClick(item.isClear || edit.editing ? undefined : onShape);
   return (
     <div
+      data-flip-id={item.id}
       className={`now-card${selected ? " is-selected" : ""}${isNew ? " is-new" : ""}${completing ? " is-completing" : ""}`}
       {...click}
       onContextMenu={(e) => {
@@ -248,6 +256,7 @@ function Row({
   const click = useSingleClick(unclear && !edit.editing ? onFirstStep : undefined);
   return (
     <div
+      data-flip-id={item.id}
       className={`row${selected ? " is-selected" : ""}${done ? " is-done" : ""}${unclear ? " is-unclear" : ""}${edit.editing ? " is-editing" : ""}${isNew ? " is-new" : ""}${completing ? " is-completing" : ""}`}
       {...click}
       onContextMenu={(e) => {
@@ -301,6 +310,7 @@ export function TodayList() {
   const [draft, setDraft] = useState("");
   // 머리 다이얼로 고른 묶음. 목록을 열 때마다 Today로 돌아온다.
   const [dial, setDial] = useState<DialView>("today");
+  const [dialDir, setDialDir] = useState<"next" | "prev" | null>(null);
   const [selected, setSelected] = useState(0);
   const [firstSteps, setFirstSteps] = useState<FirstStepState[]>([]);
   // 빚기(C1, C2)를 열어 둔 할 일. auto면 바로 Shape it을 누른다(화면 확인용).
@@ -309,6 +319,9 @@ export function TodayList() {
   const rootRef = useRef<HTMLDivElement>(null);
   const captureRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // 끌어서 순서를 바꾸는 중에는 dnd-kit이 움직이므로 FLIP을 쉰다.
+  const dragging = useRef(false);
+  useFlip(scrollRef, dragging);
   // 제자리에서 고치는 중인 할 일, 방금 지워서 되살릴 수 있는 할 일
   const [editingId, setEditingId] = useState<string | null>(null);
   const [undo, setUndo] = useState<TodoItem | null>(null);
@@ -316,7 +329,7 @@ export function TodayList() {
   const [highlight, setHighlight] = useState<string[]>([]);
   // 마감을 고르는 중인 할 일 (메뉴의 Pick a date…, ⌘D)
   const [duePickId, setDuePickId] = useState<string | null>(null);
-  // 체크한 할 일: 체크·취소선이 그어지는 동안(360ms) 자리에 두었다가 끝낸 할 일로 보낸다.
+  // 체크한 할 일: 체크가 채워지고 줄 안에서 빛이 번진 뒤 앞으로 밀려 나가는 동안(420ms) 자리에 두었다가 끝낸 할 일로 보낸다.
   const [completing, setCompleting] = useState<string[]>([]);
   // 화면 전환 방향(목록 → 빚기는 앞으로, 돌아오면 뒤로)과 창 열기 움직임
   const [viewDir, setViewDir] = useState<"forward" | "back" | null>(null);
@@ -332,6 +345,7 @@ export function TodayList() {
     const offOpen = api.onListOpened((opts) => {
       replayOpen();
       setSelected(0);
+      setDialDir(null);
       setDial("today");
       setShaping(null);
       rootRef.current?.focus();
@@ -361,13 +375,43 @@ export function TodayList() {
 
   // 카드 높이에 맞춰 창 높이를 바꾼다. 창이 곧 카드다.
   const hasData = data !== null;
+  // 카드 높이를 부드럽게: 안쪽(inner)의 원래 높이가 바뀌면 카드(shell) 높이를 이전 값에서 새 값으로 옮긴다.
+  // ResizeObserver는 그리기 전에 불리므로 순간적으로 커지거나 줄어든 모습이 보이지 않는다.
+  // 창은 커질 때 먼저 키우고, 줄어들 때는 움직임이 끝난 뒤 줄인다(투명한 여백이라 보이지 않는다).
+  const innerRef = useRef<HTMLDivElement>(null);
+  const heightTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastHeight = useRef(0);
   useLayoutEffect(() => {
-    const el = shellRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => api.resizeList(el.getBoundingClientRect().height));
-    ro.observe(el);
+    const inner = innerRef.current;
+    const shell = shellRef.current;
+    if (!inner || !shell) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const border = 2; // 위아래 테두리
+    const ro = new ResizeObserver(() => {
+      const to = Math.ceil(inner.getBoundingClientRect().height) + border;
+      const from = lastHeight.current || to;
+      lastHeight.current = to;
+      if (heightTimer.current) clearTimeout(heightTimer.current);
+      if (reduce || Math.abs(to - from) < 2 || !shell.isConnected) {
+        shell.style.height = "";
+        api.resizeList(to);
+        return;
+      }
+      const current = shell.getBoundingClientRect().height || from;
+      api.resizeList(Math.max(current, to));
+      shell.style.transition = "none";
+      shell.style.height = `${current}px`;
+      void shell.offsetHeight;
+      shell.style.transition = "";
+      shell.style.height = `${to}px`;
+      heightTimer.current = setTimeout(() => {
+        shell.style.height = "";
+        api.resizeList(to);
+      }, 260);
+    });
+    ro.observe(inner);
     return () => ro.disconnect();
-  }, [hasData]);
+  }, [hasData, Boolean(shaping)]);
 
   // 키보드로 고른 줄이 목록 영역 밖으로 나가면 그 줄이 보이도록 스크롤한다.
   useEffect(() => {
@@ -395,7 +439,7 @@ export function TodayList() {
     setTimeout(() => {
       toggle();
       setCompleting((c) => c.filter((x) => x !== t.id));
-    }, reduce ? 0 : 360);
+    }, reduce ? 0 : 420);
   };
 
   // 지우면 바로 지우고, 5초 동안 되살리기 안내를 보여 준다.
@@ -440,6 +484,8 @@ export function TodayList() {
   // 키보드로 고르는 줄: Today는 오늘 목록, 다른 묶음은 그 묶음의 할 일
   const rows = dial === "today" ? open : buckets[dial];
   const turnDial = (v: DialView) => {
+    // 다이얼이 도는 쪽에서 목록이 들어온다(오른쪽 묶음으로 가면 오른쪽에서).
+    setDialDir(DIAL_VIEWS.indexOf(v) > DIAL_VIEWS.indexOf(dial) ? "next" : "prev");
     setDial(v);
     setSelected(0);
   };
@@ -475,6 +521,8 @@ export function TodayList() {
   };
 
   const onDragEnd = ({ active, over }: DragEndEvent) => {
+    // 놓은 뒤 순서가 저장되며 한 번 더 그려진다. 그때까지 FLIP을 쉰다.
+    setTimeout(() => (dragging.current = false), 300);
     if (!over || active.id === over.id) return;
     const ids = open.map((t) => t.id);
     const moved = arrayMove(ids, ids.indexOf(String(active.id)), ids.indexOf(String(over.id)));
@@ -523,6 +571,7 @@ export function TodayList() {
     return (
       <div className="window" ref={rootRef} tabIndex={0} onKeyDown={onKeyDown}>
         <div className={`shell${data.settings.listPin.pinned ? " is-pinned" : ""}${viewDir ? ` view--${viewDir}` : ""}`} ref={shellRef}>
+          <div className="shell__inner" ref={innerRef}>
           <ShapePanel
             key={shapingTodo.id}
             todo={shapingTodo}
@@ -535,6 +584,7 @@ export function TodayList() {
               rootRef.current?.focus();
             }}
           />
+          </div>
         </div>
       </div>
     );
@@ -542,6 +592,7 @@ export function TodayList() {
   return (
     <div className="window" ref={rootRef} tabIndex={0} onKeyDown={onKeyDown}>
       <div className={`shell${data.settings.listPin.pinned ? " is-pinned" : ""}${viewDir ? ` view--${viewDir}` : ""}`} ref={shellRef}>
+        <div className="shell__inner" ref={innerRef}>
         <header className="header">
           <div className="header__title">
             <h1>Today</h1>
@@ -582,7 +633,7 @@ export function TodayList() {
 
         <div className="scroll" ref={scrollRef}>
           {dial !== "today" ? (
-            <section className="section section--view">
+            <section className={`section section--view${dialDir ? ` swap--${dialDir}` : ""}`} key={dial}>
               <h2 className="section__label">
                 {DIAL_LABEL[dial]} · {buckets[dial].length}
               </h2>
@@ -624,9 +675,9 @@ export function TodayList() {
               </button>
             </section>
           ) : (
-            <>
+            <div className={dialDir ? `swap--${dialDir}` : undefined} key="today">
           {carry.length > 0 && (
-            <div className="carry">
+            <div className="carry motion-rise">
               <div className="carry__top">
                 <span className="eyebrow">
                   <CalendarIcon size={12} /> From yesterday
@@ -647,7 +698,7 @@ export function TodayList() {
           )}
 
           {open.length === 0 && carry.length === 0 && (
-            <div className="empty">
+            <div className="empty motion-rise">
               <span className="empty__mark">
                 <CheckIcon size={18} />
               </span>
@@ -656,7 +707,7 @@ export function TodayList() {
             </div>
           )}
 
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={() => (dragging.current = true)} onDragEnd={onDragEnd} onDragCancel={() => (dragging.current = false)}>
             <SortableContext items={open.map((t) => t.id)} strategy={verticalListSortingStrategy}>
               <div className="list">
                 {now && (
@@ -678,7 +729,7 @@ export function TodayList() {
           </DndContext>
 
           {(done.length > 0 || later.length > 0) && (
-            <nav className="quiet-links">
+            <nav className="quiet-links motion-fade">
               {(["done", "tomorrow", "later"] as const)
                 .filter((v) => buckets[v].length > 0)
                 .map((v) => (
@@ -688,7 +739,7 @@ export function TodayList() {
                 ))}
             </nav>
           )}
-            </>
+            </div>
           )}
         </div>
 
@@ -742,6 +793,7 @@ export function TodayList() {
             <ArrowRightIcon size={14} />
           </button>
         </footer>
+        </div>
       </div>
     </div>
   );

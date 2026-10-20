@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 
 const css = readFileSync(new URL("../src/renderer/src/styles.css", import.meta.url), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 const COMPOSITE = new Set(["transform", "opacity"]);
-const PAINT = new Set(["background-color", "background", "color", "border-color", "fill", "box-shadow", "filter"]);
+const PAINT = new Set(["background-color", "background", "color", "border-color", "fill", "stroke", "stroke-dashoffset", "box-shadow", "filter"]); // 다시 칠하기만(배치 없음)
 const ALLOWED_LAYOUT = new Set(["height", "flex-grow"]); // 근거 펼치기, 비율 막대 칸 (작은 영역)
 
 const rows: { where: string; prop: string; kind: string }[] = [];

@@ -204,6 +204,13 @@ const VERIFY_FAIL: Record<string, string> = {
 };
 
 function StatusPill({ status }: { status: McpStatus | null }) {
+  return (
+    <span className="motion-fade" key={status ?? "checking"} style={{ display: "contents" }}>
+      <StatusPillInner status={status} />
+    </span>
+  );
+}
+function StatusPillInner({ status }: { status: McpStatus | null }) {
   if (status === null) return <span className="status">Checking</span>;
   if (status === "connected") return <span className="status status--ok">Connected</span>;
   if (status === "pending") return <span className="status">Connecting</span>;
@@ -216,7 +223,7 @@ function McpGuide({ source, status, onClose }: { source: McpSource; status: McpS
   const name = MCP_SERVICES[source].name.replace(" frame", "");
   const signIn = status === "needs-auth";
   return (
-    <div className="guide">
+    <div className="guide motion-rise">
       <div className="guide__head">
         <p className="guide__title">{signIn ? `Sign in to ${name}` : `Add ${name} to Claude`}</p>
         <button type="button" className="text-button" onClick={onClose}>
@@ -359,7 +366,7 @@ function ToolsTab({ data }: { data: AppData }) {
           </button>
         </div>
         {rulesBroken && (
-          <div className="guide">
+          <div className="guide motion-rise">
             <div className="guide__head">
               <p className="guide__title">Your edited CLAUDE.md can't read these yet</p>
               <button type="button" className="button button--primary button--sm" onClick={() => api.resetRules().then((r) => (setRules(r), check(true)))}>
@@ -387,7 +394,7 @@ function ToolsTab({ data }: { data: AppData }) {
                   <p className="setting__title">
                     {MCP_SERVICES[s].name} <StatusPill status={st} />
                   </p>
-                  <p className={`setting__desc${v?.state === "ok" ? " is-ok" : v?.state === "fail" ? " is-error" : ""}`}>
+                  <p className={`setting__desc motion-fade${v?.state === "ok" ? " is-ok" : v?.state === "fail" ? " is-error" : ""}`} key={mcpDesc(s, st)}>
                     {v?.state === "testing" && <Spinner size={10} />} {mcpDesc(s, st)}
                   </p>
                 </div>

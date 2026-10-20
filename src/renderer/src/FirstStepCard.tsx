@@ -21,7 +21,7 @@ export function FirstStepCard({ state, originalTitle }: { state: FirstStepState;
 
   if (state.status === "loading") {
     return (
-      <div className="fs-status" {...stop}>
+      <div className="fs-status motion-fade" {...stop}>
         <Spinner size={12} /> {state.answer ? "Shaping a step from your answer…" : "Finding a first step…"}
       </div>
     );
@@ -29,7 +29,7 @@ export function FirstStepCard({ state, originalTitle }: { state: FirstStepState;
 
   if (state.status === "error") {
     return (
-      <div className="fs-card fs-card--plain" {...stop}>
+      <div className="fs-card fs-card--plain motion-rise" {...stop}>
         <p className="fs-card__body">{ERROR_TEXT[state.error?.kind ?? "failed"]}</p>
         <div className="fs-card__actions">
           <button type="button" className="button button--primary button--sm" onClick={() => api.requestFirstStep(id, { answer: state.answer ?? undefined })}>
@@ -47,7 +47,7 @@ export function FirstStepCard({ state, originalTitle }: { state: FirstStepState;
   if (state.status === "question") {
     const send = () => answer.trim() && api.requestFirstStep(id, { answer });
     return (
-      <div className="fs-card fs-card--hero" {...stop}>
+      <div className="fs-card fs-card--hero motion-rise" {...stop}>
         <p className="fs-card__eyebrow">One question</p>
         <p className="fs-card__title">{state.question}</p>
         <input
@@ -69,7 +69,7 @@ export function FirstStepCard({ state, originalTitle }: { state: FirstStepState;
   }
 
   return (
-    <div className="fs-card fs-card--hero" {...stop}>
+    <div className="fs-card fs-card--hero motion-rise" {...stop}>
       <p className="fs-card__eyebrow fs-card__eyebrow--ai">
         <AiSparkle size={12} /> First step
       </p>

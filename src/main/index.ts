@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, globalShortcut, ipcMain, Menu, nativeImage, screen, shell, Tray } from "electron";
+import { app, BrowserWindow, dialog, globalShortcut, ipcMain, Menu, nativeImage, screen, shell, systemPreferences, Tray } from "electron";
 import { join } from "node:path";
 import { writeFileSync } from "node:fs";
 import { execFile } from "node:child_process";
@@ -183,6 +183,17 @@ function toggleListWindow(): void {
   listWindow.focus();
   listWindow.webContents.send("list:opened");
   settleShadow(listWindow);
+}
+
+// 일반 창(설정·확인·시작하기)은 내용 높이가 바뀌면 macOS 기본 창 애니메이션으로 크기를 바꾼다.
+// 운영체제가 그리므로 가장 가볍다. 보이지 않는 창(처음 열기 전, 화면 확인용)은 바로 바꾼다.
+function resizeAnimated(win: BrowserWindow, w: number, h: number): void {
+  const animate = win.isVisible() && !HEADLESS && !systemPrefersReducedMotion();
+  win.setContentSize(w, h, animate);
+}
+
+function systemPrefersReducedMotion(): boolean {
+  return process.platform === "darwin" && systemPreferences.getAnimationSettings().prefersReducedMotion;
 }
 
 // 여는 움직임(240ms)이 끝난 뒤 그림자를 다시 계산한다. 움직이는 중 모양으로 그림자가 남지 않게.
@@ -552,7 +563,7 @@ app.whenReady().then(() => {
     if (!welcomeWindow) return;
     const h = Math.min(Math.max(Math.ceil(height), 360), 760);
     const [w, cur] = welcomeWindow.getContentSize();
-    if (cur !== h) welcomeWindow.setContentSize(w ?? 480, h);
+    if (cur !== h) resizeAnimated(welcomeWindow, w ?? 480, h);
   });
   ipcMain.on("welcome:finish", (_e, openList: boolean) => {
     act({ type: "setSettings", patch: { welcomed: true } });
@@ -571,7 +582,7 @@ app.whenReady().then(() => {
     if (!settingsWindow) return;
     const h = Math.min(Math.max(Math.ceil(height), 300), 760);
     const [w, cur] = settingsWindow.getContentSize();
-    if (cur !== h) settingsWindow.setContentSize(w ?? 560, h);
+    if (cur !== h) resizeAnimated(settingsWindow, w ?? 560, h);
   });
   ipcMain.handle("settings:hotkeyStatus", () => hotkeyError);
   ipcMain.handle("settings:claudeInfo", async () => {
@@ -601,7 +612,7 @@ app.whenReady().then(() => {
     if (!reviewWindow) return;
     const h = Math.min(Math.max(Math.ceil(height), 200), REVIEW_MAX_HEIGHT);
     const [w, cur] = reviewWindow.getContentSize();
-    if (cur !== h) reviewWindow.setContentSize(w ?? REVIEW_WIDTH, h);
+    if (cur !== h) resizeAnimated(reviewWindow, w ?? REVIEW_WIDTH, h);
   });
   ipcMain.on("review:commit", (_e, drafts: ReviewDraft[]) => {
     if (!review) return;
