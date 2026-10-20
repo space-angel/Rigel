@@ -165,3 +165,37 @@ test("오늘 이미 물었으면 다시 묻지 않는다", () => {
   d = { ...d, settings: { ...d.settings, lastCarryOverCheck: today } };
   assert.equal(pendingCarryOver(d, today).length, 0);
 });
+
+test("날짜 옮기기: 내일·나중은 맨 아래로, 오늘은 오늘 맨 아래로", () => {
+  let d = emptyData();
+  d = applyAction(d, { type: "add", title: "a" }, now);
+  d = applyAction(d, { type: "add", title: "b" }, now);
+  const [a, b] = d.todos;
+  d = applyAction(d, { type: "schedule", id: a!.id, plannedDate: "2026-10-21" }, now);
+  assert.equal(d.todos.find((t) => t.id === a!.id)!.plannedDate, "2026-10-21");
+  assert.ok(d.todos.find((t) => t.id === a!.id)!.order > d.todos.find((t) => t.id === b!.id)!.order);
+  d = applyAction(d, { type: "schedule", id: b!.id, plannedDate: null }, now);
+  assert.equal(d.todos.find((t) => t.id === b!.id)!.plannedDate, null);
+  d = applyAction(d, { type: "schedule", id: a!.id, plannedDate: today }, now);
+  assert.deepEqual(todayView(d.todos, today).open.map((t) => t.title), ["a"]);
+});
+
+test("지운 할 일을 되살리면 제목·날짜·순서가 그대로다", () => {
+  let d = emptyData();
+  d = applyAction(d, { type: "add", title: "포폴 손보기" }, now);
+  d = applyAction(d, { type: "add", title: "면접 준비" }, now);
+  const gone = d.todos[0]!;
+  d = applyAction(d, { type: "remove", id: gone.id }, now);
+  assert.equal(d.todos.length, 1);
+  d = applyAction(d, { type: "restore", item: gone }, now);
+  assert.deepEqual(todayView(d.todos, today).open.map((t) => t.title), ["포폴 손보기", "면접 준비"]);
+  assert.equal(applyAction(d, { type: "restore", item: gone }, now).todos.length, 2, "두 번 되살려도 하나");
+});
+
+test("이름 바꾸기: 앞뒤 공백을 빼고, 빈 이름은 무시한다", () => {
+  let d = applyAction(emptyData(), { type: "add", title: "포폴 손보기" }, now);
+  const id = d.todos[0]!.id;
+  d = applyAction(d, { type: "rename", id, title: "  포폴 3번 장표 고치기 " }, now);
+  assert.equal(d.todos[0]!.title, "포폴 3번 장표 고치기");
+  assert.equal(applyAction(d, { type: "rename", id, title: "  " }, now).todos[0]!.title, "포폴 3번 장표 고치기");
+});

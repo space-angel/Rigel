@@ -6,7 +6,7 @@ import type { AppData, Shortcut, TodoItem } from "@shared/types";
 import { localDate, pendingCarryOver, todayView } from "@shared/todos";
 import { displayAccelerator } from "@shared/hotkey";
 import type { FirstStepState } from "@shared/firstStep";
-import { AiSparkle, ArrowRightIcon, CalendarIcon, CheckIcon, ChevronRightIcon, FigmaMark, PlayIcon, PlusIcon, SettingsIcon } from "./components/icons";
+import { AiSparkle, ArrowRightIcon, CalendarIcon, CheckIcon, ChevronRightIcon, FigmaMark, MoreIcon, PlayIcon, PlusIcon, SettingsIcon } from "./components/icons";
 import { FirstStepCard } from "./FirstStepCard";
 import { ShapePanel } from "./Shape";
 import { FanDial } from "./components/FanDial";
@@ -63,6 +63,77 @@ function StartButton({ shortcut, variant = "row" }: { shortcut: Shortcut; varian
   );
 }
 
+// 할 일 줄의 고치기·메뉴 동작. 목록이 들고 있고 줄은 받아서 쓴다.
+interface EditProps {
+  editing: boolean;
+  onEdit: () => void;
+  onSave: (title: string) => void;
+  onCancel: () => void;
+  onMenu: () => void;
+}
+
+// 제목을 그 자리에서 고친다. Enter 저장, Esc 취소, 다른 곳을 누르면 저장.
+function Title({ item, className, editing, onEdit, onSave, onCancel }: { item: TodoItem; className: string } & Omit<EditProps, "onMenu">) {
+  const [value, setValue] = useState(item.title);
+  useEffect(() => setValue(item.title), [editing, item.title]);
+  if (!editing)
+    return (
+      <span className={className} onDoubleClick={(e) => (e.stopPropagation(), onEdit())}>
+        {item.title}
+      </span>
+    );
+  return (
+    <input
+      className={`${className} title-input`}
+      aria-label="Task title"
+      autoFocus
+      value={value}
+      onFocus={(e) => e.currentTarget.select()}
+      onChange={(e) => setValue(e.target.value)}
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+      onKeyDown={(e) => {
+        e.stopPropagation();
+        if (e.nativeEvent.isComposing) return;
+        if (e.key === "Enter") onSave(value);
+        if (e.key === "Escape") onCancel();
+      }}
+      onBlur={() => onSave(value)}
+    />
+  );
+}
+
+function MoreButton({ onMenu }: { onMenu: () => void }) {
+  return (
+    <button
+      type="button"
+      className="more"
+      aria-label="More actions"
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.stopPropagation();
+        onMenu();
+      }}
+    >
+      <MoreIcon size={14} />
+    </button>
+  );
+}
+
+// 정리 안 된 할 일은 한 번 누르면 빚기를 연다. 더블클릭(제목 고치기)과 겹치지 않게 잠깐 기다린다.
+function useSingleClick(fn: (() => void) | undefined) {
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => void (timer.current && clearTimeout(timer.current)), []);
+  if (!fn) return {};
+  return {
+    onClick: (e: React.MouseEvent) => {
+      if (e.detail > 1) return;
+      timer.current = setTimeout(fn, 220);
+    },
+    onDoubleClickCapture: () => timer.current && clearTimeout(timer.current),
+  };
+}
+
 function NowCard({
   item,
   shortcut,
@@ -70,6 +141,7 @@ function NowCard({
   onToggle,
   onFirstStep,
   onShape,
+  edit,
 }: {
   item: TodoItem;
   shortcut?: Shortcut;
@@ -77,14 +149,26 @@ function NowCard({
   onToggle: () => void;
   onFirstStep: () => void;
   onShape: () => void;
+  edit: EditProps;
 }) {
+  const click = useSingleClick(item.isClear || edit.editing ? undefined : onShape);
   return (
-    <div className={`now-card${selected ? " is-selected" : ""}`} onClick={item.isClear ? undefined : onShape}>
+    <div
+      className={`now-card${selected ? " is-selected" : ""}`}
+      {...click}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        edit.onMenu();
+      }}
+    >
       <div className="now-card__top">
         <span className="eyebrow">Now</span>
-        <Checkbox checked={false} onToggle={onToggle} variant="now" />
+        <span className="now-card__tools">
+          <MoreButton onMenu={edit.onMenu} />
+          <Checkbox checked={false} onToggle={onToggle} variant="now" />
+        </span>
       </div>
-      <p className="now-card__title">{item.title}</p>
+      <Title item={item} className="now-card__title" {...edit} />
       {item.isClear ? (
         <div className="now-card__bottom">
           {shortcut ? (
@@ -121,6 +205,7 @@ function Row({
   trailing,
   onToggle,
   onFirstStep,
+  edit,
 }: {
   item: TodoItem;
   shortcut?: Shortcut;
@@ -129,23 +214,34 @@ function Row({
   trailing?: React.ReactNode;
   onToggle: () => void;
   onFirstStep?: () => void;
+  edit: EditProps;
 }) {
   const unclear = !item.isClear && !done;
+  const click = useSingleClick(unclear && !edit.editing ? onFirstStep : undefined);
   return (
     <div
-      className={`row${selected ? " is-selected" : ""}${done ? " is-done" : ""}${unclear ? " is-unclear" : ""}`}
-      onClick={unclear ? onFirstStep : undefined}
+      className={`row${selected ? " is-selected" : ""}${done ? " is-done" : ""}${unclear ? " is-unclear" : ""}${edit.editing ? " is-editing" : ""}`}
+      {...click}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        edit.onMenu();
+      }}
     >
       <Checkbox checked={Boolean(done)} onToggle={onToggle} />
       {unclear && <span className="row__dot" aria-label="Unclear" />}
-      <span className="row__title">{item.title}</span>
-      {unclear && onFirstStep && (
-        <span className="row__hint">
-          <AiSparkle size={12} /> Shape
-        </span>
+      <Title item={item} className="row__title" {...edit} />
+      {!edit.editing && (
+        <>
+          {unclear && onFirstStep && (
+            <span className="row__hint">
+              <AiSparkle size={12} /> Shape
+            </span>
+          )}
+          {shortcut && !done && <StartButton shortcut={shortcut} />}
+          {trailing}
+          <MoreButton onMenu={edit.onMenu} />
+        </>
       )}
-      {shortcut && !done && <StartButton shortcut={shortcut} />}
-      {trailing}
     </div>
   );
 }
@@ -183,6 +279,12 @@ export function TodayList() {
   const rootRef = useRef<HTMLDivElement>(null);
   const captureRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // 제자리에서 고치는 중인 할 일, 방금 지워서 되살릴 수 있는 할 일
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [undo, setUndo] = useState<TodoItem | null>(null);
+  const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dataRef = useRef<AppData | null>(null);
+  dataRef.current = data;
 
   useEffect(() => {
     api.getData().then(setData);
@@ -195,7 +297,16 @@ export function TodayList() {
       rootRef.current?.focus();
     });
     const offShape = api.onShapeOpen((id, auto) => setShaping({ id, auto }));
+    // ⋯ 메뉴나 오른쪽 클릭 메뉴에서 고르면 메인이 알려 준다.
+    const offRequest = api.onTodoRequest((kind, id) => {
+      if (kind === "edit") setEditingId(id);
+      else {
+        const t = dataRef.current?.todos.find((x) => x.id === id);
+        if (t) removeRef.current(t);
+      }
+    });
     return () => {
+      offRequest();
       offData();
       offOpen();
       offFirst();
@@ -221,6 +332,24 @@ export function TodayList() {
     el.scrollIntoView({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
   }, [selected, dial]);
 
+  // 지우면 바로 지우고, 5초 동안 되살리기 안내를 보여 준다.
+  const remove = (t: TodoItem) => {
+    api.act({ type: "remove", id: t.id }).then(setData);
+    api.dismissFirstStep(t.id);
+    if (editingId === t.id) setEditingId(null);
+    setUndo(t);
+    if (undoTimer.current) clearTimeout(undoTimer.current);
+    undoTimer.current = setTimeout(() => setUndo(null), 5000);
+  };
+  const removeRef = useRef(remove);
+  removeRef.current = remove;
+  const restore = () => {
+    if (!undo) return;
+    api.act({ type: "restore", item: undo }).then(setData);
+    setUndo(null);
+    if (undoTimer.current) clearTimeout(undoTimer.current);
+  };
+
   const carry = useMemo(() => (data ? pendingCarryOver(data, localDate()) : []), [data]);
   const view = useMemo(() => (data ? todayView(data.todos, localDate(), carry) : null), [data, carry]);
   const buckets = useMemo(() => (data ? dialBuckets(data.todos, localDate(), carry) : null), [data, carry]);
@@ -243,6 +372,20 @@ export function TodayList() {
     if (!stepOf(t.id)) api.requestFirstStep(t.id);
   };
   const shape = (t: TodoItem) => setShaping({ id: t.id, auto: false });
+  const edit = (t: TodoItem): EditProps => ({
+    editing: editingId === t.id,
+    onEdit: () => setEditingId(t.id),
+    onSave: (title) => {
+      setEditingId(null);
+      if (title.trim() && title.trim() !== t.title) act({ type: "rename", id: t.id, title });
+      rootRef.current?.focus();
+    },
+    onCancel: () => {
+      setEditingId(null);
+      rootRef.current?.focus();
+    },
+    onMenu: () => api.todoMenu(t.id),
+  });
   const stepCard = (t: TodoItem) => {
     const st = stepOf(t.id);
     if (shaping?.id === t.id) return null;
@@ -272,7 +415,10 @@ export function TodayList() {
     else if (e.key === "Enter" && current && !current.isClear && !current.completedAt) (dial === "today" ? askFirstStep(current) : shape(current));
     else if (e.key === "Enter" && current && shortcutOf(current)) api.openShortcut(current.shortcutId!);
     else if (e.key === "," && e.metaKey) api.openSettings();
-    else if (e.key === "Backspace" && e.metaKey && current) act({ type: "remove", id: current.id });
+    else if (e.key === "Backspace" && e.metaKey && current) remove(current);
+    // 한글 입력 중에도 되도록 글자 대신 키 자리(code)로 본다.
+    else if (e.code === "KeyE" && e.metaKey && current) setEditingId(current.id);
+    else if (e.code === "KeyZ" && e.metaKey && undo) restore();
     else if (e.key === "n" && e.metaKey) captureRef.current?.focus();
     else if (e.key === "Escape") api.hideList();
     else return;
@@ -353,6 +499,7 @@ export function TodayList() {
                   done={dial === "done"}
                   onToggle={() => act({ type: "toggle", id: t.id })}
                   onFirstStep={() => shape(t)}
+                  edit={edit(t)}
                   trailing={
                     dial !== "done" && (
                       <>
@@ -415,14 +562,14 @@ export function TodayList() {
               <div className="list">
                 {now && (
                   <SortableItem id={now.id}>
-                    <NowCard item={now} shortcut={shortcutOf(now)} selected={selected === 0} onToggle={() => act({ type: "toggle", id: now.id })} onFirstStep={() => askFirstStep(now)} onShape={() => shape(now)} />
+                    <NowCard item={now} shortcut={shortcutOf(now)} selected={selected === 0} onToggle={() => act({ type: "toggle", id: now.id })} onFirstStep={() => askFirstStep(now)} onShape={() => shape(now)} edit={edit(now)} />
                   </SortableItem>
                 )}
                 {now && stepCard(now)}
                 {rest.map((t, i) => (
                   <div key={t.id}>
                     <SortableItem id={t.id}>
-                      <Row item={t} shortcut={shortcutOf(t)} selected={selected === i + 1} onToggle={() => act({ type: "toggle", id: t.id })} onFirstStep={() => shape(t)} />
+                      <Row item={t} shortcut={shortcutOf(t)} selected={selected === i + 1} onToggle={() => act({ type: "toggle", id: t.id })} onFirstStep={() => shape(t)} edit={edit(t)} />
                     </SortableItem>
                     {stepCard(t)}
                   </div>
@@ -446,6 +593,16 @@ export function TodayList() {
           )}
         </div>
 
+        {undo && (
+          <div className="toast" role="status">
+            <span className="toast__text">
+              Deleted “{undo.title}”
+            </span>
+            <button type="button" className="toast__undo" onClick={restore}>
+              Undo <kbd>⌘Z</kbd>
+            </button>
+          </div>
+        )}
         <footer className="capture">
           <AiSparkle size={14} className="capture__icon" />
           <input

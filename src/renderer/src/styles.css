@@ -1608,7 +1608,7 @@ body::-webkit-scrollbar-thumb {
   background: var(--surface-row);
 }
 .dial--bare {
-  margin: -6px 0 -4px;
+  margin: 6px 0 2px;
 }
 .dial:focus-visible {
   border-color: rgb(111 166 255 / 55%);
@@ -2001,8 +2001,8 @@ body::-webkit-scrollbar-thumb {
 .overview {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 0 12px 12px;
+  gap: 12px;
+  padding: 0 12px 16px;
 }
 .ratio {
   display: flex;
@@ -2166,4 +2166,86 @@ body::-webkit-scrollbar-thumb {
 }
 .dial.is-dragging .dial__scale {
   transition: none;
+}
+
+/* 할 일 고치기·메뉴·되살리기 */
+.more {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  margin-right: -4px;
+  border-radius: var(--radius-full);
+  color: var(--color-text-tertiary);
+  opacity: 0;
+}
+.row:hover .more,
+.row.is-selected .more,
+.now-card:hover .more,
+.more:focus-visible {
+  opacity: 1;
+}
+.more:hover {
+  background: var(--white-10);
+  color: var(--color-text-primary);
+}
+.now-card__tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.title-input {
+  min-width: 0;
+  margin: -3px 0;
+  padding: 2px 8px;
+  border: 1px solid rgb(111 166 255 / 70%);
+  border-radius: var(--radius-r2);
+  background: var(--surface-field);
+  font: inherit;
+  outline: none;
+  user-select: text;
+}
+.row__title.title-input {
+  flex: 1;
+  white-space: normal;
+}
+.now-card__title.title-input {
+  width: 100%;
+  font-size: 17px;
+  font-weight: 700;
+}
+.row.is-editing {
+  border-color: rgb(111 166 255 / 45%);
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 12px 6px;
+  padding: 8px 8px 8px 14px;
+  border-radius: var(--radius-r3);
+  border: 1px solid var(--white-14);
+  background: var(--ink-3);
+  font-size: 12px;
+}
+.toast__text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--color-text-secondary);
+}
+.toast__undo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  color: var(--blue-300);
+}
+.toast__undo:hover {
+  background: var(--white-08);
 }

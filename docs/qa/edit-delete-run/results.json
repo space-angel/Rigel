@@ -1,0 +1,97 @@
+[
+  {
+    "name": "목록 · 다이얼 위아래 간격",
+    "win": "list",
+    "ok": true,
+    "ms": 1071,
+    "snap": "01-list.png"
+  },
+  {
+    "name": "제목 더블클릭 → 제자리 고치기",
+    "win": "list",
+    "ok": true,
+    "ms": 664,
+    "value": "우테크 과제 README 마무리하기",
+    "snap": "02-list.png"
+  },
+  {
+    "name": "새 제목 입력 → Enter로 저장",
+    "win": "list",
+    "ok": true,
+    "ms": 864,
+    "value": true,
+    "snap": "03-list.png"
+  },
+  {
+    "name": "⌘E → 지금 할 일 고치기, Esc로 취소",
+    "win": "list",
+    "ok": true,
+    "ms": 611,
+    "value": true
+  },
+  {
+    "name": "정리 안 된 줄 더블클릭 → 빚기가 아니라 고치기",
+    "win": "list",
+    "ok": true,
+    "ms": 862,
+    "value": true,
+    "snap": "05-list.png"
+  },
+  {
+    "name": "Esc → 고치기 끝",
+    "win": "list",
+    "ok": true,
+    "ms": 304,
+    "value": true
+  },
+  {
+    "name": "정리 안 된 줄 한 번 클릭 → 빚기는 그대로 열린다",
+    "win": "list",
+    "ok": true,
+    "ms": 602,
+    "value": true
+  },
+  {
+    "name": "빚기에서 돌아온다",
+    "win": "list",
+    "ok": true,
+    "ms": 405,
+    "value": true
+  },
+  {
+    "name": "⋯ 메뉴 항목",
+    "win": "list",
+    "ok": true,
+    "ms": 1,
+    "value": [
+      "Edit title",
+      "Move to Today (off)",
+      "Move to Tomorrow",
+      "Move to Later",
+      "Delete"
+    ]
+  },
+  {
+    "name": "⌘⌫ 지우기 → 되살리기 안내",
+    "win": "list",
+    "ok": true,
+    "ms": 1006,
+    "value": "사일로 발표 자료 3~5번 장표 검토하기",
+    "snap": "10-list.png"
+  },
+  {
+    "name": "⌘Z → 되살아난다",
+    "win": "list",
+    "ok": true,
+    "ms": 841,
+    "value": true,
+    "snap": "11-list.png"
+  },
+  {
+    "name": "다시 지우고 5초 기다리면 안내가 사라진다",
+    "win": "list",
+    "ok": true,
+    "ms": 5604,
+    "value": true
+  }
+]

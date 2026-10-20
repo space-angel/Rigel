@@ -4,6 +4,7 @@ import { writeFileSync } from "node:fs";
 import { execFile } from "node:child_process";
 import type { AppData, TodoAction } from "@shared/types";
 import { applyAction, localDate, pendingCarryOver, todayView } from "@shared/todos";
+import { addDays } from "@shared/dial";
 import { classifyQuickInput, firstLine, matchShortcutByKeywords } from "@shared/quickInput";
 import { loadData, saveData } from "./store";
 import type { ReviewDraft } from "@shared/review";
@@ -353,6 +354,25 @@ app.whenReady().then(() => {
 
   ipcMain.handle("data:get", () => data);
   ipcMain.handle("todo:action", (_e, action: TodoAction) => act(action));
+  // 할 일 줄의 ⋯ 버튼과 오른쪽 클릭 메뉴. 고치기와 지우기는 목록 창이 처리한다(제자리 편집, 되살리기 안내).
+  ipcMain.handle("todo:menu", (_e, id: string) => {
+    const t = data.todos.find((x) => x.id === id);
+    if (!t || !listWindow) return [];
+    const today = localDate();
+    const tomorrow = addDays(today, 1);
+    const send = (channel: string) => listWindow?.webContents.send(channel, id);
+    const items: Electron.MenuItemConstructorOptions[] = [
+      { label: "Edit title", accelerator: "CommandOrControl+E", registerAccelerator: false, click: () => send("todo:requestEdit") },
+      { type: "separator" },
+      { label: "Move to Today", enabled: !t.completedAt && !(t.plannedDate !== null && t.plannedDate <= today), click: () => act({ type: "moveToToday", id }) },
+      { label: "Move to Tomorrow", enabled: !t.completedAt && t.plannedDate !== tomorrow, click: () => act({ type: "schedule", id, plannedDate: tomorrow }) },
+      { label: "Move to Later", enabled: !t.completedAt && t.plannedDate !== null, click: () => act({ type: "schedule", id, plannedDate: null }) },
+      { type: "separator" },
+      { label: "Delete", accelerator: "CommandOrControl+Backspace", registerAccelerator: false, click: () => send("todo:requestDelete") },
+    ];
+    if (!E2E) Menu.buildFromTemplate(items).popup({ window: listWindow });
+    return items.filter((i) => i.label).map((i) => `${i.label}${i.enabled === false ? " (off)" : ""}`);
+  });
 
   // 렌더러가 내용 높이를 알려 주면 창 높이를 맞춘다. 창 밖의 투명한 영역이 클릭을 가로채지 않게 하려는 것.
   ipcMain.on("list:resize", (_e, height: number) => fitHeight(listWindow, height, LIST_MAX_HEIGHT));

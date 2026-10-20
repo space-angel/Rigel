@@ -129,6 +129,21 @@ export function applyAction(data: AppData, action: TodoAction, now: Date = new D
       t.title = title;
       break;
     }
+    case "schedule": {
+      // 다른 날로 옮기면 그 묶음의 맨 아래에 붙는다. 오늘로 옮기는 것은 moveToToday와 같다.
+      const t = find(action.id);
+      if (!t) return data;
+      if (action.plannedDate !== null && action.plannedDate <= today) return applyAction(data, { type: "moveToToday", id: action.id }, now);
+      t.plannedDate = action.plannedDate;
+      t.order = orderBetween(Math.max(...todos.map((x) => x.order)), null);
+      break;
+    }
+    case "restore": {
+      // 지운 할 일을 되살린다(Undo). 같은 id가 이미 있으면 아무것도 하지 않는다.
+      if (find(action.item.id)) return data;
+      todos.push({ ...action.item });
+      break;
+    }
     case "moveToToday": {
       const t = find(action.id);
       if (!t) return data;

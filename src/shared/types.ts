@@ -91,6 +91,8 @@ export type TodoAction =
   | { type: "remove"; id: string }
   | { type: "rename"; id: string; title: string }
   | { type: "moveToToday"; id: string }
+  | { type: "schedule"; id: string; plannedDate: string | null }
+  | { type: "restore"; item: TodoItem }
   | { type: "reorder"; id: string; beforeId: string | null; afterId: string | null }
   | { type: "setShortcut"; id: string; shortcutId: string | null }
   | { type: "saveShortcut"; shortcut: ShortcutInput & { id?: string } }

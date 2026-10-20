@@ -8,6 +8,17 @@ import type { McpSource, McpStatus } from "@shared/mcp";
 const api = {
   getData: (): Promise<AppData> => ipcRenderer.invoke("data:get"),
   act: (action: TodoAction): Promise<AppData> => ipcRenderer.invoke("todo:action", action),
+  todoMenu: (id: string): Promise<string[]> => ipcRenderer.invoke("todo:menu", id),
+  onTodoRequest: (fn: (kind: "edit" | "delete", id: string) => void) => {
+    const edit = (_e: unknown, id: string) => fn("edit", id);
+    const del = (_e: unknown, id: string) => fn("delete", id);
+    ipcRenderer.on("todo:requestEdit", edit);
+    ipcRenderer.on("todo:requestDelete", del);
+    return () => {
+      ipcRenderer.removeListener("todo:requestEdit", edit);
+      ipcRenderer.removeListener("todo:requestDelete", del);
+    };
+  },
   onData: (fn: (data: AppData) => void) => {
     const listener = (_e: unknown, d: AppData) => fn(d);
     ipcRenderer.on("data:changed", listener);
