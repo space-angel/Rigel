@@ -351,6 +351,8 @@ function trayMenu(): Menu {
 app.whenReady().then(() => {
   app.dock?.hide();
   data = loadData();
+  // 규칙 파일(CLAUDE.md)을 시작할 때 최신으로 맞춘다. 첫 Claude 호출까지 미루면 그 전에 연 화면이 예전 규칙을 쓴다.
+  ensureWorkDir();
 
   ipcMain.handle("data:get", () => data);
   ipcMain.handle("todo:action", (_e, action: TodoAction) => act(action));
