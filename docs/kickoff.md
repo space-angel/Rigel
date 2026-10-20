@@ -355,7 +355,7 @@ claude -p --output-format stream-json --verbose --no-session-persistence --model
 |---|---|---|---|
 | Notion | `claude.ai Notion` | `notion-search`, `notion-fetch` | 7-a에서 3번 성공 |
 | Linear | `claude.ai Linear` | `list_issues`, `get_issue` | 7-a에서 1번 성공 (해당 이슈 없음) |
-| Figma frame | `claude.ai Figma` | `get_metadata` | 7-c에서 확인. 할 일에 연결된(없으면 낱말이 맞는) 피그마 바로가기의 프레임을 읽어 화면 속 글을 요약합니다. 최근 파일 목록을 주는 도구는 없습니다 |
+| Figma frame | `claude.ai Figma` | `get_metadata`, `get_design_context` | 7-c에서 확인. 할 일에 연결된(없으면 낱말이 맞는) 피그마 바로가기의 프레임을 읽어 화면 속 글을 요약합니다. 최근 파일 목록을 주는 도구는 없습니다 |
 | Gmail | `claude.ai Gmail` | 미정 | 이 맥에서 `needs-auth`. Claude Code 안에서 다시 인증한 뒤 도구 이름을 확인합니다 |
 | Google Calendar | `claude.ai Google Calendar` | 미정 | 이 맥에서 `needs-auth`. LOCAL 캘린더(osascript)를 먼저 씁니다 |
 
@@ -557,6 +557,13 @@ scripts/claude-probe.ts    // 0단계 측정 스크립트
 - Claude는 보낸 비율보다 일반 지식 몫을 크게 돌려주는 편입니다(보냄 25% → 받음 55~60%). C2는 받은 값을 보여 줍니다.
 - 캘린더는 macOS 자동화 권한 창이 뜨기 때문에 아직 실제로 켜 보지 않았습니다. 코드와 권한 거부 처리는 있고, 처음 켤 때 확인합니다.
 - 도구 탭에는 LOCAL 묶음과 기본 비율만 있습니다. MCP 묶음은 7-c에서 붙입니다.
+
+### MCP 매칭 점검 (2026-10-20)
+
+`docs/qa/2026-10-20-mcp-matching.md`. 요약:
+- 커넥터 하나 = 워크스페이스 하나. 켤 때 whoami 도구(`notion-get-self`, `get_workspace`, `whoami`)로 워크스페이스·계정을 확인해 `tools.mcpInfo`에 저장하고 Tools 탭과 빚기 카드에 보여 줍니다.
+- Notion 검색은 키워드 검색입니다(자연어 AI 검색은 Notion AI가 있는 Business 플랜부터). Claude가 낱말을 문장으로 붙이지 않고 하나씩 최대 3번 찾도록 규칙을 바꿨습니다.
+- Claude가 검색 도구를 안 부르고 “없음”을 내는 일이 있어서, 앱이 한 번 다시 시키고 그래도 안 부르면 “읽지 못함”으로 표시합니다.
 
 ### 7-c 확인 결과 (2026-10-20)
 

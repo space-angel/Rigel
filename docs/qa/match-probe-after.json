@@ -1,0 +1,356 @@
+[
+  {
+    "source": "notion",
+    "words": [
+      "면접",
+      "준비"
+    ],
+    "expect": "match",
+    "note": "면접 관련 페이지가 있음",
+    "ms": 18315,
+    "calls": [
+      {
+        "tool": "notion-search",
+        "input": {
+          "query": "면접",
+          "page_size": 5
+        }
+      },
+      {
+        "tool": "notion-fetch",
+        "input": {
+          "id": "3ec8826f85638033a473de41d410d89e"
+        }
+      },
+      {
+        "tool": "notion-fetch",
+        "input": {
+          "id": "3ec8826f8563814ca095e108c1281ac7"
+        }
+      }
+    ],
+    "denied": [],
+    "label": "답변 공통 규칙 · 면접 답변 작성 후 확인 목록",
+    "text": "면접 답변 규칙 페이지. 첫 문장에서 질문에 답하기, 프로젝트는 문제→근거→이유→한 일→결과→배운 점 순서, 답변 1분 안팎. 숫자는 몇 명 중인지 함께 말하고 새로 계산한 숫자는 말하지 않기. 팀이 한 일과 내가 한 일 구분. 답변을 쓴 뒤 D 항목 6개를 확인하고, 이어질 질문 2개",
+    "wordsFound": [
+      "면접",
+      "준비"
+    ],
+    "got": "match",
+    "asExpected": true
+  },
+  {
+    "source": "notion",
+    "words": [
+      "포트폴리오"
+    ],
+    "expect": "match",
+    "note": "",
+    "ms": 13507,
+    "calls": [
+      {
+        "tool": "notion-search",
+        "input": {
+          "query": "포트폴리오",
+          "page_size": 5
+        }
+      },
+      {
+        "tool": "notion-fetch",
+        "input": {
+          "id": "https://app.notion.com/p/3e98826f8563800eb97bc3a58a7d86d4"
+        }
+      }
+    ],
+    "denied": [],
+    "label": "포트폴리오 피드백 · 덱 구조와 첫인상 고칠 점",
+    "text": "첫 2~3장에서 해낸 일과 강점이 보여야 한다. 커버 문구 '보이는 문제를 그대로 풀지 않습니다'는 태도일 뿐 강점이 아니다. 첫 장에 개조식 키워드 2~3개를 둔다. 30장 중 두잇 파트가 12장이라 장 수를 줄이고, 장마다 헤드라인 1개, 불릿 3개, 숫자 1개를 같은 자리에 둔다.",
+    "wordsFound": [
+      "포트폴리오"
+    ],
+    "got": "match",
+    "asExpected": true
+  },
+  {
+    "source": "notion",
+    "words": [
+      "운동",
+      "루틴"
+    ],
+    "expect": "none",
+    "note": "관련 페이지가 없을 것으로 예상",
+    "ms": 14980,
+    "calls": [
+      {
+        "tool": "notion-search",
+        "input": {
+          "query": "루틴",
+          "page_size": 5
+        }
+      },
+      {
+        "tool": "notion-search",
+        "input": {
+          "query": "운동",
+          "page_size": 5
+        }
+      },
+      {
+        "tool": "notion-search",
+        "input": {
+          "query": "헬스",
+          "page_size": 5
+        }
+      }
+    ],
+    "denied": [],
+    "label": null,
+    "text": null,
+    "wordsFound": [],
+    "got": "none",
+    "asExpected": true
+  },
+  {
+    "source": "linear",
+    "words": [
+      "todoBAN"
+    ],
+    "expect": "none",
+    "note": "Linear에 todoBAN 이슈는 없음",
+    "ms": 10817,
+    "calls": [
+      {
+        "tool": "list_issues",
+        "input": {
+          "query": "todoBAN",
+          "limit": 5,
+          "fields": [
+            "title",
+            "description",
+            "url",
+            "updatedAt",
+            "dueDate"
+          ]
+        }
+      },
+      {
+        "tool": "list_issues",
+        "input": {
+          "query": "todoban",
+          "limit": 5,
+          "fields": [
+            "title",
+            "description",
+            "url",
+            "updatedAt",
+            "dueDate"
+          ]
+        }
+      },
+      {
+        "tool": "list_issues",
+        "input": {
+          "query": "todo",
+          "limit": 5,
+          "fields": [
+            "title",
+            "description",
+            "url",
+            "updatedAt",
+            "dueDate"
+          ]
+        }
+      }
+    ],
+    "denied": [],
+    "label": null,
+    "text": null,
+    "wordsFound": [],
+    "got": "none",
+    "asExpected": true
+  },
+  {
+    "source": "linear",
+    "words": [
+      "디자인",
+      "QA"
+    ],
+    "expect": "match",
+    "note": "있을 수도 있음",
+    "ms": 12982,
+    "calls": [
+      {
+        "tool": "list_issues",
+        "input": {
+          "query": "디자인",
+          "limit": 10,
+          "fields": [
+            "title",
+            "description",
+            "url",
+            "updatedAt",
+            "status"
+          ]
+        }
+      },
+      {
+        "tool": "list_issues",
+        "input": {
+          "query": "QA",
+          "limit": 10,
+          "fields": [
+            "title",
+            "description",
+            "url",
+            "updatedAt",
+            "status"
+          ]
+        }
+      }
+    ],
+    "denied": [],
+    "label": "[개발] 웹 앱 화면 만들기 (A1~A4)",
+    "text": "신지님이 그린 웹 앱 화면(A1~A4)을 apps/web에 만들었다. 터미널을 쓰지 않는 디자이너와 다른 팀이 웹 앱에서 확인할 변경을 보고 답할 수 있다. A1 OS 알림은 실제로 띄워 보지 못했다. 진짜 DB와 실시간 갱신은 베타 DB에서 확인해야 한다. 상태는 Done이다.",
+    "wordsFound": [],
+    "got": "match",
+    "asExpected": true
+  },
+  {
+    "source": "frame",
+    "words": [
+      "면접",
+      "자기소개"
+    ],
+    "target": {
+      "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+      "nodeId": "63:527"
+    },
+    "expect": "match",
+    "note": "C2 Your first step: 면접·자기소개 글이 있음",
+    "ms": 14287,
+    "calls": [
+      {
+        "tool": "get_metadata",
+        "input": {
+          "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+          "nodeId": "63:527"
+        }
+      }
+    ],
+    "denied": [],
+    "label": "Window/Today · 면접 준비 첫 행동 화면",
+    "text": "할 일 '면접 준비'의 첫 행동 카드. 30분, 금요일 오후 2시 전까지. 제안은 '합격 메일에 적힌 면접 질문 3개에, 포폴 덱 3번 장표 사례로 1분 답변 쓰기'. 근거 자료는 합격 안내 메일의 질문 3개, 포폴 덱 frame 12-408, Toss PO interview(금 오후 ",
+    "wordsFound": [
+      "면접",
+      "자기소개"
+    ],
+    "got": "match",
+    "asExpected": true
+  },
+  {
+    "source": "frame",
+    "words": [
+      "운동",
+      "헬스"
+    ],
+    "target": {
+      "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+      "nodeId": "63:527"
+    },
+    "expect": "none",
+    "note": "같은 프레임, 관련 글 없음",
+    "ms": 16945,
+    "calls": [
+      {
+        "tool": "get_metadata",
+        "input": {
+          "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+          "nodeId": "63:527"
+        }
+      }
+    ],
+    "denied": [],
+    "label": null,
+    "text": null,
+    "wordsFound": [],
+    "got": "none",
+    "asExpected": true
+  },
+  {
+    "source": "frame",
+    "words": [
+      "바로가기",
+      "포폴"
+    ],
+    "target": {
+      "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+      "nodeId": "65:272"
+    },
+    "expect": "match",
+    "note": "D3 Shortcuts: 포폴 바로가기 목록",
+    "ms": 16523,
+    "calls": [
+      {
+        "tool": "get_metadata",
+        "input": {
+          "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+          "nodeId": "65:272"
+        }
+      }
+    ],
+    "denied": [],
+    "label": "D3 Settings · Shortcuts · 포폴 바로가기 항목",
+    "text": "설정의 Shortcuts 탭에 바로가기 3개(포폴, 사일로, 우테크)가 있다. 포폴 바로가기는 할 일 2개가 연결되어 있고, 부르는 말은 포폴, 포트폴리오, 덱이다. 연결된 피그마 링크는 figma.com/design/ABC…?node-id=12-408이다. 하단 New shortcut",
+    "wordsFound": [
+      "바로가기",
+      "포폴"
+    ],
+    "got": "match",
+    "asExpected": true
+  },
+  {
+    "source": "frame",
+    "words": [
+      "캘린더",
+      "일정"
+    ],
+    "target": {
+      "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+      "nodeId": "65:272"
+    },
+    "expect": "none",
+    "note": "같은 프레임, 관련 글 없음",
+    "ms": 13557,
+    "calls": [
+      {
+        "tool": "get_metadata",
+        "input": {
+          "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+          "nodeId": "65:272"
+        }
+      }
+    ],
+    "denied": [],
+    "label": null,
+    "text": null,
+    "wordsFound": [],
+    "got": "none",
+    "asExpected": true
+  },
+  {
+    "whoami": {
+      "notion": {
+        "ms": 25008,
+        "result": "{\"workspace\":\"Wozz\",\"account\":\"wonderhy11@gmail.com\"}"
+      },
+      "linear": {
+        "ms": 11670,
+        "result": "{\"workspace\":\"Project3\",\"account\":null}"
+      },
+      "frame": {
+        "ms": 10726,
+        "result": "{\"workspace\":\"spigel's team\",\"account\":\"wonderhy11@gmail.com\"}"
+      }
+    }
+  }
+]

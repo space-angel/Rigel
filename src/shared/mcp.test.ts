@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { allowedTools, figmaTarget, parseMcpList, safeServiceUrl, statusOf } from "./mcp.ts";
+import { allowedTools, figmaTarget, parseMcpList, safeServiceUrl, searched, statusOf } from "./mcp.ts";
 
 test("claude mcp list 출력에서 서버 상태를 읽는다", () => {
   const out = [
@@ -35,4 +35,16 @@ test("피그마 링크에서 파일 키와 노드를 꺼낸다", () => {
   assert.deepEqual(figmaTarget("https://www.figma.com/design/uLkr123/todoBAN?node-id=65-272"), { fileKey: "uLkr123", nodeId: "65:272" });
   assert.deepEqual(figmaTarget("https://www.figma.com/file/AbC/x"), { fileKey: "AbC", nodeId: null });
   assert.equal(figmaTarget("https://example.com/design/x"), null);
+});
+
+test("워크스페이스 확인은 whoami 도구 하나만 연다", () => {
+  assert.deepEqual(allowedTools("notion", "whoami"), ["ToolSearch", "mcp__claude_ai_Notion__notion-get-self"]);
+  assert.deepEqual(allowedTools("linear", "whoami"), ["ToolSearch", "mcp__claude_ai_Linear__get_workspace"]);
+});
+
+test("검색 도구를 불렀는지 본다 (ToolSearch나 fetch만으로는 아님)", () => {
+  assert.equal(searched("notion", ["ToolSearch", "mcp__claude_ai_Notion__notion-search"]), true);
+  assert.equal(searched("notion", ["ToolSearch", "mcp__claude_ai_Notion__notion-fetch"]), false);
+  assert.equal(searched("linear", []), false);
+  assert.equal(searched("frame", ["mcp__claude_ai_Figma__get_design_context"]), true);
 });

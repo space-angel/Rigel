@@ -179,7 +179,7 @@ const MCP_DESC: Record<McpSource, string> = {
   frame: "Reads the frame of the task's Figma shortcut",
 };
 
-type Verify = { state: "testing" } | { state: "ok"; ms: number } | { state: "fail"; reason: string };
+type Verify = { state: "testing" } | { state: "ok"; ms: number; workspace: string | null } | { state: "fail"; reason: string };
 const VERIFY_FAIL: Record<string, string> = {
   "needs-auth": "Needs sign-in in Claude Code",
   "no-shortcut": "Add a Figma shortcut with a frame link first",
@@ -265,7 +265,7 @@ function ToolsTab({ data }: { data: AppData }) {
     setVerify((v) => ({ ...v, [s]: { state: "testing" } }));
     save({ mcp: { ...tools.mcp, [s]: true } });
     const r = await api.verifyMcp(s);
-    if (r.ok) setVerify((v) => ({ ...v, [s]: { state: "ok", ms: r.ms } }));
+    if (r.ok) setVerify((v) => ({ ...v, [s]: { state: "ok", ms: r.ms, workspace: r.workspace } }));
     else {
       setVerify((v) => ({ ...v, [s]: { state: "fail", reason: VERIFY_FAIL[r.status] ?? VERIFY_FAIL.failed! } }));
       const latest = await api.getData();
@@ -279,10 +279,13 @@ function ToolsTab({ data }: { data: AppData }) {
 
   const mcpDesc = (s: McpSource, st: McpStatus | null) => {
     const v = verify[s];
-    if (v?.state === "testing") return "Testing a read… about 10 seconds";
-    if (v?.state === "ok") return `Works · read in ${(v.ms / 1000).toFixed(1)}s`;
+    const info = tools.mcpInfo[s];
+    if (v?.state === "testing") return "Checking which workspace it reads… about 10 seconds";
+    if (v?.state === "ok") return `Works · ${v.workspace ? `reads “${v.workspace}”` : "connected"} · ${(v.ms / 1000).toFixed(1)}s`;
     if (v?.state === "fail") return v.reason;
     if (st === null) return "Checking Claude Code…";
+    if ((st === "connected" || st === "pending") && info?.workspace)
+      return `Reads “${info.workspace}”${info.account ? ` · ${info.account}` : ""}`;
     if (st === "connected" || st === "pending") return MCP_DESC[s];
     if (st === "needs-auth") return "Connected to Claude, but needs sign-in in Claude Code";
     return "Not connected in Claude yet";
@@ -312,7 +315,10 @@ function ToolsTab({ data }: { data: AppData }) {
             {status === null ? "Checking…" : "Check again"}
           </button>
         </div>
-        <p className="group__desc">Claude Code reads these with your Claude sign-in. Each read takes about 10 seconds and uses your Claude plan.</p>
+        <p className="group__desc">
+          Claude Code reads these with your Claude sign-in, one workspace per service. Each read takes about 10 seconds and uses your Claude plan. Notion
+          search matches keywords, not meaning, unless your Notion plan includes AI search.
+        </p>
         <div className="group__box">
           {MCP_SOURCES.map((s) => {
             const st = status && statusOf(status, s);

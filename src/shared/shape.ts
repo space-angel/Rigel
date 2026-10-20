@@ -12,6 +12,7 @@ export interface ToolItem {
   source: ToolSource;
   label: string;
   text?: string; // MCP 도구가 읽은 요약 (400자 이내). LOCAL 도구는 없음
+  workspace?: string; // MCP 도구가 읽은 워크스페이스 이름
   date: string | null; // 일정이나 끝낸 날짜 (YYYY-MM-DD)
   open: { kind: "shortcut"; id: string } | { kind: "file"; path: string } | { kind: "calendar" } | { kind: "url"; source: McpSource; url: string } | null;
 }

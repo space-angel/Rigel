@@ -79,7 +79,7 @@ const api = {
   installGuide: () => ipcRenderer.send("welcome:installGuide"),
   chooseClaude: (): Promise<string | null> => ipcRenderer.invoke("welcome:chooseClaude"),
   openMcpGuide: (kind: "terminal" | "connectors") => ipcRenderer.send("tools:openMcpGuide", kind),
-  verifyMcp: (source: McpSource): Promise<{ ok: boolean; status: string; ms: number }> => ipcRenderer.invoke("tools:verifyMcp", source),
+  verifyMcp: (source: McpSource): Promise<{ ok: boolean; status: string; ms: number; workspace: string | null; account: string | null }> => ipcRenderer.invoke("tools:verifyMcp", source),
   onSettingsFocus: (fn: () => void) => {
     const listener = () => fn();
     ipcRenderer.on("settings:focus", listener);

@@ -461,7 +461,18 @@ function showWelcome(): void {
     for (const [key, a] of mcpAborts) if (key.startsWith(`${todoId}:`)) a.abort();
   });
   ipcMain.handle("tools:mcpStatus", (_e, fresh?: boolean) => mcpStatus(data.settings.claudePath, fresh));
-  ipcMain.handle("tools:verifyMcp", (_e, source: McpSource) => verifyMcp(source, data));
+  // 켤 때 연결된 워크스페이스·계정을 확인하고 저장한다. 도구 탭과 빚기 카드에 보여 준다.
+  ipcMain.handle("tools:verifyMcp", async (_e, source: McpSource) => {
+    const r = await verifyMcp(source, data);
+    if (r.ok) {
+      const tools = data.settings.tools;
+      act({
+        type: "setSettings",
+        patch: { tools: { ...tools, mcpInfo: { ...tools.mcpInfo, [source]: { workspace: r.workspace, account: r.account, checkedAt: new Date().toISOString() } } } },
+      });
+    }
+    return r;
+  });
   ipcMain.on("tools:openMcpGuide", (_e, kind: "terminal" | "connectors" = "terminal") =>
     kind === "connectors"
       ? openOutside("claude.ai connectors", () => shell.openExternal("https://claude.ai/settings/connectors"))

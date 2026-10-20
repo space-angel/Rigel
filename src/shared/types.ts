@@ -30,6 +30,8 @@ export const ToolSettings = z.object({
   local: z.object({ figma: z.boolean(), calendar: z.boolean(), files: z.boolean(), todoban: z.boolean() }),
   // MCP 도구(notion, linear, frame) 켜기. Claude가 읽어서 느리고 구독 사용량을 쓰므로 처음엔 모두 꺼 둔다.
   mcp: z.record(z.string(), z.boolean()).default({}),
+  // 켤 때 확인한 연결 정보. 어느 워크스페이스·계정을 읽는지 보여 준다.
+  mcpInfo: z.record(z.string(), z.object({ workspace: z.string().nullable(), account: z.string().nullable(), checkedAt: z.string() })).default({}),
   defaultMix: z.record(z.string(), z.number()),
 });
 export type ToolSettings = z.infer<typeof ToolSettings>;
@@ -38,6 +40,7 @@ export type ToolSettings = z.infer<typeof ToolSettings>;
 export const DEFAULT_TOOLS: ToolSettings = {
   local: { figma: true, calendar: false, files: false, todoban: true },
   mcp: {},
+  mcpInfo: {},
   defaultMix: { figma: 30, calendar: 20, files: 15, todoban: 15, notion: 20, linear: 15, frame: 25, claude: 20 },
 };
 

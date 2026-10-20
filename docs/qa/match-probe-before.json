@@ -1,0 +1,277 @@
+[
+  {
+    "source": "notion",
+    "words": [
+      "면접",
+      "준비"
+    ],
+    "expect": "match",
+    "note": "면접 관련 페이지가 있음",
+    "ms": 19775,
+    "calls": [
+      {
+        "tool": "notion-search",
+        "input": {
+          "query": "면접 준비",
+          "page_size": 5
+        }
+      },
+      {
+        "tool": "notion-fetch",
+        "input": {
+          "id": "3ec8826f-8563-8033-a473-de41d410d89e"
+        }
+      },
+      {
+        "tool": "notion-fetch",
+        "input": {
+          "id": "3ec8826f-8563-80dd-beaf-eefb32dcab3c"
+        }
+      }
+    ],
+    "label": "0.공통질문 · 면접 공통질문 답변 초안",
+    "text": "면접 공통질문 답변 정리 페이지. 장단점(근거 집착과 결정 지연, 리니어 이슈에 '왜 하는지'와 '어디까지 하면 끝인지'를 먼저 적어 보완), 실패 경험(두잇투게더 AI 담당자 추천 실험에서 가정 확인을 빠뜨림), 갈등 경험(웅진씽크빅 AI DT 기획자 과정에서 PRD를 같이 리뷰해 합",
+    "wordsFound": [
+      "면접"
+    ],
+    "got": "match",
+    "asExpected": true
+  },
+  {
+    "source": "notion",
+    "words": [
+      "포트폴리오"
+    ],
+    "expect": "match",
+    "note": "",
+    "ms": 4214,
+    "calls": [],
+    "label": null,
+    "text": null,
+    "wordsFound": [],
+    "got": "none",
+    "asExpected": false
+  },
+  {
+    "source": "notion",
+    "words": [
+      "운동",
+      "루틴"
+    ],
+    "expect": "none",
+    "note": "관련 페이지가 없을 것으로 예상",
+    "ms": 9783,
+    "calls": [
+      {
+        "tool": "notion-search",
+        "input": {
+          "query": "운동 루틴",
+          "page_size": 5
+        }
+      }
+    ],
+    "label": null,
+    "text": null,
+    "wordsFound": [],
+    "got": "none",
+    "asExpected": true
+  },
+  {
+    "source": "linear",
+    "words": [
+      "todoBAN"
+    ],
+    "expect": "none",
+    "note": "Linear에 todoBAN 이슈는 없음",
+    "ms": 9518,
+    "calls": [
+      {
+        "tool": "list_issues",
+        "input": {
+          "query": "todoBAN",
+          "limit": 5,
+          "fields": [
+            "title",
+            "description",
+            "url",
+            "updatedAt",
+            "dueDate",
+            "status"
+          ]
+        }
+      }
+    ],
+    "label": null,
+    "text": null,
+    "wordsFound": [],
+    "got": "none",
+    "asExpected": true
+  },
+  {
+    "source": "linear",
+    "words": [
+      "디자인",
+      "QA"
+    ],
+    "expect": "match",
+    "note": "있을 수도 있음",
+    "ms": 3819,
+    "calls": [],
+    "label": null,
+    "text": null,
+    "wordsFound": [],
+    "got": "none",
+    "asExpected": false
+  },
+  {
+    "source": "frame",
+    "words": [
+      "면접",
+      "자기소개"
+    ],
+    "target": {
+      "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+      "nodeId": "63:527"
+    },
+    "expect": "match",
+    "note": "C2 Your first step: 면접·자기소개 글이 있음",
+    "ms": 14400,
+    "calls": [
+      {
+        "tool": "get_metadata",
+        "input": {
+          "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+          "nodeId": "63:527"
+        }
+      },
+      {
+        "tool": "get_design_context",
+        "input": {
+          "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+          "nodeId": "63:527"
+        }
+      }
+    ],
+    "label": "Window/Today · 면접 준비의 첫 행동 카드",
+    "text": "할 일 '면접 준비'의 첫 행동 화면이다. 첫 행동은 '합격 메일에 적힌 면접 질문 3개에, 포폴 덱 3번 장표 사례로 1분 답변 쓰기'이고, 30분 안에 금요일 2시 전에 끝내는 크기다. 근거 자료는 합격 안내 메일의 질문 3개, 포폴 덱 frame 12-408, Toss PO int",
+    "wordsFound": [
+      "면접",
+      "자기소개"
+    ],
+    "got": "match",
+    "asExpected": true
+  },
+  {
+    "source": "frame",
+    "words": [
+      "운동",
+      "헬스"
+    ],
+    "target": {
+      "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+      "nodeId": "63:527"
+    },
+    "expect": "none",
+    "note": "같은 프레임, 관련 글 없음",
+    "ms": 12578,
+    "calls": [
+      {
+        "tool": "get_metadata",
+        "input": {
+          "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+          "nodeId": "63:527"
+        }
+      },
+      {
+        "tool": "get_screenshot",
+        "input": {
+          "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+          "nodeId": "63:527",
+          "enableBase64Response": true
+        }
+      }
+    ],
+    "label": null,
+    "text": null,
+    "wordsFound": [],
+    "got": "none",
+    "asExpected": true
+  },
+  {
+    "source": "frame",
+    "words": [
+      "바로가기",
+      "포폴"
+    ],
+    "target": {
+      "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+      "nodeId": "65:272"
+    },
+    "expect": "match",
+    "note": "D3 Shortcuts: 포폴 바로가기 목록",
+    "ms": 15187,
+    "calls": [
+      {
+        "tool": "get_metadata",
+        "input": {
+          "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+          "nodeId": "65:272"
+        }
+      },
+      {
+        "tool": "get_screenshot",
+        "input": {
+          "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+          "nodeId": "65:272",
+          "enableBase64Response": true
+        }
+      }
+    ],
+    "label": "D3 Settings · Shortcuts 화면 · 바로가기 목록과 새 바로가기 추가 폼",
+    "text": "todoBAN 설정의 Shortcuts 탭. '3 SHORTCUTS' 아래에 바로가기 3개가 있다. 첫 번째는 '포폴'(2 TASKS)이고 키워드는 포폴, 포트폴리오, 덱이다. 연결된 피그마 링크는 FIGMA.COM/DESIGN/ABC…?NODE-ID=12-408이다. 나머지는 '사일로",
+    "wordsFound": [
+      "바로가기",
+      "포폴"
+    ],
+    "got": "match",
+    "asExpected": true
+  },
+  {
+    "source": "frame",
+    "words": [
+      "캘린더",
+      "일정"
+    ],
+    "target": {
+      "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+      "nodeId": "65:272"
+    },
+    "expect": "none",
+    "note": "같은 프레임, 관련 글 없음",
+    "ms": 13110,
+    "calls": [
+      {
+        "tool": "get_metadata",
+        "input": {
+          "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+          "nodeId": "65:272"
+        }
+      },
+      {
+        "tool": "get_design_context",
+        "input": {
+          "fileKey": "uLkrdQtbosV1DMYSYHsYeB",
+          "nodeId": "65:272",
+          "excludeScreenshot": true,
+          "clientFrameworks": "unknown",
+          "clientLanguages": "unknown"
+        }
+      }
+    ],
+    "label": null,
+    "text": null,
+    "wordsFound": [],
+    "got": "none",
+    "asExpected": true
+  }
+]

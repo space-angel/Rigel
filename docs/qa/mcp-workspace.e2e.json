@@ -1,0 +1,13 @@
+[
+  { "name": "Tools 탭", "win": "settings", "main": "openSettings:tools", "until": "!__e2e.text().includes('Checking')", "timeout": 40000 },
+  { "name": "Notion 켜기 → 워크스페이스 확인", "win": "settings",
+    "run": "__e2e.byText('Notion', '.setting').querySelector('.toggle').click(); return true;",
+    "until": "(__e2e.byText('Notion', '.setting')?.textContent || '').match(/Works|Couldn|Needs/)", "timeout": 60000, "snap": true,
+    "expect": "__e2e.byText('Notion', '.setting').textContent.includes('Works')" },
+  { "name": "Linear 켜기 → 워크스페이스 확인", "win": "settings",
+    "run": "__e2e.byText('Linear', '.setting').querySelector('.toggle').click(); return true;",
+    "until": "(__e2e.byText('Linear', '.setting')?.textContent || '').match(/Works|Couldn|Needs/)", "timeout": 60000, "snap": true,
+    "expect": "__e2e.byText('Linear', '.setting').textContent.includes('Works')" },
+  { "name": "빚기 카드에 워크스페이스", "win": "list", "main": "shape:*", "until": "__e2e.$('.shape') && __e2e.$('.badge--mcp')", "wait": 800, "snap": true,
+    "expect": "__e2e.all('.badge--mcp').some(b => !b.textContent.includes('read only'))" }
+]

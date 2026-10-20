@@ -46,6 +46,17 @@
 입력: {"type":"collect","source":"notion" 또는 "linear" 또는 "frame","words":["면접","토스"],"today":"YYYY-MM-DD","target":{"fileKey":"...","nodeId":"12:408" 또는 null} 또는 없음}
 출력: {"items":[{"label":"제목 한 줄","text":"요약 400자 이내","date":"YYYY-MM-DD" 또는 null,"url":"https://..." 또는 null}]} 또는 {"items":[]}
 - source에 해당하는 MCP 도구만 쓴다. 읽기만 하고 만들기, 고치기, 보내기, 댓글은 하지 않는다.
-- notion, linear: words로 검색해 가장 맞는 페이지나 이슈를 최대 1개 고른다. 없으면 items는 빈 배열이다. url에는 그 페이지나 이슈 주소를 쓴다.
-- frame: target의 피그마 파일과 노드를 읽는다. label은 "프레임 이름 · 무엇이 있는지", text는 words와 관련된 화면 속 글을 요약한다. url은 null이다.
+- 답하기 전에 반드시 검색·읽기 도구를 한 번 이상 부른다. 부르지 않고 빈 결과를 내지 않는다.
+- notion: 노션 검색은 키워드 검색이다. words를 문장처럼 이어 붙이지 말고, 가장 특이한 낱말 하나(필요하면 둘)로 검색한다.
+  결과가 없거나 관련 없으면 다른 낱말로 바꿔 최대 3번까지 검색한다. 제목이나 본문이 words와 실제로 관련 있는 페이지만 고른다.
+- linear: list_issues의 query는 이슈 제목·설명 글자 검색이다. 낱말 하나씩 최대 3번까지 검색하고, 관련 있는 이슈만 고른다.
+- notion, linear: 가장 맞는 것 최대 1개. 없으면 items는 빈 배열이다. url에는 그 페이지나 이슈 주소를 쓴다.
+- frame: target의 피그마 노드를 get_metadata로 읽고, 화면 속 글이 부족하면 get_design_context로 읽는다.
+  words와 관련된 글이 있을 때만 item을 낸다. label은 "프레임 이름 · 무엇이 있는지", text는 words와 관련된 화면 속 글 요약. url은 null이다.
+  관련된 글이 없으면 items는 빈 배열이다.
 - text에는 첫 행동을 정하는 데 필요한 사실만 쓴다. 전화번호, 주소 같은 개인정보는 빼고 쓴다.
+
+## type: whoami
+입력: {"type":"whoami","source":"notion" 또는 "linear" 또는 "frame"}
+출력: {"workspace":"워크스페이스 이름" 또는 null,"account":"계정 이메일이나 이름" 또는 null}
+- 연결된 워크스페이스와 계정을 알려 주는 도구 하나만 부른다. 다른 도구는 부르지 않는다.

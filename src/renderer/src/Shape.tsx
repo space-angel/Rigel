@@ -324,7 +324,13 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
                       {loading && <Spinner size={10} />}{" "}
                       {r.item?.label ?? (r.source === "figma" && r.status === "empty" && data.shortcuts.length === 0 ? "No shortcuts yet" : TOOL_DESC[r.status])}
                     </span>
-                    {isMcp(r.source) ? <span className="badge badge--mcp">MCP · read only</span> : <span className="badge">Local</span>}
+                    {isMcp(r.source) ? (
+                      <span className="badge badge--mcp" title="Workspace Claude Code reads">
+                        MCP · {data.settings.tools.mcpInfo[r.source]?.workspace ?? "read only"}
+                      </span>
+                    ) : (
+                      <span className="badge">Local</span>
+                    )}
                   </button>
                 );
               })}

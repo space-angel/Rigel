@@ -1,0 +1,31 @@
+[
+  {
+    "name": "Tools 탭",
+    "win": "settings",
+    "ok": true,
+    "ms": 10647
+  },
+  {
+    "name": "Notion 켜기 → 워크스페이스 확인",
+    "win": "settings",
+    "ok": true,
+    "ms": 9459,
+    "value": true,
+    "snap": "02-settings.png"
+  },
+  {
+    "name": "Linear 켜기 → 워크스페이스 확인",
+    "win": "settings",
+    "ok": true,
+    "ms": 9929,
+    "value": true,
+    "snap": "03-settings.png"
+  },
+  {
+    "name": "빚기 카드에 워크스페이스",
+    "win": "list",
+    "ok": true,
+    "ms": 1440,
+    "snap": "04-list.png"
+  }
+]
