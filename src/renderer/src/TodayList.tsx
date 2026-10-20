@@ -6,7 +6,7 @@ import type { AppData, Shortcut, TodoItem } from "@shared/types";
 import { localDate, pendingCarryOver, todayView } from "@shared/todos";
 import { displayAccelerator } from "@shared/hotkey";
 import type { FirstStepState } from "@shared/firstStep";
-import { AiSparkle, ArrowRightIcon, CalendarIcon, CheckIcon, ChevronRightIcon, FigmaMark, MoreIcon, PinIcon, PlayIcon, PlusIcon, SettingsIcon } from "./components/icons";
+import { AiSparkle, ArrowRightIcon, CalendarIcon, CheckIcon, ChevronRightIcon, FigmaMark, MoreIcon, PinIcon, PlayIcon, SettingsIcon } from "./components/icons";
 import { FirstStepCard } from "./FirstStepCard";
 import { ShapePanel } from "./Shape";
 import { Attachments } from "./components/Attachments";
@@ -630,9 +630,6 @@ export function TodayList() {
               {unclearCount > 0 && <span className="chip">{t("{n} unclear", { n: unclearCount })}</span>}
             </div>
           </div>
-          <button type="button" className="icon-button" aria-label={t("Add task")} onClick={() => captureRef.current?.focus()}>
-            <PlusIcon size={14} />
-          </button>
           <button
             type="button"
             className={`icon-button${data.settings.listPin.pinned ? " is-on" : ""}`}

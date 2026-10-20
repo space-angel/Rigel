@@ -436,7 +436,8 @@ kbd {
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding: 28px 16px 24px;
+  /* 위는 다이얼 그림 아래 여백이 이미 있어서 적게, 아래는 입력창까지 같은 거리가 되게 */
+  padding: 8px 16px 32px;
   text-align: center;
 }
 .empty__mark {
@@ -1060,10 +1061,20 @@ body::-webkit-scrollbar-thumb {
   background: var(--white-14);
 }
 .settings__toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   justify-content: center;
-  padding: 40px 14px 6px;
+  padding: 40px 14px 10px;
+  border-bottom: 1px solid transparent;
   -webkit-app-region: drag;
+  transition: background-color var(--dur-s) var(--ease-out), border-color var(--dur-s) var(--ease-out);
+}
+/* 내려가면 탭 뒤로 내용이 비치지 않게 막고, 경계선을 보여 준다 */
+.settings__toolbar.is-scrolled {
+  background-color: rgb(24 27 33 / 92%);
+  border-bottom-color: var(--white-08);
 }
 .tabs {
   display: flex;

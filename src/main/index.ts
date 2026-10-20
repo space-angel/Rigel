@@ -314,11 +314,25 @@ function cancelReview(): void {
   endReview();
 }
 
+// 설정 창은 탭이 늘 같은 자리에 있게 위쪽을 고정하고 아래로만 늘린다.
+// 가장 긴 탭(SETTINGS_MAX)이 들어갈 자리를 화면 가운데에 잡아 두고, 그 안에서만 늘어난다. 더 길면 창 안에서 스크롤한다.
+const SETTINGS_WIDTH = 560;
+const SETTINGS_MAX = 760;
+const SCREEN_GAP = 24;
+function settingsFrame(): { x: number; y: number; maxHeight: number } {
+  const wa = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea;
+  const maxHeight = Math.min(SETTINGS_MAX, wa.height - SCREEN_GAP * 2);
+  return { x: Math.round(wa.x + (wa.width - SETTINGS_WIDTH) / 2), y: Math.round(wa.y + (wa.height - maxHeight) / 2), maxHeight };
+}
+
 function showSettings(tab: "general" | "tools" | "shortcuts" | "shortcuts-new" = "general"): void {
   hideLooseList();
   if (!settingsWindow || settingsWindow.isDestroyed()) {
+    const frame = settingsFrame();
     settingsWindow = new BrowserWindow({
-      width: 560,
+      x: frame.x,
+      y: frame.y,
+      width: SETTINGS_WIDTH,
       height: 520,
       useContentSize: true,
       show: false,
@@ -610,11 +624,15 @@ app.whenReady().then(() => {
     if (path) act({ type: "setSettings", patch: { claudePath: path } });
     return path;
   });
+  // 내용 높이에 맞추되 화면 아래(여백 포함)를 넘지 않는다. 넘는 만큼은 창 안에서 스크롤한다.
   ipcMain.on("settings:resize", (_e, height: number) => {
-    if (!settingsWindow) return;
-    const h = Math.min(Math.max(Math.ceil(height), 300), 760);
-    const [w, cur] = settingsWindow.getContentSize();
-    if (cur !== h) resizeAnimated(settingsWindow, w ?? 560, h);
+    const win = settingsWindow;
+    if (!win) return;
+    const b = win.getContentBounds();
+    const wa = screen.getDisplayMatching(b).workArea;
+    const room = wa.y + wa.height - SCREEN_GAP - b.y;
+    const h = Math.min(Math.max(Math.ceil(height), 300), SETTINGS_MAX, Math.max(room, 300));
+    if (b.height !== h) resizeAnimated(win, b.width, h);
   });
   ipcMain.handle("settings:hotkeyStatus", () => hotkeyError());
   ipcMain.handle("settings:claudeInfo", async () => {

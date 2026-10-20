@@ -615,6 +615,14 @@ export function Settings({ initialTab, openSheet }: { initialTab: Tab; openSheet
   const [tab, setTab] = useState<Tab>(initialTab);
   const [data, setData] = useState<AppData | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  // 창보다 내용이 길면 창 안에서 스크롤한다. 탭은 위에 붙어 있고, 내려가면 탭 아래에 경계가 생긴다.
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  useEffect(() => window.scrollTo(0, 0), [tab]);
   useEffect(() => {
     api.getData().then(setData);
     const off = api.onData(setData);
@@ -654,7 +662,7 @@ export function Settings({ initialTab, openSheet }: { initialTab: Tab; openSheet
   if (!data) return <div ref={rootRef} />;
   return (
     <div className="settings" ref={rootRef}>
-      <div className="settings__toolbar">
+      <div className={`settings__toolbar${scrolled ? " is-scrolled" : ""}`}>
         <div className="tabs" role="tablist">
           <button type="button" role="tab" aria-selected={tab === "general"} className={`tab${tab === "general" ? " is-active" : ""}`} onClick={() => setTab("general")}>
             {t("General")}
