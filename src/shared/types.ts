@@ -58,7 +58,7 @@ export function emptyData(): AppData {
 
 // 렌더러가 메인 프로세스에 보내는 변경 요청. 메인이 적용하고 새 상태를 돌려준다.
 export type TodoAction =
-  | { type: "add"; title: string }
+  | { type: "add"; title: string; rawText?: string }
   | { type: "toggle"; id: string }
   | { type: "remove"; id: string }
   | { type: "rename"; id: string; title: string }

@@ -335,3 +335,85 @@ button {
   margin-left: auto;
   color: var(--color-text-unclear);
 }
+
+/* 빠른 입력창 (640폭). 다른 앱 위에 뜨고, 배경은 건드리지 않는다. */
+.quick-window {
+  padding: 12px 20px 40px;
+}
+.quick {
+  width: 640px;
+  background: var(--color-surface-window);
+  border: 1px solid var(--color-border-window);
+  border-radius: var(--radius-r4);
+  box-shadow: var(--shadow-s3);
+  overflow: hidden;
+}
+.quick__input {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-component-default);
+  padding: 18px 20px 16px;
+}
+.quick__icon {
+  flex: none;
+  margin-top: 4px;
+  color: #3cc488;
+}
+.quick textarea {
+  flex: 1;
+  border: 0;
+  outline: none;
+  resize: none;
+  background: transparent;
+  font: inherit;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: -0.3px;
+  color: var(--color-text-primary);
+  caret-color: #22a56a;
+}
+.quick textarea::placeholder {
+  color: var(--color-text-done);
+}
+.quick__hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 8px 20px;
+  background: var(--gray-100);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+.quick__kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+.quick__kind--ai svg {
+  color: #3cc488;
+}
+.quick__keys {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-unclear);
+}
+.quick__keys kbd {
+  padding: 1px 6px;
+  border-radius: var(--radius-r1-5);
+  border: 1px solid var(--color-border-card);
+  background: var(--color-surface-window);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.quick__keys kbd + kbd,
+.quick__keys kbd:not(:first-child) {
+  margin-left: 6px;
+}

@@ -59,7 +59,7 @@ export function applyAction(data: AppData, action: TodoAction, now: Date = new D
         order: orderBetween(last?.order ?? null, null),
         completedAt: null,
         createdAt: now.toISOString(),
-        rawText: action.title,
+        rawText: action.rawText ?? action.title,
         // AI를 거치지 않고 바로 넣은 할 일은 정리 안 된 할 일이다.
         isClear: false,
         shortcutId: null,
