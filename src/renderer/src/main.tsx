@@ -16,5 +16,6 @@ const screens = {
   review: <Review />,
   "settings-general": <Settings initialTab="general" />,
   "settings-shortcuts": <Settings initialTab="shortcuts" />,
+  "settings-shortcuts-new": <Settings initialTab="shortcuts" openSheet />,
 } as const;
 createRoot(document.getElementById("root")!).render(screens[view as keyof typeof screens] ?? <TodayList />);

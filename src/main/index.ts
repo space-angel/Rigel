@@ -23,7 +23,7 @@ const DEMO_FIRSTSTEP = process.env.TODOBAN_FIRSTSTEP_TITLE;
 const DEMO_ANSWER = process.env.TODOBAN_FIRSTSTEP_ANSWER;
 // 화면 확인용: 빠른 입력을 넣은 것처럼 처리한 뒤 목록을, 또는 설정 창을 저장한다.
 const DEMO_QUICK = process.env.TODOBAN_QUICK_TEXT;
-const DEMO_SETTINGS = process.env.TODOBAN_SETTINGS_TAB as "general" | "shortcuts" | undefined;
+const DEMO_SETTINGS = process.env.TODOBAN_SETTINGS_TAB as "general" | "shortcuts" | "shortcuts-new" | undefined;
 
 async function snapshotAndQuit(win: BrowserWindow | null): Promise<void> {
   if (!SNAPSHOT || !win) return;
@@ -217,7 +217,7 @@ function cancelReview(): void {
   endReview();
 }
 
-function showSettings(tab: "general" | "shortcuts" = "general"): void {
+function showSettings(tab: "general" | "shortcuts" | "shortcuts-new" = "general"): void {
   listWindow?.hide();
   if (!settingsWindow || settingsWindow.isDestroyed()) {
     settingsWindow = new BrowserWindow({
@@ -247,7 +247,7 @@ function showSettings(tab: "general" | "shortcuts" = "general"): void {
     settingsWindow.on("closed", () => (settingsWindow = null));
     return;
   }
-  settingsWindow.webContents.send("settings:tab", tab);
+  settingsWindow.webContents.send("settings:tab", tab === "shortcuts-new" ? "shortcuts" : tab);
   app.focus({ steal: true });
   settingsWindow.show();
   settingsWindow.focus();

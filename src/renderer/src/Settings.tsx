@@ -232,8 +232,8 @@ function ShortcutSheet({ initial, onClose }: { initial: Shortcut | null; onClose
   );
 }
 
-function ShortcutsTab({ data }: { data: AppData }) {
-  const [editing, setEditing] = useState<Shortcut | "new" | null>(null);
+function ShortcutsTab({ data, openSheet }: { data: AppData; openSheet?: boolean }) {
+  const [editing, setEditing] = useState<Shortcut | "new" | null>(openSheet ? "new" : null);
   const usage = (id: string) => data.todos.filter((t) => t.shortcutId === id && !t.completedAt).length;
   return (
     <div className="settings__body">
@@ -285,7 +285,7 @@ function ShortcutsTab({ data }: { data: AppData }) {
   );
 }
 
-export function Settings({ initialTab }: { initialTab: Tab }) {
+export function Settings({ initialTab, openSheet }: { initialTab: Tab; openSheet?: boolean }) {
   const [tab, setTab] = useState<Tab>(initialTab);
   const [data, setData] = useState<AppData | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -301,9 +301,28 @@ export function Settings({ initialTab }: { initialTab: Tab }) {
   useLayoutEffect(() => {
     const el = rootRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => api.resizeSettings(el.getBoundingClientRect().height));
+    // 바로가기 시트는 화면 위에 띄운 요소라 내용 높이에 들어가지 않는다. 시트가 열려 있으면 시트 아래까지 창을 늘린다.
+    let sheet: Element | null = null;
+    const measure = () => {
+      const s = el.querySelector(".sheet");
+      const sheetBottom = s ? s.getBoundingClientRect().bottom + 40 : 0;
+      api.resizeSettings(Math.max(el.getBoundingClientRect().height, sheetBottom));
+    };
+    const ro = new ResizeObserver(measure);
     ro.observe(el);
-    return () => ro.disconnect();
+    const mo = new MutationObserver(() => {
+      const s = el.querySelector(".sheet");
+      if (s === sheet) return;
+      if (sheet) ro.unobserve(sheet);
+      sheet = s;
+      if (s) ro.observe(s);
+      measure();
+    });
+    mo.observe(el, { childList: true, subtree: true });
+    return () => {
+      ro.disconnect();
+      mo.disconnect();
+    };
   }, [data !== null]);
 
   if (!data) return <div ref={rootRef} />;
@@ -320,7 +339,7 @@ export function Settings({ initialTab }: { initialTab: Tab }) {
           </button>
         </div>
       </div>
-      {tab === "general" ? <GeneralTab data={data} /> : <ShortcutsTab data={data} />}
+      {tab === "general" ? <GeneralTab data={data} /> : <ShortcutsTab data={data} openSheet={openSheet} />}
     </div>
   );
 }
