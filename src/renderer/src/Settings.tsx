@@ -3,10 +3,13 @@ import type { AppData, Shortcut } from "@shared/types";
 import { FIGMA_BUNDLE_ID } from "@shared/types";
 import { figmaLinkInfo } from "@shared/todos";
 import { displayAccelerator, toAccelerator } from "@shared/hotkey";
-import { CheckIcon, EditIcon, FigmaMark, LinkIcon, PlusIcon, TerminalIcon, TrashIcon } from "./components/icons";
+import { CheckIcon, EditIcon, FigmaMark, LinkIcon, PlusIcon, TerminalIcon, TrashIcon, UserIcon } from "./components/icons";
+import { LOCAL_SOURCES, normalizeMix, type LocalSource } from "@shared/shape";
+import { MixBar } from "./components/MixBar";
+import { SOURCE_NAME, SourceIcon } from "./components/SourceIcon";
 
 const api = window.todoban;
-type Tab = "general" | "shortcuts";
+type Tab = "general" | "tools" | "shortcuts";
 
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
   return <button type="button" role="switch" aria-checked={on} className={`toggle${on ? " is-on" : ""}`} onClick={() => onChange(!on)} />;
@@ -158,6 +161,48 @@ function GeneralTab({ data }: { data: AppData }) {
           <Toggle on={data.settings.openAtLogin} onChange={(v) => api.act({ type: "setSettings", patch: { openAtLogin: v } })} />
         </div>
       </Group>
+    </div>
+  );
+}
+
+const LOCAL_DESC: Record<LocalSource, (data: AppData) => string> = {
+  figma: (d) => `Your shortcuts · ${d.shortcuts.length}`,
+  calendar: () => "Next 7 days · deadlines set the size. macOS asks once",
+  files: () => "Documents you opened this week · names only",
+  todoban: () => "Done & later tasks",
+};
+
+// 첫 행동을 빚을 때 쓸 도구 (D2). MCP 도구는 7-c에서 붙인다.
+function ToolsTab({ data }: { data: AppData }) {
+  const tools = data.settings.tools;
+  const on = LOCAL_SOURCES.filter((s) => tools.local[s]);
+  const save = (patch: Partial<typeof tools>) => api.act({ type: "setSettings", patch: { tools: { ...tools, ...patch } } });
+  return (
+    <div className="settings__body">
+      <Group label="Local · fast">
+        {LOCAL_SOURCES.map((s) => (
+          <div className="setting" key={s}>
+            <span className="setting__icon">
+              <SourceIcon source={s} size={13} />
+            </span>
+            <div className="setting__text">
+              <p>{SOURCE_NAME[s]}</p>
+              <p className="setting__desc">{LOCAL_DESC[s](data)}</p>
+            </div>
+            <span className="badge">Local</span>
+            <Toggle on={tools.local[s]} onChange={(v) => save({ local: { ...tools.local, [s]: v } })} />
+          </div>
+        ))}
+      </Group>
+      {on.length > 0 && (
+        <section className="group">
+          <h2 className="group__label">Default mix</h2>
+          <MixBar mix={normalizeMix(tools.defaultMix, on)} onChange={(mix) => save({ defaultMix: { ...tools.defaultMix, ...mix } })} />
+        </section>
+      )}
+      <div className="tip">
+        <UserIcon size={14} /> Only titles of what you pick are sent to Claude. Links, paths and file contents stay on your Mac.
+      </div>
     </div>
   );
 }
@@ -364,12 +409,15 @@ export function Settings({ initialTab, openSheet }: { initialTab: Tab; openSheet
           <button type="button" role="tab" aria-selected={tab === "general"} className={`tab${tab === "general" ? " is-active" : ""}`} onClick={() => setTab("general")}>
             General
           </button>
+          <button type="button" role="tab" aria-selected={tab === "tools"} className={`tab${tab === "tools" ? " is-active" : ""}`} onClick={() => setTab("tools")}>
+            Tools
+          </button>
           <button type="button" role="tab" aria-selected={tab === "shortcuts"} className={`tab${tab === "shortcuts" ? " is-active" : ""}`} onClick={() => setTab("shortcuts")}>
             Shortcuts
           </button>
         </div>
       </div>
-      {tab === "general" ? <GeneralTab data={data} /> : <ShortcutsTab data={data} openSheet={openSheet} />}
+      {tab === "general" ? <GeneralTab data={data} /> : tab === "tools" ? <ToolsTab data={data} /> : <ShortcutsTab data={data} openSheet={openSheet} />}
     </div>
   );
 }

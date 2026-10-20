@@ -15,6 +15,7 @@ const screens = {
   quick: <QuickInput />,
   review: <Review />,
   "settings-general": <Settings initialTab="general" />,
+  "settings-tools": <Settings initialTab="tools" />,
   "settings-shortcuts": <Settings initialTab="shortcuts" />,
   "settings-shortcuts-new": <Settings initialTab="shortcuts" openSheet />,
 } as const;

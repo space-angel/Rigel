@@ -32,6 +32,7 @@ select {
 /* L1 주인공 카드: 한 화면에 하나만. 반투명 면 아래에 불투명 바닥을 깔아 그라데이션 테두리가 비치지 않게 한다. */
 .now-card,
 .carry,
+.result,
 .fs-card--hero,
 .draft.is-unclear,
 .sheet,
@@ -1386,4 +1387,405 @@ body[data-view="review"] {
   font: inherit;
   font-size: 13px;
   user-select: text;
+}
+
+/* ===== 첫 행동 빚기 (C1 고르기, C2 결과) — 목록 창 안 ===== */
+.shape {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.shape__head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 14px 16px 10px;
+}
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: -4px;
+  padding: 2px 4px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+.back:hover {
+  color: var(--color-text-primary);
+}
+.shape__head h1 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+.task-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--white-10);
+  background: var(--white-06);
+  font-size: 12px;
+  color: var(--white-90);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.task-chip__dot {
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--white-45);
+}
+.shape__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px 12px 12px;
+  overflow-y: auto;
+  /* 도구 결과가 늦게 들어와도 보던 자리로 스크롤이 튀지 않게 한다 */
+  overflow-anchor: none;
+}
+.shape__body::-webkit-scrollbar {
+  width: 0;
+}
+.shape__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.shape__section > .eyebrow,
+.shape__label-row {
+  padding: 0 4px;
+}
+.shape__label-row {
+  display: flex;
+  justify-content: space-between;
+}
+.shape__empty {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 4px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+.link {
+  padding: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--blue-300);
+}
+.words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px;
+  border-radius: var(--radius-r4);
+  border: 1px solid var(--border-row);
+  background:
+    radial-gradient(rgb(255 255 255 / 8%) 0.6px, transparent 0.9px) 0 0 / 12px 12px,
+    rgb(0 0 0 / 18%);
+}
+.word {
+  padding: 4px 10px;
+  border-radius: var(--radius-r2);
+  border: 1px solid var(--white-10);
+  background: var(--white-06);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--white-55);
+}
+.word:hover {
+  color: var(--color-text-primary);
+}
+.word.is-on {
+  border-color: #fff;
+  background: #fff;
+  font-weight: 600;
+  color: var(--color-text-on-white);
+}
+.tools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.tool {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px 10px 10px 12px;
+  border-radius: var(--radius-r3-5);
+  border: 1px solid var(--border-row);
+  background: var(--surface-row);
+  text-align: left;
+}
+.tool.is-on {
+  border-color: rgb(111 166 255 / 55%);
+  background: linear-gradient(180deg, rgb(94 152 254 / 14%), rgb(94 152 254 / 5%));
+}
+.tool:disabled {
+  opacity: 0.55;
+}
+.tool__top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+.tool__icon {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  background: var(--white-08);
+}
+.tool__name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+}
+.tool__item {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+.badge {
+  flex: none;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--white-06);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--white-45);
+}
+.toggle--sm {
+  width: 26px;
+  height: 16px;
+}
+.toggle--sm::after {
+  width: 12px;
+  height: 12px;
+}
+.toggle--sm.is-on::after {
+  transform: translateX(10px);
+}
+
+.dial {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: var(--radius-r4);
+  border: 1px solid var(--border-row);
+  background: var(--surface-row);
+  outline: none;
+  overflow: hidden;
+}
+.dial:focus-visible {
+  border-color: rgb(111 166 255 / 55%);
+}
+.dial__scale {
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.dial__tick {
+  stroke: #fff;
+  stroke-width: 1.2;
+}
+.dial__label {
+  fill: rgb(255 255 255 / 40%);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  text-anchor: middle;
+  dominant-baseline: central;
+  cursor: default;
+}
+.dial__label.is-active {
+  fill: #fff;
+  font-size: 16px;
+  font-weight: 600;
+}
+.dial__needle {
+  fill: var(--orange-500);
+}
+
+.mix {
+  display: flex;
+  height: 38px;
+}
+.mix__cell {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-basis: 0;
+}
+.mix__seg {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+  margin: 0 1px;
+  border-radius: 5px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  overflow: hidden;
+}
+.mix__cell:first-child .mix__seg {
+  border-top-left-radius: 19px;
+  border-bottom-left-radius: 19px;
+}
+.mix__cell:last-child .mix__seg {
+  border-top-right-radius: 19px;
+  border-bottom-right-radius: 19px;
+}
+.mix__seg--lead {
+  background: var(--gradient-blue);
+}
+.mix__seg--rest {
+  background: var(--gradient-blue-soft);
+}
+.mix__seg--claude {
+  border: 1px dashed var(--white-16);
+  background: rgb(255 255 255 / 3%);
+  color: var(--white-55);
+}
+.mix__edge {
+  position: absolute;
+  top: 6px;
+  right: -4px;
+  bottom: 6px;
+  z-index: 1;
+  width: 8px;
+  cursor: ew-resize;
+}
+.mix__edge::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 3px;
+  width: 2px;
+  border-radius: 1px;
+  background: rgb(255 255 255 / 0%);
+  transition: background 120ms ease;
+}
+.mix:hover .mix__edge::after {
+  background: rgb(255 255 255 / 70%);
+}
+
+.shape__foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px 12px 16px;
+  border-top: 1px solid var(--white-08);
+}
+.shape__note {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+
+/* C2 결과 카드 (L1) */
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 14px 14px 16px;
+  border-radius: var(--radius-r4);
+}
+.result__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.due {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgb(255 106 42 / 55%);
+  background: rgb(255 106 42 / 10%);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--orange-200);
+}
+.result__title {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: -0.3px;
+  word-break: keep-all;
+}
+.made {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.made__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px 7px 8px;
+  border-radius: var(--radius-r2-5);
+  border: 1px solid var(--white-08);
+  background: rgb(0 0 0 / 18%);
+  font-size: 12px;
+}
+.made__icon {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  background: var(--white-08);
+}
+.made__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.made__pct {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--blue-300);
+}
+.result__words {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.result__words .word {
+  padding: 2px 8px;
+  font-size: 11px;
+}
+.result__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
 }

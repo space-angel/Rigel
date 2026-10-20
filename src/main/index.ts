@@ -8,6 +8,8 @@ import { loadData, saveData } from "./store";
 import type { ReviewDraft } from "@shared/review";
 import { ReviewSession, clearPending, loadPending, savePending } from "./review";
 import { FirstStepManager } from "./firstStep";
+import { collectLocal } from "./tools/local";
+import type { ShapeInput, ToolItem } from "@shared/shape";
 import { openShortcut } from "./shortcutOpener";
 import { claudeVersion, ensureWorkDir, findClaude } from "./claude/setup";
 
@@ -23,7 +25,9 @@ const DEMO_FIRSTSTEP = process.env.TODOBAN_FIRSTSTEP_TITLE;
 const DEMO_ANSWER = process.env.TODOBAN_FIRSTSTEP_ANSWER;
 // 화면 확인용: 빠른 입력을 넣은 것처럼 처리한 뒤 목록을, 또는 설정 창을 저장한다.
 const DEMO_QUICK = process.env.TODOBAN_QUICK_TEXT;
-const DEMO_SETTINGS = process.env.TODOBAN_SETTINGS_TAB as "general" | "shortcuts" | "shortcuts-new" | undefined;
+const DEMO_SETTINGS = process.env.TODOBAN_SETTINGS_TAB as "general" | "tools" | "shortcuts" | "shortcuts-new" | undefined;
+const DEMO_SHAPE = process.env.TODOBAN_SHAPE_TITLE; // 화면 확인용: 이 할 일로 빚기(C1)를 연다
+const DEMO_SHAPE_GO = process.env.TODOBAN_SHAPE_GO === "1"; // 화면 확인용: 바로 Shape it을 눌러 결과(C2)까지 간다
 
 async function snapshotAndQuit(win: BrowserWindow | null): Promise<void> {
   if (!SNAPSHOT || !win) return;
@@ -217,7 +221,7 @@ function cancelReview(): void {
   endReview();
 }
 
-function showSettings(tab: "general" | "shortcuts" | "shortcuts-new" = "general"): void {
+function showSettings(tab: "general" | "tools" | "shortcuts" | "shortcuts-new" = "general"): void {
   listWindow?.hide();
   if (!settingsWindow || settingsWindow.isDestroyed()) {
     settingsWindow = new BrowserWindow({
@@ -306,21 +310,42 @@ app.whenReady().then(() => {
     (all) => {
       listWindow?.webContents.send("firstStep:states", all);
       const st = all[0];
+      if (DEMO_SHAPE_GO && st && st.status !== "loading") return void setTimeout(() => snapshotAndQuit(listWindow), 1200);
       if (!DEMO_FIRSTSTEP || !st || st.status === "loading") return;
       if (st.status === "question" && DEMO_ANSWER && !st.answer) setTimeout(() => firstSteps.request(st.todoId, { answer: DEMO_ANSWER }), 1500);
       else setTimeout(() => snapshotAndQuit(listWindow), 800);
     },
   );
   ipcMain.handle("firstStep:get", () => firstSteps.all());
-  ipcMain.on("firstStep:request", (_e, id: string, opts: { answer?: string; again?: boolean }) => firstSteps.request(id, opts));
+  ipcMain.on("firstStep:request", (_e, id: string, opts: { answer?: string; again?: boolean; shape?: ShapeInput }) => firstSteps.request(id, opts));
   ipcMain.on("firstStep:dismiss", (_e, id: string) => firstSteps.dismiss(id));
-  ipcMain.on("firstStep:accept", (_e, id: string) => {
+  ipcMain.on("firstStep:accept", (_e, id: string, opts: { toToday?: boolean } = {}) => {
     const st = firstSteps.all().find((s) => s.todoId === id);
-    if (st?.status === "suggestion" && st.title) act({ type: "applyFirstStep", id, title: st.title, shortcutId: st.shortcutId });
+    if (st?.status === "suggestion" && st.title) act({ type: "applyFirstStep", id, title: st.title, shortcutId: st.shortcutId, toToday: opts.toToday });
     firstSteps.dismiss(id);
   });
 
-  ipcMain.on("settings:open", (_e, tab?: "general" | "shortcuts") => showSettings(tab));
+  // 빚기(C1): 켜 둔 LOCAL 도구에서 낱말에 맞는 자료를 하나씩 찾는다.
+  // 렌더러가 열 수 있는 파일은 여기서 찾아 준 경로뿐이다.
+  const openablePaths = new Set<string>();
+  ipcMain.handle("tools:collect", async (_e, todoId: string, words: string[]) => {
+    const todo = data.todos.find((t) => t.id === todoId);
+    if (!todo) return [];
+    const results = await collectLocal(todo, words, data);
+    for (const r of results) if (r.item?.open?.kind === "file") openablePaths.add(r.item.open.path);
+    return results;
+  });
+  ipcMain.on("tools:open", (_e, open: ToolItem["open"]) => {
+    if (!open) return;
+    listWindow?.hide();
+    if (open.kind === "shortcut") {
+      const s = data.shortcuts.find((x) => x.id === open.id);
+      if (s) openShortcut(s);
+    } else if (open.kind === "file" && openablePaths.has(open.path)) shell.openPath(open.path);
+    else if (open.kind === "calendar") shell.openPath("/System/Applications/Calendar.app");
+  });
+
+  ipcMain.on("settings:open", (_e, tab?: "general" | "tools" | "shortcuts") => showSettings(tab));
   ipcMain.on("settings:resize", (_e, height: number) => {
     if (!settingsWindow) return;
     const h = Math.min(Math.max(Math.ceil(height), 300), 760);
@@ -397,6 +422,17 @@ app.whenReady().then(() => {
       submitQuick(DEMO_QUICK);
       setTimeout(() => snapshotAndQuit(listWindow), 1500);
     });
+
+  if (DEMO_SHAPE) {
+    const t = data.todos.find((x) => x.title === DEMO_SHAPE);
+    if (t)
+      listWindow.webContents.once("did-finish-load", () =>
+        setTimeout(() => {
+          listWindow?.webContents.send("shape:open", t.id, DEMO_SHAPE_GO);
+          if (!DEMO_SHAPE_GO) setTimeout(() => snapshotAndQuit(listWindow), 1800);
+        }, 600),
+      );
+  }
 
   if (DEMO_FIRSTSTEP) {
     const t = data.todos.find((x) => x.title === DEMO_FIRSTSTEP);

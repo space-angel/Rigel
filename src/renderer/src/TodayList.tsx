@@ -8,6 +8,7 @@ import { displayAccelerator } from "@shared/hotkey";
 import type { FirstStepState } from "@shared/firstStep";
 import { AiSparkle, ArrowRightIcon, CalendarIcon, CheckIcon, ChevronRightIcon, FigmaMark, PlayIcon, PlusIcon, SettingsIcon } from "./components/icons";
 import { FirstStepCard } from "./FirstStepCard";
+import { ShapePanel } from "./Shape";
 
 const api = window.todoban;
 
@@ -65,15 +66,17 @@ function NowCard({
   selected,
   onToggle,
   onFirstStep,
+  onShape,
 }: {
   item: TodoItem;
   shortcut?: Shortcut;
   selected: boolean;
   onToggle: () => void;
   onFirstStep: () => void;
+  onShape: () => void;
 }) {
   return (
-    <div className={`now-card${selected ? " is-selected" : ""}`} onClick={item.isClear ? undefined : onFirstStep}>
+    <div className={`now-card${selected ? " is-selected" : ""}`} onClick={item.isClear ? undefined : onShape}>
       <div className="now-card__top">
         <span className="eyebrow">Now</span>
         <Checkbox checked={false} onToggle={onToggle} variant="now" />
@@ -91,7 +94,15 @@ function NowCard({
           {shortcut && <StartButton shortcut={shortcut} variant="now" />}
         </div>
       ) : (
-        <button type="button" className="pill-question">
+        <button
+          type="button"
+          className="pill-question"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onFirstStep();
+          }}
+        >
           <AiSparkle size={12} /> Let Claude find a first step
         </button>
       )}
@@ -127,7 +138,7 @@ function Row({
       <span className="row__title">{item.title}</span>
       {unclear && onFirstStep && (
         <span className="row__hint">
-          <AiSparkle size={12} /> First step
+          <AiSparkle size={12} /> Shape
         </span>
       )}
       {shortcut && !done && <StartButton shortcut={shortcut} />}
@@ -158,6 +169,8 @@ export function TodayList() {
   const [laterOpen, setLaterOpen] = useState(false);
   const [selected, setSelected] = useState(0);
   const [firstSteps, setFirstSteps] = useState<FirstStepState[]>([]);
+  // 빚기(C1, C2)를 열어 둔 할 일. auto면 바로 Shape it을 누른다(화면 확인용).
+  const [shaping, setShaping] = useState<{ id: string; auto: boolean } | null>(null);
   const shellRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const captureRef = useRef<HTMLInputElement>(null);
@@ -171,10 +184,12 @@ export function TodayList() {
       setSelected(0);
       rootRef.current?.focus();
     });
+    const offShape = api.onShapeOpen((id, auto) => setShaping({ id, auto }));
     return () => {
       offData();
       offOpen();
       offFirst();
+      offShape();
     };
   }, []);
 
@@ -202,8 +217,10 @@ export function TodayList() {
   const askFirstStep = (t: TodoItem) => {
     if (!stepOf(t.id)) api.requestFirstStep(t.id);
   };
+  const shape = (t: TodoItem) => setShaping({ id: t.id, auto: false });
   const stepCard = (t: TodoItem) => {
     const st = stepOf(t.id);
+    if (shaping?.id === t.id) return null;
     return st && <FirstStepCard key={`${st.todoId}-${st.status}-${st.question ?? ""}`} state={st} originalTitle={t.title} />;
   };
 
@@ -216,6 +233,10 @@ export function TodayList() {
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
+    if (shaping) {
+      if (e.key === "Escape") setShaping(null);
+      return;
+    }
     const current = open[selected];
     if (e.key === "ArrowDown") setSelected((s) => Math.min(s + 1, open.length - 1));
     else if (e.key === "ArrowUp") setSelected((s) => Math.max(s - 1, 0));
@@ -236,6 +257,26 @@ export function TodayList() {
     const res = await api.submitQuick(draft);
     if (res.ok) setDraft("");
   };
+
+  const shapingTodo = shaping && data.todos.find((t) => t.id === shaping.id);
+  if (shapingTodo)
+    return (
+      <div className="window" ref={rootRef} tabIndex={0} onKeyDown={onKeyDown}>
+        <div className="shell" ref={shellRef}>
+          <ShapePanel
+            key={shapingTodo.id}
+            todo={shapingTodo}
+            data={data}
+            state={stepOf(shapingTodo.id)}
+            auto={shaping.auto}
+            onClose={() => {
+              setShaping(null);
+              rootRef.current?.focus();
+            }}
+          />
+        </div>
+      </div>
+    );
 
   return (
     <div className="window" ref={rootRef} tabIndex={0} onKeyDown={onKeyDown}>
@@ -294,14 +335,14 @@ export function TodayList() {
               <div className="list">
                 {now && (
                   <SortableItem id={now.id}>
-                    <NowCard item={now} shortcut={shortcutOf(now)} selected={selected === 0} onToggle={() => act({ type: "toggle", id: now.id })} onFirstStep={() => askFirstStep(now)} />
+                    <NowCard item={now} shortcut={shortcutOf(now)} selected={selected === 0} onToggle={() => act({ type: "toggle", id: now.id })} onFirstStep={() => askFirstStep(now)} onShape={() => shape(now)} />
                   </SortableItem>
                 )}
                 {now && stepCard(now)}
                 {rest.map((t, i) => (
                   <div key={t.id}>
                     <SortableItem id={t.id}>
-                      <Row item={t} shortcut={shortcutOf(t)} selected={selected === i + 1} onToggle={() => act({ type: "toggle", id: t.id })} onFirstStep={() => askFirstStep(t)} />
+                      <Row item={t} shortcut={shortcutOf(t)} selected={selected === i + 1} onToggle={() => act({ type: "toggle", id: t.id })} onFirstStep={() => shape(t)} />
                     </SortableItem>
                     {stepCard(t)}
                   </div>

@@ -111,6 +111,7 @@ export function applyAction(data: AppData, action: TodoAction, now: Date = new D
       t.title = title;
       t.isClear = true;
       if (action.shortcutId) t.shortcutId = action.shortcutId;
+      if (action.toToday) t.plannedDate = today;
       break;
     }
     case "toggle": {

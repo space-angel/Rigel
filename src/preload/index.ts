@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer } from "electron";
 import type { AppData, TodoAction } from "@shared/types";
 import type { ReviewDraft, ReviewState } from "@shared/review";
 import type { FirstStepState } from "@shared/firstStep";
+import type { ShapeInput, ToolItem, ToolResult } from "@shared/shape";
 
 const api = {
   getData: (): Promise<AppData> => ipcRenderer.invoke("data:get"),
@@ -54,11 +55,20 @@ const api = {
       ipcRenderer.removeListener("firstStep:states", listener);
     };
   },
-  requestFirstStep: (id: string, opts: { answer?: string; again?: boolean } = {}) => ipcRenderer.send("firstStep:request", id, opts),
-  acceptFirstStep: (id: string) => ipcRenderer.send("firstStep:accept", id),
+  requestFirstStep: (id: string, opts: { answer?: string; again?: boolean; shape?: ShapeInput } = {}) => ipcRenderer.send("firstStep:request", id, opts),
+  acceptFirstStep: (id: string, opts: { toToday?: boolean } = {}) => ipcRenderer.send("firstStep:accept", id, opts),
+  collectTools: (todoId: string, words: string[]): Promise<ToolResult[]> => ipcRenderer.invoke("tools:collect", todoId, words),
+  openToolItem: (open: ToolItem["open"]) => ipcRenderer.send("tools:open", open),
+  onShapeOpen: (fn: (todoId: string, auto: boolean) => void) => {
+    const listener = (_e: unknown, id: string, auto: boolean) => fn(id, auto);
+    ipcRenderer.on("shape:open", listener);
+    return () => {
+      ipcRenderer.removeListener("shape:open", listener);
+    };
+  },
   dismissFirstStep: (id: string) => ipcRenderer.send("firstStep:dismiss", id),
-  openSettings: (tab?: "general" | "shortcuts") => ipcRenderer.send("settings:open", tab),
-  onSettingsTab: (fn: (tab: "general" | "shortcuts") => void) => {
+  openSettings: (tab?: "general" | "tools" | "shortcuts") => ipcRenderer.send("settings:open", tab),
+  onSettingsTab: (fn: (tab: "general" | "tools" | "shortcuts") => void) => {
     const listener = (_e: unknown, tab: "general" | "shortcuts") => fn(tab);
     ipcRenderer.on("settings:tab", listener);
     return () => {

@@ -25,6 +25,19 @@ export const Shortcut = z.object({
 });
 export type Shortcut = z.infer<typeof Shortcut>;
 
+// 첫 행동을 빚을 때 쓸 도구. LOCAL은 앱이 맥 안에서 직접 읽는다. MCP 도구는 7-c에서 붙인다.
+export const ToolSettings = z.object({
+  local: z.object({ figma: z.boolean(), calendar: z.boolean(), files: z.boolean(), todoban: z.boolean() }),
+  defaultMix: z.record(z.string(), z.number()),
+});
+export type ToolSettings = z.infer<typeof ToolSettings>;
+
+// 캘린더와 파일은 맥 권한이나 자료 범위를 사용자가 보고 켜도록 처음엔 꺼 둔다.
+export const DEFAULT_TOOLS: ToolSettings = {
+  local: { figma: true, calendar: false, files: false, todoban: true },
+  defaultMix: { figma: 30, calendar: 20, files: 15, todoban: 15, claude: 20 },
+};
+
 export const Settings = z.object({
   hotkey: z.string(),
   claudePath: z.string().nullable(),
@@ -32,11 +45,13 @@ export const Settings = z.object({
   themeId: z.string(),
   openAtLogin: z.boolean(),
   lastCarryOverCheck: DateString.nullable(),
+  tools: ToolSettings.default(DEFAULT_TOOLS),
 });
 export type Settings = z.infer<typeof Settings>;
 
+// v1 파일에는 tools가 없다. 읽을 때 기본값을 채우고 version 2로 올린다.
 export const AppData = z.object({
-  version: z.literal(1),
+  version: z.union([z.literal(1), z.literal(2)]).transform((): 2 => 2),
   todos: z.array(TodoItem),
   shortcuts: z.array(Shortcut),
   settings: Settings,
@@ -50,10 +65,11 @@ export const DEFAULT_SETTINGS: Settings = {
   themeId: "default",
   openAtLogin: false,
   lastCarryOverCheck: null,
+  tools: DEFAULT_TOOLS,
 };
 
 export function emptyData(): AppData {
-  return { version: 1, todos: [], shortcuts: [], settings: { ...DEFAULT_SETTINGS } };
+  return { version: 2, todos: [], shortcuts: [], settings: { ...DEFAULT_SETTINGS } };
 }
 
 // 렌더러가 메인 프로세스에 보내는 변경 요청. 메인이 적용하고 새 상태를 돌려준다.
@@ -64,7 +80,7 @@ export type TodoAction =
       rawText: string;
       items: { title: string; plannedDate: string | null; isClear: boolean; shortcutId: string | null }[];
     }
-  | { type: "applyFirstStep"; id: string; title: string; shortcutId: string | null }
+  | { type: "applyFirstStep"; id: string; title: string; shortcutId: string | null; toToday?: boolean }
   | { type: "toggle"; id: string }
   | { type: "remove"; id: string }
   | { type: "rename"; id: string; title: string }
