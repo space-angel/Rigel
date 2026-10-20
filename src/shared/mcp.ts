@@ -6,7 +6,7 @@ import { z } from "zod";
 // whoami: 연결된 워크스페이스와 계정을 알려 주는 도구. 커넥터 하나는 워크스페이스 하나에만 연결된다.
 export const MCP_SERVICES = {
   // 노션 검색은 키워드 검색이다(자연어 AI 검색은 Notion AI가 있는 Business 플랜부터). 낱말을 문장으로 이어 붙이지 않는다.
-  notion: { name: "Notion", server: "claude.ai Notion", search: ["notion-search"], tools: ["notion-search", "notion-fetch"], whoami: "notion-get-self", hosts: ["notion.so", "notion.site"] },
+  notion: { name: "Notion", server: "claude.ai Notion", search: ["notion-search"], tools: ["notion-search", "notion-fetch"], whoami: "notion-get-self", hosts: ["notion.so", "notion.site", "notion.com"] },
   // list_issues의 query는 이슈 제목·설명 글자 검색이다.
   linear: { name: "Linear", server: "claude.ai Linear", search: ["list_issues"], tools: ["list_issues", "get_issue"], whoami: "get_workspace", hosts: ["linear.app"] },
   // 할 일에 연결된 피그마 바로가기의 프레임을 읽는다. 레이어 이름만으로 글이 부족하면 디자인 내용을 읽는다. 최근 파일 목록을 주는 도구는 없다.

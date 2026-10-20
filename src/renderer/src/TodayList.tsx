@@ -9,6 +9,7 @@ import type { FirstStepState } from "@shared/firstStep";
 import { AiSparkle, ArrowRightIcon, CalendarIcon, CheckIcon, ChevronRightIcon, FigmaMark, MoreIcon, PlayIcon, PlusIcon, SettingsIcon } from "./components/icons";
 import { FirstStepCard } from "./FirstStepCard";
 import { ShapePanel } from "./Shape";
+import { Attachments } from "./components/Attachments";
 import { FanDial } from "./components/FanDial";
 import { RatioBar } from "./components/RatioBar";
 import { DIAL_LABEL, DIAL_VIEWS, dialBuckets, dialRatio, type DialView } from "@shared/dial";
@@ -169,6 +170,7 @@ function NowCard({
         </span>
       </div>
       <Title item={item} className="now-card__title" {...edit} />
+      {!edit.editing && <Attachments notes={item.context.filter((n) => !(shortcut && n.source === "figma"))} variant="chips" />}
       {item.isClear ? (
         <div className="now-card__bottom">
           {shortcut ? (
@@ -237,6 +239,7 @@ function Row({
               <AiSparkle size={12} /> Shape
             </span>
           )}
+          <Attachments notes={item.context.filter((n) => !(shortcut && n.source === "figma"))} variant="icons" />
           {shortcut && !done && <StartButton shortcut={shortcut} />}
           {trailing}
           <MoreButton onMenu={edit.onMenu} />

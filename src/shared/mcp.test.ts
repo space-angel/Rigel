@@ -25,6 +25,7 @@ test("서비스별 읽기 도구만 연다", () => {
 
 test("링크는 그 서비스의 https 주소만 연다", () => {
   assert.equal(safeServiceUrl("notion", "https://www.notion.so/abc"), "https://www.notion.so/abc");
+  assert.equal(safeServiceUrl("notion", "https://app.notion.com/p/3e98826f"), "https://app.notion.com/p/3e98826f", "요즘 노션 링크");
   assert.equal(safeServiceUrl("notion", "https://evil.com/notion.so"), null);
   assert.equal(safeServiceUrl("linear", "http://linear.app/x"), null);
   assert.equal(safeServiceUrl("linear", "file:///etc/passwd"), null);

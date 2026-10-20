@@ -147,7 +147,7 @@
 | completedAt | string \| null (ISO) | 앱(체크할 때) | 비어 있으면 끝나지 않은 할 일입니다 |
 | createdAt | string (ISO) | 앱 | 만든 시각입니다 |
 | rawText | string | 앱 | 빠른 입력에 적은 원래 문장입니다. AI가 나누면서 뜻이 빠졌는지 확인할 때 씁니다 |
-| context | ContextNote[] | 앱(확인 창의 MCP 자료) | 할 일에 붙여 둔 자료. `{source, label, text, date, url, workspace}`. 빚기에서 다시 읽지 않고 씁니다 |
+| context | ContextNote[] | 앱(확인 창의 MCP 자료, 빚기에서 쓴 자료) | 할 일에 붙여 둔 자료. `{source, label, text, date, url, path, workspace}`. 목록에서 아이콘(지금 할 일 카드는 칩)을 누르면 바로 엽니다: Notion·Linear는 링크, 피그마 프레임은 피그마 앱, 파일은 맥에서. 빚기에서 다시 읽지 않고 씁니다 |
 | isClear | boolean | AI 판단, 사용자 수정 | 첫 행동이 정해졌는지 표시합니다. AI 없이 바로 넣은 짧은 입력은 false입니다 |
 | shortcutId | string \| null | AI 제안, 사용자 수정 | 연결된 바로가기입니다. 비어 있으면 시작 버튼을 표시하지 않습니다 |
 

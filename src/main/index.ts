@@ -2,7 +2,7 @@ import { app, BrowserWindow, dialog, globalShortcut, ipcMain, Menu, nativeImage,
 import { join } from "node:path";
 import { writeFileSync } from "node:fs";
 import { execFile } from "node:child_process";
-import type { AppData, TodoAction } from "@shared/types";
+import { FIGMA_BUNDLE_ID, type AppData, type TodoAction } from "@shared/types";
 import { applyAction, localDate, pendingCarryOver, todayView } from "@shared/todos";
 import { addDays } from "@shared/dial";
 import { classifyQuickInput, firstLine, matchShortcutByKeywords } from "@shared/quickInput";
@@ -489,7 +489,13 @@ function showWelcome(): void {
     } else if (open.kind === "shortcut") {
       const s = data.shortcuts.find((x) => x.id === open.id);
       if (s) openOutside(s.url, () => openShortcut(s));
-    } else if (open.kind === "file" && openablePaths.has(open.path)) openOutside(open.path, () => shell.openPath(open.path));
+    } else if (open.kind === "figma") {
+      // 피그마 링크만 피그마 앱으로 연다(없으면 브라우저).
+      const url = safeServiceUrl("frame", open.url);
+      if (url) openOutside(url, () => openShortcut({ id: "", name: "", keywords: [], url, appBundleId: FIGMA_BUNDLE_ID }));
+    } else if (open.kind === "file" && (openablePaths.has(open.path) || data.todos.some((t) => t.context.some((n) => n.path === open.path))))
+      // 열 수 있는 파일은 Files 도구가 찾아 준 경로와, 할 일에 붙여 둔 경로뿐이다.
+      openOutside(open.path, () => shell.openPath(open.path));
     else if (open.kind === "calendar") openOutside("Calendar", () => shell.openPath("/System/Applications/Calendar.app"));
   });
 

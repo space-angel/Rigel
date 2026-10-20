@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ReviewDraft, ReviewState } from "@shared/review";
 import type { ContextNote, Shortcut } from "@shared/types";
 import { MCP_SERVICES, type McpSource } from "@shared/mcp";
+import { noteOpen } from "@shared/shape";
 import { SourceIcon } from "./components/SourceIcon";
 import { Spinner } from "./components/icons";
 import { localDate } from "@shared/todos";
@@ -31,8 +32,8 @@ function DraftNotes({ notes, loading, onRemove }: { notes: ContextNote[]; loadin
             type="button"
             className="note-chip__label"
             title={n.text || n.label}
-            disabled={!n.url}
-            onClick={() => n.url && api.openToolItem({ kind: "url", source: n.source as McpSource, url: n.url })}
+            disabled={!noteOpen(n)}
+            onClick={() => api.openToolItem(noteOpen(n))}
           >
             {serviceName(n.source)} · {n.label}
           </button>

@@ -37,10 +37,9 @@ function env() {
 }
 
 // 피그마 프레임은 할 일에 연결된 바로가기, 없으면 낱말이 맞는 바로가기에서 고른다.
-function frameTarget(todo: TodoItem, words: string[], data: AppData) {
+function frameShortcut(todo: TodoItem, words: string[], data: AppData) {
   const id = todo.shortcutId ?? matchShortcutByKeywords(`${todo.title} ${words.join(" ")}`, data.shortcuts);
-  const s = data.shortcuts.find((x) => x.id === id);
-  return s ? figmaTarget(s.url) : null;
+  return data.shortcuts.find((x) => x.id === id) ?? null;
 }
 
 type Line = Record<string, any>;
@@ -101,7 +100,8 @@ const resultJson = (lines: Line[]): unknown => {
 };
 
 export async function collectMcp(source: McpSource, todo: TodoItem, words: string[], data: AppData, signal: AbortSignal): Promise<ToolResult> {
-  const target = source === "frame" ? frameTarget(todo, words, data) : null;
+  const shortcut = source === "frame" ? frameShortcut(todo, words, data) : null;
+  const target = shortcut ? figmaTarget(shortcut.url) : null;
   if (source === "frame" && !target) return { source, status: "empty", item: null };
   const { path } = await findClaude(data.settings.claudePath);
   if (!path) return { source, status: "failed", item: null };
@@ -130,7 +130,8 @@ export async function collectMcp(source: McpSource, todo: TodoItem, words: strin
       label: item.label.slice(0, 80),
       text: item.text.slice(0, 400),
       date: item.date && /^\d{4}-\d{2}-\d{2}$/.test(item.date) ? item.date : null,
-      open: url ? { kind: "url", source, url } : null,
+      // 피그마 프레임은 읽은 바로가기 링크를 피그마 앱으로 연다.
+      open: shortcut ? { kind: "figma", url: shortcut.url } : url ? { kind: "url", source, url } : null,
       ...(info?.workspace && { workspace: info.workspace }),
     },
   };
@@ -145,12 +146,15 @@ export async function collectManyMcp(
   signal: AbortSignal,
 ): Promise<{ status: EnrichStatus; notes: Record<string, ContextNote> }> {
   const none = (status: EnrichStatus) => ({ status, notes: {} });
+  const frameUrl: Record<string, string> = {};
   const tasks: CollectTask[] = drafts.slice(0, 6).flatMap((d) => {
     const words = splitWords(d.title, d.title).filter((w) => w.on).map((w) => w.word);
     if (source !== "frame") return [{ key: d.key, title: d.title, words }];
     // 피그마 프레임은 바로가기가 맞는 할 일만 읽는다.
     const id = d.shortcutId ?? matchShortcutByKeywords(d.title, data.shortcuts);
-    const target = figmaTarget(data.shortcuts.find((s) => s.id === id)?.url ?? "");
+    const url = data.shortcuts.find((s) => s.id === id)?.url ?? "";
+    const target = figmaTarget(url);
+    if (target) frameUrl[d.key] = url;
     return target ? [{ key: d.key, title: d.title, words, target }] : [];
   });
   if (!tasks.length) return none("empty");
@@ -177,7 +181,8 @@ export async function collectManyMcp(
       label: item.label.slice(0, 80),
       text: item.text.slice(0, 400),
       date: item.date && /^\d{4}-\d{2}-\d{2}$/.test(item.date) ? item.date : null,
-      url: safeServiceUrl(source, item.url),
+      url: source === "frame" ? (frameUrl[item.key] ?? null) : safeServiceUrl(source, item.url),
+      path: null,
       workspace,
     };
   }

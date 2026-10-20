@@ -2309,3 +2309,49 @@ body::-webkit-scrollbar-thumb {
   line-height: 1.5;
   color: var(--color-text-secondary);
 }
+
+/* 할 일에 붙인 자료 바로 열기 */
+.attach {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.attach--icons .attach__item {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  border: 1px solid var(--white-10);
+  background: var(--white-06);
+  color: var(--white-90);
+}
+.attach--chips {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.attach--chips .attach__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  min-width: 0;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--white-14);
+  background: var(--white-08);
+  font-size: 12px;
+}
+.attach__label {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.attach__item:hover {
+  border-color: rgb(111 166 255 / 55%);
+  background: rgb(94 152 254 / 14%);
+}

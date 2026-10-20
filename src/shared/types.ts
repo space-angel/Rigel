@@ -9,7 +9,8 @@ export const ContextNote = z.object({
   label: z.string(),
   text: z.string().default(""),
   date: z.string().nullable().default(null),
-  url: z.string().nullable().default(null),
+  url: z.string().nullable().default(null), // Notion·Linear 페이지, 피그마 프레임 링크
+  path: z.string().nullable().default(null), // 맥 안의 파일 (Files 도구)
   workspace: z.string().nullable().default(null),
 });
 export type ContextNote = z.infer<typeof ContextNote>;
@@ -108,6 +109,7 @@ export type TodoAction =
   | { type: "moveToToday"; id: string }
   | { type: "schedule"; id: string; plannedDate: string | null }
   | { type: "restore"; item: TodoItem }
+  | { type: "attach"; id: string; notes: ContextNote[] }
   | { type: "reorder"; id: string; beforeId: string | null; afterId: string | null }
   | { type: "setShortcut"; id: string; shortcutId: string | null }
   | { type: "saveShortcut"; shortcut: ShortcutInput & { id?: string } }

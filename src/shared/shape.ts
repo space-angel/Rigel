@@ -14,7 +14,13 @@ export interface ToolItem {
   text?: string; // MCP 도구가 읽은 요약 (400자 이내). LOCAL 도구는 없음
   workspace?: string; // MCP 도구가 읽은 워크스페이스 이름
   date: string | null; // 일정이나 끝낸 날짜 (YYYY-MM-DD)
-  open: { kind: "shortcut"; id: string } | { kind: "file"; path: string } | { kind: "calendar" } | { kind: "url"; source: McpSource; url: string } | null;
+  open:
+    | { kind: "shortcut"; id: string }
+    | { kind: "file"; path: string }
+    | { kind: "calendar" }
+    | { kind: "url"; source: McpSource; url: string }
+    | { kind: "figma"; url: string } // 피그마 앱에서 프레임 열기
+    | null;
 }
 
 export type ToolStatus = "ok" | "empty" | "slow" | "denied" | "failed" | "loading" | "needs-auth";
@@ -163,4 +169,27 @@ export function moveEdge(values: number[], i: number, delta: number, mins: numbe
 export function keepSentSources<T extends { source: string; weight: number }>(sources: T[], sent: string[]): T[] {
   const allowed = new Set([...sent, "claude"]);
   return sources.filter((s) => allowed.has(s.source)).map((s) => ({ ...s, weight: Math.max(0, Math.min(100, Math.round(s.weight))) }));
+}
+
+// 할 일에 붙인 자료를 여는 방법. 피그마 프레임은 피그마 앱으로, 파일은 맥에서, Notion·Linear는 링크로.
+export function noteOpen(n: { source: string; url: string | null; path: string | null }): ToolItem["open"] {
+  if (n.path) return { kind: "file", path: n.path };
+  if (!n.url) return n.source === "calendar" ? { kind: "calendar" } : null;
+  if (n.source === "frame" || n.source === "figma") return { kind: "figma", url: n.url };
+  if (n.source === "notion" || n.source === "linear") return { kind: "url", source: n.source, url: n.url };
+  return null;
+}
+
+// 빚기 화면에서 찾은 자료를 할 일에 붙일 자료로 바꾼다. 여는 곳(링크·경로)을 함께 담는다.
+export function toNote(item: ToolItem, shortcutUrl?: (id: string) => string | undefined) {
+  const open = item.open;
+  return {
+    source: item.source,
+    label: item.label,
+    text: item.text ?? "",
+    date: item.date,
+    url: open?.kind === "url" || open?.kind === "figma" ? open.url : open?.kind === "shortcut" ? (shortcutUrl?.(open.id) ?? null) : null,
+    path: open?.kind === "file" ? open.path : null,
+    workspace: item.workspace ?? null,
+  };
 }

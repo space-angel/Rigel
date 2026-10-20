@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { AppData, TodoItem } from "@shared/types";
 import type { FirstStepState } from "@shared/firstStep";
 import { localDate } from "@shared/todos";
-import { defaultMinutes, normalizeMix, sizeLabel, splitWords, type ShapeInput, type ToolResult, type ToolSource, type WordChip } from "@shared/shape";
+import { defaultMinutes, noteOpen, normalizeMix, sizeLabel, splitWords, toNote, type ShapeInput, type ToolResult, type ToolSource, type WordChip } from "@shared/shape";
 import { MCP_SERVICES, MCP_SOURCES, type McpSource } from "@shared/mcp";
 import { AiSparkle, ChevronLeftIcon, RefreshIcon, Spinner } from "./components/icons";
 import { SizeDial } from "./components/SizeDial";
@@ -21,7 +21,7 @@ const TOOL_DESC: Record<string, string> = {
   "needs-auth": "Needs sign-in · open Settings",
 };
 
-const OPEN_LABEL: Record<string, string> = { shortcut: "Open in Figma", file: "Open file", calendar: "Open Calendar" };
+const OPEN_LABEL: Record<string, string> = { shortcut: "Open in Figma", figma: "Open in Figma", file: "Open file", calendar: "Open Calendar" };
 const isMcp = (s: string): s is McpSource => s in MCP_SERVICES;
 const SKIP_AFTER_MS = 15_000;
 
@@ -42,7 +42,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
     return {
       source: s,
       status: "ok",
-      item: { source: s, label: n.label, text: n.text, date: n.date, open: n.url ? { kind: "url", source: s, url: n.url } : null, ...(n.workspace && { workspace: n.workspace }) },
+      item: { source: s, label: n.label, text: n.text, date: n.date, open: noteOpen(n), ...(n.workspace && { workspace: n.workspace }) },
     };
   };
   const [mcp, setMcp] = useState<Partial<Record<McpSource, ToolResult>>>(() =>
@@ -256,6 +256,12 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
             type="button"
             className="button button--primary"
             onClick={() => {
+              // 첫 행동에 실제로 쓴 자료를 할 일에 붙여 두면, 목록에서 바로 열 수 있다.
+              const used = new Set(state.sources.map((s) => s.source));
+              const notes = found
+                .filter((r) => used.has(r.source) && r.item)
+                .map((r) => toNote(r.item!, (id) => data.shortcuts.find((s) => s.id === id)?.url));
+              if (notes.length) api.act({ type: "attach", id: todo.id, notes });
               api.acceptFirstStep(todo.id, { toToday: todo.plannedDate !== today && toToday });
               onClose();
             }}

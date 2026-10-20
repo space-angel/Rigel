@@ -1,0 +1,19 @@
+[
+  { "name": "긴 생각 → 확인 창", "win": "quick",
+    "run": "__e2e.type('textarea', '노션에 정리한 면접 질문 보고 자기소개 1분 버전 쓰고, 리니어에 웹 앱 화면 이슈 정리하기'); __e2e.key('textarea', 'Enter'); return true;", "wait": 300 },
+  { "name": "MCP 칩이 채워진다", "win": "review", "until": "__e2e.all('.draft').length > 0 && !__e2e.text().includes('Looking in')", "timeout": 120000, "snap": true },
+  { "name": "칩에 열 곳이 있다", "win": "review", "run": "return __e2e.all('.note-chip').map(c => c.textContent + (c.querySelector('.note-chip__label').disabled ? ' (열 곳 없음)' : ' (열기 가능)'));" },
+  { "name": "넣기", "win": "review", "run": "__e2e.click('.review__footer .button--primary'); return true;", "wait": 800 },
+  { "name": "목록 · 자료 아이콘", "win": "list", "main": "openList", "wait": 700, "snap": true,
+    "run": "return __e2e.all('.attach__item').map(b => b.getAttribute('aria-label'));" },
+  { "name": "목록 · 아이콘을 누르면 연다", "win": "list", "run": "const b = __e2e.all('.attach__item'); b.forEach(x => __e2e.click(x)); return b.length;", "wait": 500,
+    "note": "앱 로그의 '열기 생략: …'으로 무엇을 열지 확인" },
+  { "name": "빚기 · 면접 할 일 (피그마 프레임·파일·노션)", "win": "list",
+    "run": "return true;", "main": "shape:@context", "until": "__e2e.$('.shape') && !__e2e.text().includes('Reading')", "timeout": 60000, "snap": true },
+  { "name": "Shape it", "win": "list", "run": "__e2e.click('.shape__foot .button--primary'); return true;", "until": "__e2e.$('.result')", "timeout": 90000, "snap": true },
+  { "name": "Use this step → 쓴 자료가 할 일에 붙는다", "win": "list", "run": "__e2e.click(__e2e.byText('Use this step')); return true;", "wait": 900, "snap": true,
+    "expect": "true" },
+  { "name": "붙은 자료", "win": "list",
+    "run": "const d = await window.todoban.getData(); return d.todos.filter(t => t.context.length).map(t => t.title + ' ← ' + t.context.map(c => c.source + (c.url ? ' url' : '') + (c.path ? ' path' : '')).join(', '));" },
+  { "name": "목록 · 다시 열기", "win": "list", "run": "const b = __e2e.all('.attach__item'); b.forEach(x => __e2e.click(x)); return __e2e.all('.attach__item').map(b => b.getAttribute('aria-label'));", "wait": 500 }
+]

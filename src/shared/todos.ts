@@ -140,6 +140,14 @@ export function applyAction(data: AppData, action: TodoAction, now: Date = new D
       t.order = orderBetween(Math.max(...todos.map((x) => x.order)), null);
       break;
     }
+    case "attach": {
+      // 빚기에서 쓴 자료를 할 일에 붙인다. 같은 출처는 새 자료로 바꾼다.
+      const t = find(action.id);
+      if (!t) return data;
+      const sources = new Set(action.notes.map((n) => n.source));
+      t.context = [...t.context.filter((n) => !sources.has(n.source)), ...action.notes];
+      break;
+    }
     case "restore": {
       // 지운 할 일을 되살린다(Undo). 같은 id가 이미 있으면 아무것도 하지 않는다.
       if (find(action.item.id)) return data;
