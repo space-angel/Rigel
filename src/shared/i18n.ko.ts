@@ -280,13 +280,6 @@ export const KO: Record<string, string> = {
   "Reset to default": "기본으로 되돌리기",
   Open: "열기",
   Language: "언어",
-  "Glow (experiment)": "글로우 실험",
-  "How the Now card glows. Wait 6 seconds, press the card, check it, or ask Claude for a first step.": "지금 할 일 카드의 빛을 골라요. 목록을 열고 6초 기다리거나, 카드를 누르거나, 체크하거나, Claude에게 첫 행동을 물어보면 볼 수 있어요.",
-  Static: "고정",
-  "Start hint": "시작 힌트",
-  Press: "누르기",
-  Handoff: "이어받기",
-  All: "모두",
   "Menus and screens change right away": "바꾸면 메뉴와 화면에 바로 적용돼요",
   "Open at login": "Mac을 켜면 자동으로 열기",
 

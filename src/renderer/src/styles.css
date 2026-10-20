@@ -2989,7 +2989,7 @@ html[lang="ko"] :is(.eyebrow,
   letter-spacing: 0;
 }
 
-/* ===== 움직이는 글로우 (실험, 설정 → 일반 → 글로우 실험) =====
+/* ===== 움직이는 글로우 =====
    토스 인터랙션 기준: 피드백을 주거나, 다음 행동을 알려 주거나, 지금 일어나는 일을 전할 때만 움직인다.
    바닥의 고정 글로우(--shadow-hero)는 그대로 두고, 위에 빛 두 개를 얹어 transform·opacity로만 움직인다.
    easing은 두 가지만: --ease-out(bezier), --ease-spring. 요소 하나에는 움직임 하나. */
@@ -3003,6 +3003,27 @@ html[lang="ko"] :is(.eyebrow,
   border-radius: inherit;
   overflow: hidden;
   pointer-events: none;
+}
+/* 흐르는 빛: 늘 아주 느리게 좌우로 흘러 카드가 살아 있는 느낌만 준다. 생각 중에는 그 빛에 자리를 내준다. */
+.hero-glow__flow {
+  position: absolute;
+  left: -10%;
+  bottom: -60px;
+  width: 80%;
+  height: 130px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(110 160 255 / 38%), rgb(110 160 255 / 0%));
+  opacity: 0.5;
+  animation: glow-flow 14s ease-in-out infinite alternate;
+  transition: opacity var(--dur-m) var(--ease-out);
+}
+@keyframes glow-flow {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(30%, -6px, 0) scale(1.08); }
+  100% { transform: translate3d(55%, 0, 0) scale(0.95); }
+}
+.now-card:is(.is-thinking, .is-completing) .hero-glow__flow {
+  opacity: 0;
 }
 .hero-glow__blob {
   position: absolute;
@@ -3021,10 +3042,10 @@ html[lang="ko"] :is(.eyebrow,
   45% { opacity: 0.9; transform: translate3d(0, 0, 0) scale(1.05); }
   100% { opacity: 0; transform: translate3d(0, 0, 0) scale(1); }
 }
-:is([data-glow="nudge"], [data-glow="all"]) .now-card.is-nudge .hero-glow__blob {
+.now-card.is-nudge .hero-glow__blob {
   animation: glow-nudge 1600ms var(--ease-out) both;
 }
-:is([data-glow="nudge"], [data-glow="all"]) .now-card.is-nudge .start--now {
+.now-card.is-nudge .start--now {
   animation: nudge-arrow 1600ms var(--ease-spring) both;
 }
 @keyframes nudge-arrow {
@@ -3045,15 +3066,15 @@ html[lang="ko"] :is(.eyebrow,
   transform: translate3d(var(--px, 50%), var(--py, 50%), 0) scale(0.3);
   transition: opacity 360ms var(--ease-out), transform 420ms var(--ease-out);
 }
-:is([data-glow="press"], [data-glow="all"]) .now-card.is-pressing .hero-glow__press {
+.now-card.is-pressing .hero-glow__press {
   opacity: 1;
   transform: translate3d(var(--px, 50%), var(--py, 50%), 0) scale(1);
   transition: opacity 120ms var(--ease-out), transform 260ms var(--ease-out);
 }
-:is([data-glow="press"], [data-glow="all"]) .now-card {
+.now-card {
   transition: transform 380ms var(--ease-spring);
 }
-:is([data-glow="press"], [data-glow="all"]) .now-card.is-pressing {
+.now-card.is-pressing {
   transform: scale(0.985);
   transition: transform 120ms var(--ease-out);
 }
@@ -3063,7 +3084,7 @@ html[lang="ko"] :is(.eyebrow,
   0% { opacity: 0.95; }
   100% { opacity: 0; }
 }
-:is([data-glow="handoff"], [data-glow="all"]) .now-card.is-handoff .hero-glow__blob {
+.now-card.is-handoff .hero-glow__blob {
   animation: glow-carry 1400ms var(--ease-out) both;
 }
 .hero-ring {
@@ -3079,7 +3100,7 @@ html[lang="ko"] :is(.eyebrow,
   -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
-:is([data-glow="handoff"], [data-glow="all"]) .hero-ring {
+.hero-ring {
   display: block;
   animation: ring-fade 1100ms var(--ease-out) both;
 }
@@ -3108,7 +3129,7 @@ html[lang="ko"] :is(.eyebrow,
   from { opacity: 0.55; transform: translate3d(-30%, 0, 0) scale(0.9); }
   to { opacity: 0.95; transform: translate3d(30%, 0, 0) scale(1.05); }
 }
-html:not([data-glow="static"]) .now-card.is-thinking .hero-glow__blob {
+.now-card.is-thinking .hero-glow__blob {
   animation: glow-think 1.6s ease-in-out infinite alternate;
 }
 @keyframes glow-arrive {
@@ -3116,11 +3137,12 @@ html:not([data-glow="static"]) .now-card.is-thinking .hero-glow__blob {
   30% { opacity: 1; transform: scale(1.25); }
   100% { opacity: 0; transform: scale(1.1); }
 }
-html:not([data-glow="static"]) .now-card.is-arrived .hero-glow__blob {
+.now-card.is-arrived .hero-glow__blob {
   animation: glow-arrive 900ms var(--ease-out) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .hero-glow__flow,
   .hero-glow__blob,
   .hero-glow__press,
   .hero-ring,

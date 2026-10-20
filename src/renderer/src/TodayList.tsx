@@ -224,8 +224,9 @@ function NowCard({
         edit.onMenu();
       }}
     >
-      {/* 움직이는 글로우 층(실험). 요소 하나에 움직임 하나: blob은 아래 빛(힌트·이어받기·생각 중·도착), press는 손끝 빛. */}
+      {/* 움직이는 글로우 층. 요소 하나에 움직임 하나: flow는 늘 은은하게 흐르는 빛, blob은 순간의 빛(힌트·이어받기·생각 중·도착), press는 손끝 빛. */}
       <span className="hero-glow" aria-hidden="true">
+        <span className="hero-glow__flow" />
         <span className="hero-glow__blob" />
         <span className="hero-glow__press" />
       </span>
