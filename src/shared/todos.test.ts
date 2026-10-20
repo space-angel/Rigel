@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { applyAction, orderBetween, todayView, localDate } from "./todos.ts";
+import { applyAction, figmaLinkInfo, orderBetween, todayView, localDate } from "./todos.ts";
 import { emptyData } from "./types.ts";
 
 const now = new Date(2026, 9, 20, 9, 12);
@@ -97,4 +97,42 @@ test("첫 행동으로 바꾸면 제목이 바뀌고 정리된 할 일이 된다
   assert.equal(d.todos[0]!.rawText, "면접 준비");
   d = applyAction(d, { type: "applyFirstStep", id, title: "x", shortcutId: "s1" }, now);
   assert.equal(d.todos[0]!.shortcutId, "s1");
+});
+
+test("바로가기 저장·수정·삭제", () => {
+  let d = applyAction(emptyData(), { type: "add", title: "포폴 장표" }, now);
+  d = applyAction(d, { type: "saveShortcut", shortcut: { name: " 포폴 ", keywords: ["포폴", " 포트폴리오 ", "포폴", ""], url: "https://www.figma.com/design/abc/Portfolio?node-id=12-408", appBundleId: "com.figma.Desktop" } }, now);
+  const s = d.shortcuts[0]!;
+  assert.equal(s.name, "포폴");
+  assert.deepEqual(s.keywords, ["포폴", "포트폴리오"]);
+  d = applyAction(d, { type: "setShortcut", id: d.todos[0]!.id, shortcutId: s.id }, now);
+  d = applyAction(d, { type: "saveShortcut", shortcut: { ...s, name: "포트폴리오" } }, now);
+  assert.equal(d.shortcuts.length, 1);
+  assert.equal(d.shortcuts[0]!.name, "포트폴리오");
+  d = applyAction(d, { type: "removeShortcut", id: s.id }, now);
+  assert.equal(d.shortcuts.length, 0);
+  assert.equal(d.todos[0]!.shortcutId, null);
+});
+
+test("이름이나 링크가 없으면 바로가기를 저장하지 않는다", () => {
+  const d = applyAction(emptyData(), { type: "saveShortcut", shortcut: { name: "", keywords: [], url: "x", appBundleId: null } }, now);
+  assert.equal(d.shortcuts.length, 0);
+});
+
+test("부르는 말이 비면 이름을 부르는 말로 쓴다", () => {
+  const d = applyAction(emptyData(), { type: "saveShortcut", shortcut: { name: "사일로", keywords: [], url: "https://figma.com/x", appBundleId: null } }, now);
+  assert.deepEqual(d.shortcuts[0]!.keywords, ["사일로"]);
+});
+
+test("피그마 링크 판별", () => {
+  assert.deepEqual(figmaLinkInfo("https://www.figma.com/design/abc/P?node-id=12-408"), { isFigma: true, hasNode: true });
+  assert.deepEqual(figmaLinkInfo("https://figma.com/design/abc/P"), { isFigma: true, hasNode: false });
+  assert.deepEqual(figmaLinkInfo("https://notfigma.com/x?node-id=1"), { isFigma: false, hasNode: false });
+  assert.deepEqual(figmaLinkInfo("아무거나"), { isFigma: false, hasNode: false });
+});
+
+test("설정 바꾸기", () => {
+  const d = applyAction(emptyData(), { type: "setSettings", patch: { hotkey: "Alt+Shift+Space" } }, now);
+  assert.equal(d.settings.hotkey, "Alt+Shift+Space");
+  assert.equal(d.settings.model, "sonnet");
 });

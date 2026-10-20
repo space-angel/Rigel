@@ -2,10 +2,10 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEve
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { AppData, TodoItem } from "@shared/types";
+import type { AppData, Shortcut, TodoItem } from "@shared/types";
 import { localDate, todayView } from "@shared/todos";
 import type { FirstStepState } from "@shared/firstStep";
-import { AiSparkle, BrandMark, CheckIcon, ChevronRightIcon, PlusIcon, SettingsIcon } from "./components/icons";
+import { AiSparkle, BrandMark, CheckIcon, ChevronRightIcon, PlayIcon, PlusIcon, SettingsIcon } from "./components/icons";
 import { FirstStepCard } from "./FirstStepCard";
 
 const api = window.todoban;
@@ -32,7 +32,38 @@ function Checkbox({ checked, onToggle, variant = "default" }: { checked: boolean
   );
 }
 
-function NowCard({ item, selected, onToggle, onFirstStep }: { item: TodoItem; selected: boolean; onToggle: () => void; onFirstStep: () => void }) {
+// 바로가기가 연결된 할 일에만 보이는 시작 버튼. 피그마 앱에서 프레임을 연다.
+function StartButton({ shortcut, variant = "row" }: { shortcut: Shortcut; variant?: "row" | "now" }) {
+  return (
+    <button
+      type="button"
+      className={`start start--${variant}`}
+      title={shortcut.url}
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.stopPropagation();
+        api.openShortcut(shortcut.id);
+      }}
+    >
+      <PlayIcon size={variant === "now" ? 12 : 10} />
+      {variant === "now" ? `${shortcut.name} 열기` : shortcut.name}
+    </button>
+  );
+}
+
+function NowCard({
+  item,
+  shortcut,
+  selected,
+  onToggle,
+  onFirstStep,
+}: {
+  item: TodoItem;
+  shortcut?: Shortcut;
+  selected: boolean;
+  onToggle: () => void;
+  onFirstStep: () => void;
+}) {
   return (
     <div className={`now-card${selected ? " is-selected" : ""}`} onClick={item.isClear ? undefined : onFirstStep}>
       <div className="now-card__top">
@@ -41,7 +72,10 @@ function NowCard({ item, selected, onToggle, onFirstStep }: { item: TodoItem; se
       </div>
       <p className="now-card__title">{item.title}</p>
       {item.isClear ? (
-        <p className="now-card__sub">바로 시작할 수 있어요</p>
+        <>
+          <p className="now-card__sub">{shortcut ? `${shortcut.name} 바로가기 연결됨` : "바로 시작할 수 있어요"}</p>
+          {shortcut && <StartButton shortcut={shortcut} variant="now" />}
+        </>
       ) : (
         <button type="button" className="now-card__cta">
           <AiSparkle size={12} /> 첫 행동 받기
@@ -53,6 +87,7 @@ function NowCard({ item, selected, onToggle, onFirstStep }: { item: TodoItem; se
 
 function Row({
   item,
+  shortcut,
   selected,
   done,
   trailing,
@@ -60,6 +95,7 @@ function Row({
   onFirstStep,
 }: {
   item: TodoItem;
+  shortcut?: Shortcut;
   selected?: boolean;
   done?: boolean;
   trailing?: React.ReactNode;
@@ -80,6 +116,7 @@ function Row({
           <AiSparkle size={12} /> 첫 행동 받기
         </span>
       )}
+      {shortcut && !done && <StartButton shortcut={shortcut} />}
       {trailing}
     </div>
   );
@@ -146,6 +183,7 @@ export function TodayList() {
 
   const act = (a: Parameters<typeof api.act>[0]) => api.act(a).then(setData);
   const stepOf = (id: string) => firstSteps.find((f) => f.todoId === id);
+  const shortcutOf = (t: TodoItem) => (t.shortcutId ? data.shortcuts.find((s) => s.id === t.shortcutId) : undefined);
   const askFirstStep = (t: TodoItem) => {
     if (!stepOf(t.id)) api.requestFirstStep(t.id);
   };
@@ -169,6 +207,8 @@ export function TodayList() {
     else if (e.key === "ArrowUp") setSelected((s) => Math.max(s - 1, 0));
     else if (e.key === " " && current) act({ type: "toggle", id: current.id });
     else if (e.key === "Enter" && current && !current.isClear) askFirstStep(current);
+    else if (e.key === "Enter" && current && shortcutOf(current)) api.openShortcut(current.shortcutId!);
+    else if (e.key === "," && e.metaKey) api.openSettings();
     else if (e.key === "Backspace" && e.metaKey && current) act({ type: "remove", id: current.id });
     else if (e.key === "n" && e.metaKey) setAdding(true);
     else if (e.key === "Escape") api.hideList();
@@ -196,7 +236,7 @@ export function TodayList() {
           <button type="button" className="icon-button" aria-label="할 일 추가" onClick={() => setAdding(true)}>
             <PlusIcon />
           </button>
-          <button type="button" className="icon-button" aria-label="설정" disabled title="설정은 5단계에서 만들어요">
+          <button type="button" className="icon-button" aria-label="설정" onClick={() => api.openSettings()}>
             <SettingsIcon />
           </button>
         </header>
@@ -238,14 +278,14 @@ export function TodayList() {
               <div className="list">
                 {now && (
                   <SortableItem id={now.id}>
-                    <NowCard item={now} selected={selected === 0} onToggle={() => act({ type: "toggle", id: now.id })} onFirstStep={() => askFirstStep(now)} />
+                    <NowCard item={now} shortcut={shortcutOf(now)} selected={selected === 0} onToggle={() => act({ type: "toggle", id: now.id })} onFirstStep={() => askFirstStep(now)} />
                   </SortableItem>
                 )}
                 {now && stepCard(now)}
                 {rest.map((t, i) => (
                   <div key={t.id}>
                     <SortableItem id={t.id}>
-                      <Row item={t} selected={selected === i + 1} onToggle={() => act({ type: "toggle", id: t.id })} onFirstStep={() => askFirstStep(t)} />
+                      <Row item={t} shortcut={shortcutOf(t)} selected={selected === i + 1} onToggle={() => act({ type: "toggle", id: t.id })} onFirstStep={() => askFirstStep(t)} />
                     </SortableItem>
                     {stepCard(t)}
                   </div>
@@ -293,7 +333,7 @@ export function TodayList() {
         <footer className="footer">
           <kbd>⌥ Space</kbd>
           <span>빠른 입력</span>
-          <span className="footer__hint">↑↓ 이동 · Space 체크 · ↵ 첫 행동</span>
+          <span className="footer__hint">↑↓ 이동 · Space 체크 · ↵ 시작</span>
         </footer>
       </div>
     </div>

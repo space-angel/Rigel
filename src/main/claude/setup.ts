@@ -66,3 +66,10 @@ export function ensureWorkDir(): string {
   }
   return dir;
 }
+
+export function claudeVersion(path: string): Promise<string | null> {
+  return new Promise((resolve) => {
+    const env = { ...process.env, PATH: [...EXTRA_PATHS, process.env.PATH ?? ""].join(":") };
+    execFile(path, ["--version"], { timeout: 10_000, env }, (err, stdout) => resolve(err ? null : stdout.trim()));
+  });
+}

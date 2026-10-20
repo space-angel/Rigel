@@ -3,11 +3,13 @@ import { join } from "node:path";
 import { writeFileSync } from "node:fs";
 import type { AppData, TodoAction } from "@shared/types";
 import { applyAction, localDate, todayView } from "@shared/todos";
-import { classifyQuickInput, firstLine } from "@shared/quickInput";
+import { classifyQuickInput, firstLine, matchShortcutByKeywords } from "@shared/quickInput";
 import { loadData, saveData } from "./store";
 import type { ReviewDraft } from "@shared/review";
 import { ReviewSession, clearPending, loadPending, savePending } from "./review";
 import { FirstStepManager } from "./firstStep";
+import { openShortcut } from "./shortcutOpener";
+import { claudeVersion, ensureWorkDir, findClaude } from "./claude/setup";
 
 app.setName("todoBAN");
 // 개발 중 확인용: 실제 데이터 대신 다른 폴더를 쓰고, 실행하자마자 목록이나 빠른 입력창을 띄운다.
@@ -19,6 +21,9 @@ const SNAPSHOT = process.env.TODOBAN_SNAPSHOT;
 // 화면 확인용: 시작하자마자 이 제목의 할 일에 첫 행동을 요청하고, 질문이 오면 ANSWER로 답한 뒤 목록을 저장한다.
 const DEMO_FIRSTSTEP = process.env.TODOBAN_FIRSTSTEP_TITLE;
 const DEMO_ANSWER = process.env.TODOBAN_FIRSTSTEP_ANSWER;
+// 화면 확인용: 빠른 입력을 넣은 것처럼 처리한 뒤 목록을, 또는 설정 창을 저장한다.
+const DEMO_QUICK = process.env.TODOBAN_QUICK_TEXT;
+const DEMO_SETTINGS = process.env.TODOBAN_SETTINGS_TAB as "general" | "shortcuts" | undefined;
 
 async function snapshotAndQuit(win: BrowserWindow | null): Promise<void> {
   if (!SNAPSHOT || !win) return;
@@ -43,6 +48,7 @@ let reviewWindow: BrowserWindow | null = null;
 let review: ReviewSession | null = null;
 let quitting = false;
 let firstSteps: FirstStepManager;
+let settingsWindow: BrowserWindow | null = null;
 let data: AppData;
 let hotkeyError: string | null = null;
 
@@ -57,8 +63,12 @@ function broadcast(): void {
 }
 
 function act(action: TodoAction): AppData {
+  const prevHotkey = data.settings.hotkey;
+  const prevLogin = data.settings.openAtLogin;
   data = applyAction(data, action);
   saveData(data);
+  if (data.settings.hotkey !== prevHotkey) registerHotkey();
+  if (data.settings.openAtLogin !== prevLogin) app.setLoginItemSettings({ openAtLogin: data.settings.openAtLogin });
   broadcast();
   return data;
 }
@@ -206,6 +216,52 @@ function cancelReview(): void {
   endReview();
 }
 
+function showSettings(tab: "general" | "shortcuts" = "general"): void {
+  listWindow?.hide();
+  if (!settingsWindow || settingsWindow.isDestroyed()) {
+    settingsWindow = new BrowserWindow({
+      width: 560,
+      height: 520,
+      useContentSize: true,
+      show: false,
+      title: "설정",
+      titleBarStyle: "hiddenInset",
+      trafficLightPosition: { x: 16, y: 16 },
+      resizable: false,
+      minimizable: false,
+      maximizable: false,
+      fullscreenable: false,
+      backgroundColor: "#ffffff",
+      webPreferences: { preload: join(__dirname, "../preload/index.js"), sandbox: true },
+    });
+    loadView(settingsWindow, `settings-${tab}`);
+    settingsWindow.once("ready-to-show", () => {
+      if (SNAPSHOT) {
+        setTimeout(() => snapshotAndQuit(settingsWindow), 1500);
+        return;
+      }
+      app.focus({ steal: true });
+      settingsWindow?.show();
+    });
+    settingsWindow.on("closed", () => (settingsWindow = null));
+    return;
+  }
+  settingsWindow.webContents.send("settings:tab", tab);
+  app.focus({ steal: true });
+  settingsWindow.show();
+  settingsWindow.focus();
+}
+
+// 한 줄 30자 이하는 그대로 넣고(부르는 말이 있으면 바로가기 연결), 긴 입력은 확인 창에서 Claude에게 나눠 달라고 한다.
+function submitQuick(text: string): { ok: boolean; kind?: "short" | "long" } {
+  const kind = classifyQuickInput(text);
+  if (kind === "empty") return { ok: false };
+  quickWindow?.hide();
+  if (kind === "short") act({ type: "add", title: text.trim(), rawText: text, shortcutId: matchShortcutByKeywords(text, data.shortcuts) });
+  else startReview(text);
+  return { ok: true, kind };
+}
+
 function registerHotkey(): void {
   globalShortcut.unregisterAll();
   const accelerator = data.settings.hotkey;
@@ -221,6 +277,7 @@ function trayMenu(): Menu {
   return Menu.buildFromTemplate([
     { label: "빠른 입력", accelerator: data.settings.hotkey, click: showQuickWindow },
     { label: "오늘 목록", click: toggleListWindow },
+    { label: "설정…", accelerator: "Command+,", click: () => showSettings() },
     ...(hotkeyError ? [{ type: "separator" as const }, { label: hotkeyError, enabled: false }] : []),
     { type: "separator" },
     { label: "todoBAN 종료", role: "quit" },
@@ -241,14 +298,7 @@ app.whenReady().then(() => {
   ipcMain.on("quick:hide", () => quickWindow?.hide());
 
   // 한 줄 30자 이하는 그대로 넣고, 긴 입력은 확인 창을 열어 Claude에게 나눠 달라고 한다.
-  ipcMain.handle("quick:submit", (_e, text: string) => {
-    const kind = classifyQuickInput(text);
-    if (kind === "empty") return { ok: false };
-    quickWindow?.hide();
-    if (kind === "short") act({ type: "add", title: text.trim(), rawText: text });
-    else startReview(text);
-    return { ok: true, kind };
-  });
+  ipcMain.handle("quick:submit", (_e, text: string) => submitQuick(text));
 
   firstSteps = new FirstStepManager(
     () => data,
@@ -267,6 +317,28 @@ app.whenReady().then(() => {
     const st = firstSteps.all().find((s) => s.todoId === id);
     if (st?.status === "suggestion" && st.title) act({ type: "applyFirstStep", id, title: st.title, shortcutId: st.shortcutId });
     firstSteps.dismiss(id);
+  });
+
+  ipcMain.on("settings:open", (_e, tab?: "general" | "shortcuts") => showSettings(tab));
+  ipcMain.on("settings:resize", (_e, height: number) => {
+    if (!settingsWindow) return;
+    const h = Math.min(Math.max(Math.ceil(height), 300), 760);
+    const [w, cur] = settingsWindow.getContentSize();
+    if (cur !== h) settingsWindow.setContentSize(w ?? 560, h);
+  });
+  ipcMain.handle("settings:hotkeyStatus", () => hotkeyError);
+  ipcMain.handle("settings:claudeInfo", async () => {
+    const found = await findClaude(data.settings.claudePath);
+    return { ...found, version: found.path ? await claudeVersion(found.path) : null };
+  });
+  ipcMain.on("settings:openRules", () => shell.openPath(join(ensureWorkDir(), "CLAUDE.md")));
+  // 단축키를 녹화하는 동안에는 지금 단축키가 눌려도 입력창이 뜨지 않게 잠시 풀어 둔다.
+  ipcMain.on("settings:pauseHotkey", (_e, paused: boolean) => (paused ? globalShortcut.unregisterAll() : registerHotkey()));
+  ipcMain.handle("shortcut:open", async (_e, id: string) => {
+    const s = data.shortcuts.find((x) => x.id === id);
+    if (!s) return null;
+    listWindow?.hide();
+    return openShortcut(s);
   });
 
   ipcMain.handle("review:get", () => review?.state ?? null);
@@ -306,6 +378,13 @@ app.whenReady().then(() => {
 
   if (SHOW_ON_START === "list" || SHOW_ON_START === "1") listWindow.once("ready-to-show", toggleListWindow);
   if (SHOW_ON_START === "quick") quickWindow.once("ready-to-show", showQuickWindow);
+
+  if (DEMO_SETTINGS) showSettings(DEMO_SETTINGS);
+  if (DEMO_QUICK)
+    listWindow.webContents.once("did-finish-load", () => {
+      submitQuick(DEMO_QUICK);
+      setTimeout(() => snapshotAndQuit(listWindow), 1500);
+    });
 
   if (DEMO_FIRSTSTEP) {
     const t = data.todos.find((x) => x.title === DEMO_FIRSTSTEP);

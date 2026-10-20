@@ -57,6 +57,20 @@ const api = {
   requestFirstStep: (id: string, opts: { answer?: string; again?: boolean } = {}) => ipcRenderer.send("firstStep:request", id, opts),
   acceptFirstStep: (id: string) => ipcRenderer.send("firstStep:accept", id),
   dismissFirstStep: (id: string) => ipcRenderer.send("firstStep:dismiss", id),
+  openSettings: (tab?: "general" | "shortcuts") => ipcRenderer.send("settings:open", tab),
+  onSettingsTab: (fn: (tab: "general" | "shortcuts") => void) => {
+    const listener = (_e: unknown, tab: "general" | "shortcuts") => fn(tab);
+    ipcRenderer.on("settings:tab", listener);
+    return () => {
+      ipcRenderer.removeListener("settings:tab", listener);
+    };
+  },
+  resizeSettings: (height: number) => ipcRenderer.send("settings:resize", height),
+  hotkeyStatus: (): Promise<string | null> => ipcRenderer.invoke("settings:hotkeyStatus"),
+  claudeInfo: (): Promise<{ path: string | null; searched: string[]; version: string | null }> => ipcRenderer.invoke("settings:claudeInfo"),
+  openRules: () => ipcRenderer.send("settings:openRules"),
+  pauseHotkey: (paused: boolean) => ipcRenderer.send("settings:pauseHotkey", paused),
+  openShortcut: (id: string): Promise<"app" | "browser" | null> => ipcRenderer.invoke("shortcut:open", id),
 };
 
 export type TodoBanApi = typeof api;

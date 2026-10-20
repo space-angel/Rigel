@@ -62,7 +62,7 @@ export function applyAction(data: AppData, action: TodoAction, now: Date = new D
         rawText: action.rawText ?? action.title,
         // AI를 거치지 않고 바로 넣은 할 일은 정리 안 된 할 일이다.
         isClear: false,
-        shortcutId: null,
+        shortcutId: action.shortcutId ?? null,
       });
       break;
     }
@@ -132,6 +132,41 @@ export function applyAction(data: AppData, action: TodoAction, now: Date = new D
       t.order = orderBetween(before, after);
       break;
     }
+    case "setShortcut": {
+      const t = find(action.id);
+      if (!t) return data;
+      t.shortcutId = action.shortcutId;
+      break;
+    }
+    case "saveShortcut": {
+      const input = action.shortcut;
+      const name = input.name.trim();
+      const url = input.url.trim();
+      if (!name || !url) return data;
+      const keywords = [...new Set(input.keywords.map((k) => k.trim()).filter(Boolean))];
+      const shortcut = { id: input.id ?? newId(), name, keywords: keywords.length ? keywords : [name], url, appBundleId: input.appBundleId };
+      const exists = data.shortcuts.some((s) => s.id === shortcut.id);
+      const shortcuts = exists ? data.shortcuts.map((s) => (s.id === shortcut.id ? shortcut : s)) : [...data.shortcuts, shortcut];
+      return { ...data, todos, shortcuts };
+    }
+    case "removeShortcut": {
+      // 지운 바로가기에 연결된 할 일은 연결만 끊는다.
+      for (const t of todos) if (t.shortcutId === action.id) t.shortcutId = null;
+      return { ...data, todos, shortcuts: data.shortcuts.filter((s) => s.id !== action.id) };
+    }
+    case "setSettings":
+      return { ...data, todos, settings: { ...data.settings, ...action.patch } };
   }
   return { ...data, todos };
+}
+
+// 피그마 링크에 node-id가 있으면 그 프레임까지 열린다.
+export function figmaLinkInfo(url: string): { isFigma: boolean; hasNode: boolean } {
+  try {
+    const u = new URL(url.trim());
+    const isFigma = /(^|\.)figma\.com$/.test(u.hostname);
+    return { isFigma, hasNode: isFigma && u.searchParams.has("node-id") };
+  } catch {
+    return { isFigma: false, hasNode: false };
+  }
 }

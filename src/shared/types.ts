@@ -58,7 +58,7 @@ export function emptyData(): AppData {
 
 // 렌더러가 메인 프로세스에 보내는 변경 요청. 메인이 적용하고 새 상태를 돌려준다.
 export type TodoAction =
-  | { type: "add"; title: string; rawText?: string }
+  | { type: "add"; title: string; rawText?: string; shortcutId?: string | null }
   | {
       type: "addMany";
       rawText: string;
@@ -69,4 +69,17 @@ export type TodoAction =
   | { type: "remove"; id: string }
   | { type: "rename"; id: string; title: string }
   | { type: "moveToToday"; id: string }
-  | { type: "reorder"; id: string; beforeId: string | null; afterId: string | null };
+  | { type: "reorder"; id: string; beforeId: string | null; afterId: string | null }
+  | { type: "setShortcut"; id: string; shortcutId: string | null }
+  | { type: "saveShortcut"; shortcut: ShortcutInput & { id?: string } }
+  | { type: "removeShortcut"; id: string }
+  | { type: "setSettings"; patch: Partial<Settings> };
+
+export interface ShortcutInput {
+  name: string;
+  keywords: string[];
+  url: string;
+  appBundleId: string | null;
+}
+
+export const FIGMA_BUNDLE_ID = "com.figma.Desktop";
