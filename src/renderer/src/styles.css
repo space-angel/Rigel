@@ -3004,6 +3004,44 @@ html[lang="ko"] :is(.eyebrow,
   overflow: hidden;
   pointer-events: none;
 }
+/* 주변 빛: 위 비율 막대의 파란 칸이 광원. 그 칸 아래만큼 카드 윗쪽 안이 파랗게 비치고(spill), 윗 테두리가 밝아진다(edge).
+   너비 100px 기준을 칸 너비만큼 scaleX하고 칸 자리로 옮긴다(TodayList가 --lx·--ls·--lo를 넣는다). */
+.hero-glow__spill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100px;
+  height: 46px;
+  background: radial-gradient(50% 100% at 50% 0%, rgb(111 166 255 / 34%), rgb(111 166 255 / 0%));
+  transform-origin: 0 0;
+  transform: translate3d(var(--lx, 0px), 0, 0) scaleX(var(--ls, 1));
+  opacity: var(--lo, 0);
+  transition: transform 320ms var(--ease-out), opacity 320ms var(--ease-out);
+}
+.hero-edge {
+  position: absolute;
+  inset: -1px;
+  padding: 1px;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.hero-edge__light {
+  position: absolute;
+  top: 0;
+  left: 1px;
+  width: 100px;
+  height: 18px;
+  background: radial-gradient(50% 100% at 50% 0%, rgb(150 190 255 / 90%), rgb(150 190 255 / 0%));
+  transform-origin: 0 0;
+  transform: translate3d(var(--lx, 0px), 0, 0) scaleX(var(--ls, 1));
+  opacity: var(--lo, 0);
+  transition: transform 320ms var(--ease-out), opacity 320ms var(--ease-out);
+}
+
 /* 흐르는 빛: 늘 아주 느리게 좌우로 흘러 카드가 살아 있는 느낌만 준다. 생각 중에는 그 빛에 자리를 내준다. */
 .hero-glow__flow {
   position: absolute;
@@ -3142,6 +3180,8 @@ html[lang="ko"] :is(.eyebrow,
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .hero-glow__spill,
+  .hero-edge__light,
   .hero-glow__flow,
   .hero-glow__blob,
   .hero-glow__press,
