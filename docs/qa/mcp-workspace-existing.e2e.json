@@ -1,0 +1,9 @@
+[
+  { "name": "이미 켜 둔 서비스 · Tools 탭을 열면 워크스페이스를 확인한다", "win": "settings", "main": "openSettings:tools",
+    "until": "['Notion', 'Linear', 'Figma frame'].every(n => /Works|Reads|Couldn|Needs/.test(__e2e.byText(n, '.setting')?.textContent || ''))", "timeout": 90000, "snap": true,
+    "expect": "['Notion', 'Linear'].every(n => /reads “/i.test(__e2e.byText(n, '.setting').textContent))" },
+  { "name": "다시 열면 확인하지 않고 저장된 워크스페이스를 보여 준다", "win": "settings", "main": "openSettings:general",
+    "run": "return true;" },
+  { "name": "Tools 탭 다시", "win": "settings", "main": "openSettings:tools", "wait": 1500, "snap": true,
+    "expect": "!__e2e.text().includes('Checking which workspace') && /Reads “/.test(__e2e.byText('Notion', '.setting').textContent)" }
+]

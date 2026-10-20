@@ -240,15 +240,26 @@ function McpGuide({ source, status, onClose }: { source: McpSource; status: McpS
 // 첫 행동을 빚을 때 쓸 도구 (D2). LOCAL은 앱이 읽고, MCP는 Claude Code가 읽기 전용으로 읽는다.
 function ToolsTab({ data }: { data: AppData }) {
   const tools = data.settings.tools;
+  const toolsRef = useRef(tools);
+  toolsRef.current = tools;
   const [status, setStatus] = useState<Record<string, McpStatus> | null>(null);
   const [checkedAt, setCheckedAt] = useState(0);
   const [guide, setGuide] = useState<McpSource | null>(null);
   const [verify, setVerify] = useState<Partial<Record<McpSource, Verify>>>({});
   const check = (fresh = false) => {
     setStatus(null);
-    api.mcpStatus(fresh).then((s) => {
-      setStatus(s);
+    api.mcpStatus(fresh).then((all) => {
+      setStatus(all);
       setCheckedAt(Date.now());
+      // 연결된 서비스는 어느 워크스페이스를 읽는지 확인해 둔다. 켜기 전에도 보이게, 꺼 둔 서비스도 확인한다.
+      // 확인한 지 하루가 안 됐으면 건너뛴다(한 번에 약 10초, Claude 사용량을 쓴다). Check again은 모두 다시 확인한다.
+      for (const src of MCP_SOURCES) {
+        const st = statusOf(all, src);
+        if (st !== "connected" && st !== "pending") continue;
+        const info = toolsRef.current.mcpInfo[src];
+        const stale = !info || Date.now() - Date.parse(info.checkedAt) > 24 * 3600_000;
+        if (fresh || stale) checkWorkspace(src, false);
+      }
     });
   };
   useEffect(() => check(), []);
@@ -260,21 +271,32 @@ function ToolsTab({ data }: { data: AppData }) {
   const save = (patch: Partial<typeof tools>) => api.act({ type: "setSettings", patch: { tools: { ...tools, ...patch } } });
   const on = [...LOCAL_SOURCES.filter((s) => tools.local[s]), ...MCP_SOURCES.filter((s) => tools.mcp[s])];
 
-  // 켤 때 실제로 한 번 읽어 본다. 안 되면 다시 끄고 이유를 보여 준다.
-  const turnOn = async (s: McpSource) => {
+  // 어느 워크스페이스·계정에 연결됐는지 확인한다(메인이 저장). 켤 때 안 되면 다시 끄고 이유를 보여 준다.
+  const inflight = useRef(new Set<McpSource>());
+  const checkWorkspace = async (s: McpSource, turningOn: boolean) => {
+    if (inflight.current.has(s)) return;
+    inflight.current.add(s);
     setVerify((v) => ({ ...v, [s]: { state: "testing" } }));
-    save({ mcp: { ...tools.mcp, [s]: true } });
     const r = await api.verifyMcp(s);
-    if (r.ok) setVerify((v) => ({ ...v, [s]: { state: "ok", ms: r.ms, workspace: r.workspace } }));
-    else {
-      setVerify((v) => ({ ...v, [s]: { state: "fail", reason: VERIFY_FAIL[r.status] ?? VERIFY_FAIL.failed! } }));
+    inflight.current.delete(s);
+    if (r.ok) {
+      setVerify((v) => ({ ...v, [s]: { state: "ok", ms: r.ms, workspace: r.workspace } }));
+      return;
+    }
+    setVerify((v) => ({ ...v, [s]: { state: "fail", reason: VERIFY_FAIL[r.status] ?? VERIFY_FAIL.failed! } }));
+    // 켤 때 실패했거나, 인증이 필요해 어차피 못 읽으면 끈다.
+    if (turningOn || r.status === "needs-auth") {
       const latest = await api.getData();
       api.act({ type: "setSettings", patch: { tools: { ...latest.settings.tools, mcp: { ...latest.settings.tools.mcp, [s]: false } } } });
-      if (r.status === "needs-auth") {
-        setStatus((st) => (st ? { ...st, [MCP_SERVICES[s].server]: "needs-auth" } : st));
-        setGuide(s);
-      }
     }
+    if (r.status === "needs-auth") {
+      setStatus((st) => (st ? { ...st, [MCP_SERVICES[s].server]: "needs-auth" } : st));
+      setGuide(s);
+    }
+  };
+  const turnOn = (s: McpSource) => {
+    save({ mcp: { ...tools.mcp, [s]: true } });
+    checkWorkspace(s, true);
   };
 
   const mcpDesc = (s: McpSource, st: McpStatus | null) => {

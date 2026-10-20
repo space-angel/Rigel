@@ -1,0 +1,23 @@
+[
+  {
+    "name": "이미 켜 둔 서비스 · Tools 탭을 열면 워크스페이스를 확인한다",
+    "win": "settings",
+    "ok": true,
+    "ms": 18644,
+    "snap": "01-settings.png"
+  },
+  {
+    "name": "다시 열면 확인하지 않고 저장된 워크스페이스를 보여 준다",
+    "win": "settings",
+    "ok": true,
+    "ms": 1504,
+    "value": true
+  },
+  {
+    "name": "Tools 탭 다시",
+    "win": "settings",
+    "ok": true,
+    "ms": 3360,
+    "snap": "03-settings.png"
+  }
+]
