@@ -1,0 +1,41 @@
+[
+  {
+    "name": "MCP 인증 필요 · 시작하기 창",
+    "win": "welcome",
+    "ok": true,
+    "ms": 375,
+    "snap": "01-welcome.png"
+  },
+  {
+    "name": "MCP 인증 필요 · Tools 탭 상태",
+    "win": "settings",
+    "ok": true,
+    "ms": 1936,
+    "note": "mcp list는 Connected여도 실제로는 인증이 필요한 상태를 구분하는가",
+    "snap": "02-settings.png"
+  },
+  {
+    "name": "MCP 인증 필요 · Sign in 안내",
+    "win": "settings",
+    "ok": true,
+    "ms": 779,
+    "value": true,
+    "snap": "03-settings.png"
+  },
+  {
+    "name": "MCP 연결 안 됨 · Add 안내",
+    "win": "settings",
+    "ok": true,
+    "ms": 778,
+    "value": true,
+    "snap": "04-settings.png"
+  },
+  {
+    "name": "MCP 켜기 · 읽기 테스트 실패 시 다시 꺼진다",
+    "win": "settings",
+    "ok": true,
+    "ms": 1630,
+    "value": true,
+    "snap": "05-settings.png"
+  }
+]

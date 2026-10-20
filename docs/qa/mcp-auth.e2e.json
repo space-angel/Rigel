@@ -1,0 +1,44 @@
+[
+  {
+    "name": "MCP 인증 필요 · 시작하기 창",
+    "win": "welcome",
+    "until": "__e2e.text().includes('Connected in Claude') || __e2e.text().includes('Optional')",
+    "timeout": 20000,
+    "snap": true
+  },
+  {
+    "name": "MCP 인증 필요 · Tools 탭 상태",
+    "win": "settings",
+    "main": "openSettings:tools",
+    "until": "!__e2e.text().includes('Checking')",
+    "timeout": 20000,
+    "snap": true,
+    "expect": "__e2e.text().includes('Needs sign-in')",
+    "note": "mcp list는 Connected여도 실제로는 인증이 필요한 상태를 구분하는가"
+  },
+  {
+    "name": "MCP 인증 필요 · Sign in 안내",
+    "win": "settings",
+    "run": "__e2e.click(__e2e.byText('Sign in', '.setting button')); return true;",
+    "wait": 400,
+    "snap": true,
+    "expect": "__e2e.text().includes('/mcp')"
+  },
+  {
+    "name": "MCP 연결 안 됨 · Add 안내",
+    "win": "settings",
+    "run": "__e2e.click(__e2e.byText('Add', '.group__box .setting button')); return true;",
+    "wait": 400,
+    "snap": true,
+    "expect": "__e2e.text().includes('Connectors')"
+  },
+  {
+    "name": "MCP 켜기 · 읽기 테스트 실패 시 다시 꺼진다",
+    "win": "settings",
+    "run": "const row = __e2e.byText('Linear', '.setting'); row.querySelector('.toggle').click(); return true;",
+    "until": "(__e2e.byText('Linear', '.setting')?.textContent || '').match(/Works|Couldn|Needs|longer/)",
+    "timeout": 20000,
+    "snap": true,
+    "expect": "!__e2e.byText('Linear', '.setting').querySelector('.toggle.is-on')"
+  }
+]

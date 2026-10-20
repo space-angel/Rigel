@@ -3,7 +3,7 @@ import type { AppData, Shortcut } from "@shared/types";
 import { FIGMA_BUNDLE_ID } from "@shared/types";
 import { figmaLinkInfo } from "@shared/todos";
 import { displayAccelerator, toAccelerator } from "@shared/hotkey";
-import { CheckIcon, EditIcon, FigmaMark, LinkIcon, PlusIcon, TerminalIcon, TrashIcon, UserIcon } from "./components/icons";
+import { CheckIcon, EditIcon, FigmaMark, LinkIcon, PlusIcon, Spinner, TerminalIcon, TrashIcon, UserIcon } from "./components/icons";
 import { LOCAL_SOURCES, normalizeMix, type LocalSource } from "@shared/shape";
 import { MCP_SERVICES, MCP_SOURCES, statusOf, type McpSource, type McpStatus } from "@shared/mcp";
 import { MixBar } from "./components/MixBar";
@@ -150,7 +150,7 @@ function GeneralTab({ data }: { data: AppData }) {
             <p>Rules</p>
             <p className="setting__desc">CLAUDE.md — how tasks are split and shaped</p>
           </div>
-          <button type="button" className="button button--secondary button--sm" onClick={api.openRules}>
+          <button type="button" className="button button--secondary button--sm" onClick={() => api.openRules()}>
             Open
           </button>
         </div>
@@ -179,19 +179,115 @@ const MCP_DESC: Record<McpSource, string> = {
   frame: "Reads the frame of the task's Figma shortcut",
 };
 
+type Verify = { state: "testing" } | { state: "ok"; ms: number } | { state: "fail"; reason: string };
+const VERIFY_FAIL: Record<string, string> = {
+  "needs-auth": "Needs sign-in in Claude Code",
+  "no-shortcut": "Add a Figma shortcut with a frame link first",
+  slow: "Took longer than 30s",
+  failed: "Couldn't read — turn it on again to retry",
+};
+
+function StatusPill({ status }: { status: McpStatus | null }) {
+  if (status === null) return <span className="status">Checking</span>;
+  if (status === "connected") return <span className="status status--ok">Connected</span>;
+  if (status === "pending") return <span className="status">Connecting</span>;
+  if (status === "needs-auth") return <span className="status status--error">Needs sign-in</span>;
+  return <span className="status status--off">Not added</span>;
+}
+
+// MCP 연결 안내. 인증이 필요하면 Claude Code에서 /mcp, 커넥터가 없으면 claude.ai에서 추가한다.
+function McpGuide({ source, status, onClose }: { source: McpSource; status: McpStatus; onClose: () => void }) {
+  const name = MCP_SERVICES[source].name.replace(" frame", "");
+  const signIn = status === "needs-auth";
+  return (
+    <div className="guide">
+      <div className="guide__head">
+        <p className="guide__title">{signIn ? `Sign in to ${name}` : `Add ${name} to Claude`}</p>
+        <button type="button" className="text-button" onClick={onClose}>
+          Close
+        </button>
+      </div>
+      {signIn ? (
+        <ol className="guide__steps">
+          <li>
+            Open Terminal{" "}
+            <button type="button" className="link" onClick={() => api.openMcpGuide("terminal")}>
+              Open
+            </button>
+          </li>
+          <li>
+            Run <kbd>claude</kbd>, then type <kbd>/mcp</kbd>
+          </li>
+          <li>Pick “{MCP_SERVICES[source].server}” and finish signing in in your browser</li>
+          <li>Come back here — todoBAN checks again on its own</li>
+        </ol>
+      ) : (
+        <ol className="guide__steps">
+          <li>
+            Open Claude → Settings → Connectors{" "}
+            <button type="button" className="link" onClick={() => api.openMcpGuide("connectors")}>
+              Open
+            </button>
+          </li>
+          <li>Connect {name} with the same account you use in Claude Code</li>
+          <li>Come back here — todoBAN checks again on its own</li>
+        </ol>
+      )}
+    </div>
+  );
+}
+
 // 첫 행동을 빚을 때 쓸 도구 (D2). LOCAL은 앱이 읽고, MCP는 Claude Code가 읽기 전용으로 읽는다.
 function ToolsTab({ data }: { data: AppData }) {
   const tools = data.settings.tools;
   const [status, setStatus] = useState<Record<string, McpStatus> | null>(null);
-  const [guide, setGuide] = useState(false);
+  const [checkedAt, setCheckedAt] = useState(0);
+  const [guide, setGuide] = useState<McpSource | null>(null);
+  const [verify, setVerify] = useState<Partial<Record<McpSource, Verify>>>({});
   const check = (fresh = false) => {
     setStatus(null);
-    api.mcpStatus(fresh).then(setStatus);
+    api.mcpStatus(fresh).then((s) => {
+      setStatus(s);
+      setCheckedAt(Date.now());
+    });
   };
   useEffect(() => check(), []);
-  const mcpUsable = (s: McpSource) => status !== null && statusOf(status, s) === "connected";
-  const on = [...LOCAL_SOURCES.filter((s) => tools.local[s]), ...MCP_SOURCES.filter((s) => tools.mcp[s])];
+  // 터미널이나 브라우저에서 연결하고 돌아오면 다시 확인한다.
+  const checkedRef = useRef(0);
+  checkedRef.current = checkedAt;
+  useEffect(() => api.onSettingsFocus(() => Date.now() - checkedRef.current > 10_000 && check(true)), []);
+
   const save = (patch: Partial<typeof tools>) => api.act({ type: "setSettings", patch: { tools: { ...tools, ...patch } } });
+  const on = [...LOCAL_SOURCES.filter((s) => tools.local[s]), ...MCP_SOURCES.filter((s) => tools.mcp[s])];
+
+  // 켤 때 실제로 한 번 읽어 본다. 안 되면 다시 끄고 이유를 보여 준다.
+  const turnOn = async (s: McpSource) => {
+    setVerify((v) => ({ ...v, [s]: { state: "testing" } }));
+    save({ mcp: { ...tools.mcp, [s]: true } });
+    const r = await api.verifyMcp(s);
+    if (r.ok) setVerify((v) => ({ ...v, [s]: { state: "ok", ms: r.ms } }));
+    else {
+      setVerify((v) => ({ ...v, [s]: { state: "fail", reason: VERIFY_FAIL[r.status] ?? VERIFY_FAIL.failed! } }));
+      const latest = await api.getData();
+      api.act({ type: "setSettings", patch: { tools: { ...latest.settings.tools, mcp: { ...latest.settings.tools.mcp, [s]: false } } } });
+      if (r.status === "needs-auth") {
+        setStatus((st) => (st ? { ...st, [MCP_SERVICES[s].server]: "needs-auth" } : st));
+        setGuide(s);
+      }
+    }
+  };
+
+  const mcpDesc = (s: McpSource, st: McpStatus | null) => {
+    const v = verify[s];
+    if (v?.state === "testing") return "Testing a read… about 10 seconds";
+    if (v?.state === "ok") return `Works · read in ${(v.ms / 1000).toFixed(1)}s`;
+    if (v?.state === "fail") return v.reason;
+    if (st === null) return "Checking Claude Code…";
+    if (st === "connected" || st === "pending") return MCP_DESC[s];
+    if (st === "needs-auth") return "Connected to Claude, but needs sign-in in Claude Code";
+    return "Not connected in Claude yet";
+  };
+
   return (
     <div className="settings__body">
       <Group label="Local · fast">
@@ -211,41 +307,36 @@ function ToolsTab({ data }: { data: AppData }) {
       </Group>
       <section className="group">
         <div className="settings__head">
-          <h2 className="group__label">MCP · read only · ~10s</h2>
+          <h2 className="group__label">MCP · read only</h2>
           <button type="button" className="text-button" onClick={() => check(true)} disabled={status === null}>
             {status === null ? "Checking…" : "Check again"}
           </button>
         </div>
+        <p className="group__desc">Claude Code reads these with your Claude sign-in. Each read takes about 10 seconds and uses your Claude plan.</p>
         <div className="group__box">
           {MCP_SOURCES.map((s) => {
             const st = status && statusOf(status, s);
+            const v = verify[s];
+            const usable = st === "connected" || st === "pending";
             return (
               <div className="setting" key={s}>
                 <span className="setting__icon">
                   <SourceIcon source={s} size={13} />
                 </span>
                 <div className="setting__text">
-                  <p>{MCP_SERVICES[s].name}</p>
-                  <p className="setting__desc">
-                    {st === null ? "Checking Claude Code…" : st === "connected" ? MCP_DESC[s] : st === "needs-auth" ? "Sign in again in Claude Code" : "Not connected in Claude Code"}
+                  <p className="setting__title">
+                    {MCP_SERVICES[s].name} <StatusPill status={st} />
+                  </p>
+                  <p className={`setting__desc${v?.state === "ok" ? " is-ok" : v?.state === "fail" ? " is-error" : ""}`}>
+                    {v?.state === "testing" && <Spinner size={10} />} {mcpDesc(s, st)}
                   </p>
                 </div>
-                {mcpUsable(s) ? (
-                  <>
-                    <span className="badge badge--mcp">MCP</span>
-                    <Toggle on={Boolean(tools.mcp[s])} onChange={(v) => save({ mcp: { ...tools.mcp, [s]: v } })} />
-                  </>
+                {usable ? (
+                  <Toggle on={Boolean(tools.mcp[s])} onChange={(val) => (val ? turnOn(s) : save({ mcp: { ...tools.mcp, [s]: false } }))} />
                 ) : (
                   st !== null && (
-                    <button
-                      type="button"
-                      className="button button--secondary button--sm"
-                      onClick={() => {
-                        setGuide(true);
-                        api.openMcpGuide();
-                      }}
-                    >
-                      Connect
+                    <button type="button" className="button button--secondary button--sm" onClick={() => setGuide(s)}>
+                      {st === "needs-auth" ? "Sign in" : "Add"}
                     </button>
                   )
                 )}
@@ -253,11 +344,7 @@ function ToolsTab({ data }: { data: AppData }) {
             );
           })}
         </div>
-        {guide && (
-          <p className="field__help">
-            In Terminal, run <kbd>claude</kbd> then <kbd>/mcp</kbd> and sign in. Come back and press Check again.
-          </p>
-        )}
+        {guide && status && <McpGuide source={guide} status={statusOf(status, guide)} onClose={() => setGuide(null)} />}
       </section>
       {on.length > 0 && (
         <section className="group">

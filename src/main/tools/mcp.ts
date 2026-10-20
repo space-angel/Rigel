@@ -110,30 +110,96 @@ export async function collectMcp(source: McpSource, todo: TodoItem, words: strin
   }
 }
 
-// `claude mcp list`는 서버마다 연결을 확인해서 10초쯤 걸린다. 5분 동안 기억한다.
+// 연결 상태 확인. 1) claude를 띄워 시작 메시지(init)의 서버 상태만 읽고 바로 끈다 — 모델을 부르지 않고 3초쯤 걸린다.
+// print 모드에서 실제로 쓸 수 있는지가 여기 보인다(mcp list는 Connected여도 여기선 needs-auth일 수 있음).
+// 2) 아직 연결 중(pending)인 서버는 `claude mcp list`(10초쯤)로 다시 본다. 결과는 5분 동안 기억한다.
 let statusCache: { at: number; value: Promise<Record<string, McpStatus>> } | null = null;
+
+function probeInit(path: string): Promise<Record<string, McpStatus>> {
+  return new Promise((resolve) => {
+    const child = spawn(path, ["-p", "--output-format", "stream-json", "--verbose", "--no-session-persistence", "--setting-sources", "user,project", "--tools", ""], {
+      cwd: ensureWorkDir(),
+      env: env(),
+    });
+    let buf = "";
+    const done = (v: Record<string, McpStatus>) => {
+      clearTimeout(timer);
+      child.kill("SIGTERM");
+      resolve(v);
+    };
+    const timer = setTimeout(() => done({}), 15_000);
+    child.stdout.on("data", (d) => {
+      buf += d;
+      const line = buf.split("\n").find((l) => l.includes('"subtype":"init"'));
+      if (!line) return;
+      try {
+        const init = JSON.parse(line);
+        done(Object.fromEntries((init.mcp_servers ?? []).map((m: { name: string; status: string }) => [m.name, normalizeStatus(m.status)])));
+      } catch {
+        done({});
+      }
+    });
+    child.on("error", () => done({}));
+    child.stdin.on("error", () => {});
+    child.stdin.end("status");
+  });
+}
+
+function normalizeStatus(s: string): McpStatus {
+  return s === "connected" || s === "needs-auth" || s === "pending" ? s : "failed";
+}
+
+function mcpList(path: string): Promise<Record<string, McpStatus>> {
+  return new Promise((resolve) => {
+    const child = spawn(path, ["mcp", "list"], { env: env() });
+    let out = "";
+    const timer = setTimeout(() => child.kill("SIGTERM"), 30_000);
+    child.stdout.on("data", (d) => (out += d));
+    child.on("error", () => resolve({}));
+    child.on("close", () => {
+      clearTimeout(timer);
+      resolve(parseMcpList(out));
+    });
+  });
+}
 
 export function mcpStatus(configuredPath: string | null, fresh = false): Promise<Record<string, McpStatus>> {
   if (!fresh && statusCache && Date.now() - statusCache.at < 5 * 60_000) return statusCache.value;
   const value = (async () => {
     const { path } = await findClaude(configuredPath);
     if (!path) return {};
-    return new Promise<Record<string, McpStatus>>((resolve) => {
-      const child = spawn(path, ["mcp", "list"], { env: env() });
-      let out = "";
-      const timer = setTimeout(() => child.kill("SIGTERM"), 30_000);
-      child.stdout.on("data", (d) => (out += d));
-      child.on("error", () => resolve({}));
-      child.on("close", () => {
-        clearTimeout(timer);
-        resolve(parseMcpList(out));
-      });
-    });
+    const init = await probeInit(path);
+    const ours = Object.values(MCP_SERVICES).map((s) => s.server);
+    if (!ours.some((name) => !init[name] || init[name] === "pending")) return init;
+    const listed = await mcpList(path);
+    const merged = { ...init };
+    // 시작할 때 아직 연결 중이던 서버(피그마가 자주 그렇다)는 mcp list 값을 쓴다. 켤 때 실제로 읽어 보고 확정한다.
+    for (const name of ours) if (!merged[name] || merged[name] === "pending") merged[name] = listed[name] ?? "missing";
+    return merged;
   })();
   statusCache = { at: Date.now(), value };
   return value;
 }
 
+// 켤 때 실제로 한 번 읽어 본다. 연결은 됐는데 도구를 못 부르는 경우(인증 만료 등)를 여기서 잡는다.
+export async function verifyMcp(source: McpSource, data: AppData): Promise<{ ok: boolean; status: string; ms: number }> {
+  const started = Date.now();
+  const probe: TodoItem = {
+    id: "verify",
+    title: "verify",
+    plannedDate: null,
+    order: 0,
+    completedAt: null,
+    createdAt: new Date().toISOString(),
+    rawText: "",
+    isClear: true,
+    shortcutId: data.shortcuts.find((s) => figmaTarget(s.url))?.id ?? null,
+  };
+  if (source === "frame" && !probe.shortcutId) return { ok: false, status: "no-shortcut", ms: 0 };
+  const r = await collectMcp(source, probe, ["todo"], data, new AbortController().signal);
+  if (r.status === "needs-auth") markNeedsAuth(source);
+  return { ok: r.status === "ok" || r.status === "empty", status: r.status, ms: Date.now() - started };
+}
 // collect에서 needs-auth를 보면 목록 상태도 고친다. mcp list는 Connected라고 해도 print 모드에서는 인증이 필요할 수 있다.
 export function markNeedsAuth(source: McpSource): void {
   if (!statusCache) return;

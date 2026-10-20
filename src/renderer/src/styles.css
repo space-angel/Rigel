@@ -760,7 +760,8 @@ kbd {
 
 /* ===== 확인 창 (520폭, 신호등 버튼이 있는 일반 창 = L0) ===== */
 body[data-view="review"],
-body[data-view="settings"] {
+body[data-view="settings"],
+body[data-view="welcome"] {
   min-height: 100vh;
   background: var(--surface-window), var(--ink-2);
 }
@@ -998,7 +999,18 @@ body[data-view="review"] {
 
 /* ===== 설정 창 (560폭) ===== */
 .settings {
-  width: 560px;
+  width: 100%;
+}
+body[data-view="settings"],
+body[data-view="review"] {
+  overflow-x: hidden;
+}
+body::-webkit-scrollbar {
+  width: 6px;
+}
+body::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: var(--white-14);
 }
 .settings__toolbar {
   display: flex;
@@ -1797,4 +1809,185 @@ body[data-view="review"] {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+.result__hint {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--color-text-tertiary);
+}
+.result__hint .link {
+  font-size: 11px;
+}
+.group__desc {
+  margin-top: 0;
+  padding: 0 4px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--color-text-tertiary);
+}
+.setting__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.setting__desc.is-ok {
+  color: var(--green-200);
+}
+.setting__desc.is-error {
+  color: var(--orange-200);
+}
+.setting__desc .spinner {
+  vertical-align: -1px;
+}
+.status--off {
+  background: var(--white-06);
+  color: var(--white-45);
+}
+.guide {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 14px 16px;
+  border-radius: var(--radius-r4);
+  border: 1px solid rgb(255 106 42 / 30%);
+  background: rgb(255 106 42 / 6%);
+}
+.guide__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.guide__title {
+  font-size: 13px;
+  font-weight: 600;
+}
+.guide__steps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--white-90);
+}
+.guide__steps .link {
+  margin-left: 4px;
+}
+
+/* ===== 시작하기 (D4) ===== */
+.welcome {
+  width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 44px 28px 22px;
+  background: radial-gradient(rgb(255 255 255 / 7%) 0.6px, transparent 0.9px) 0 0 / 13px 13px;
+}
+.welcome__drag {
+  position: fixed;
+  inset: 0 0 auto;
+  height: 40px;
+  -webkit-app-region: drag;
+}
+.welcome__mark {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 10px;
+  border-radius: 14px;
+  background: var(--gradient-blue);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 30%);
+}
+.welcome h1 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+}
+.welcome__sub {
+  margin-bottom: 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-r3-5);
+  border: 1px solid var(--border-row);
+  background: var(--surface-row);
+  box-shadow: var(--shadow-row);
+}
+/* 아직 안 끝난 첫 단계 하나만 주인공(L1) */
+.hero-1 > .step--n1,
+.hero-2 > .step--n2,
+.hero-3 > .step--n3 {
+  border: 1px solid transparent;
+  background:
+    var(--surface-hero) padding-box,
+    linear-gradient(var(--ink-2), var(--ink-2)) padding-box,
+    var(--border-hero) border-box;
+  box-shadow: var(--shadow-hero-sm);
+}
+.step__mark {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--white-35);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--white-90);
+}
+.step--done .step__mark {
+  border: 0;
+  background: var(--gradient-blue);
+}
+.step--error .step__mark {
+  border: 0;
+  background: rgb(255 106 42 / 18%);
+  color: var(--orange-200);
+}
+.step--todo .step__mark {
+  border-color: rgb(111 166 255 / 80%);
+}
+.step__text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.step__title {
+  font-size: 13px;
+  font-weight: 600;
+}
+.step__desc {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--color-text-tertiary);
+  overflow-wrap: anywhere;
+}
+.step__note {
+  color: var(--white-35);
+}
+.step__actions {
+  display: flex;
+  gap: 6px;
+  margin: -2px 0 2px 36px;
+}
+.welcome__foot {
+  display: flex;
+  align-items: center;
+  margin-top: 16px;
 }

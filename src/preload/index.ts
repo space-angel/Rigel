@@ -63,7 +63,19 @@ const api = {
   collectMcp: (todoId: string, source: McpSource, words: string[]): Promise<ToolResult> => ipcRenderer.invoke("tools:collectMcp", todoId, source, words),
   cancelMcp: (todoId: string) => ipcRenderer.send("tools:cancelMcp", todoId),
   mcpStatus: (fresh?: boolean): Promise<Record<string, McpStatus>> => ipcRenderer.invoke("tools:mcpStatus", fresh),
-  openMcpGuide: () => ipcRenderer.send("tools:openMcpGuide"),
+  resizeWelcome: (height: number) => ipcRenderer.send("welcome:resize", height),
+  finishWelcome: (openList: boolean) => ipcRenderer.send("welcome:finish", openList),
+  installGuide: () => ipcRenderer.send("welcome:installGuide"),
+  chooseClaude: (): Promise<string | null> => ipcRenderer.invoke("welcome:chooseClaude"),
+  openMcpGuide: (kind: "terminal" | "connectors") => ipcRenderer.send("tools:openMcpGuide", kind),
+  verifyMcp: (source: McpSource): Promise<{ ok: boolean; status: string; ms: number }> => ipcRenderer.invoke("tools:verifyMcp", source),
+  onSettingsFocus: (fn: () => void) => {
+    const listener = () => fn();
+    ipcRenderer.on("settings:focus", listener);
+    return () => {
+      ipcRenderer.removeListener("settings:focus", listener);
+    };
+  },
   onShapeOpen: (fn: (todoId: string, auto: boolean) => void) => {
     const listener = (_e: unknown, id: string, auto: boolean) => fn(id, auto);
     ipcRenderer.on("shape:open", listener);

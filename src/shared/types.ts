@@ -49,6 +49,8 @@ export const Settings = z.object({
   openAtLogin: z.boolean(),
   lastCarryOverCheck: DateString.nullable(),
   tools: ToolSettings.default(DEFAULT_TOOLS),
+  // 시작하기 창(D4)을 마쳤는지. 이 필드가 없던 파일은 이미 쓰던 사람이라 true로 읽는다.
+  welcomed: z.boolean().default(true),
 });
 export type Settings = z.infer<typeof Settings>;
 
@@ -69,6 +71,7 @@ export const DEFAULT_SETTINGS: Settings = {
   openAtLogin: false,
   lastCarryOverCheck: null,
   tools: DEFAULT_TOOLS,
+  welcomed: false,
 };
 
 export function emptyData(): AppData {

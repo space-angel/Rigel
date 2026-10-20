@@ -231,19 +231,19 @@ export function Review() {
           </button>
         )}
         {state.status === "ready" && err?.kind === "parseFailed" && (
-          <button type="button" className="button button--ghost" onClick={api.retryReview}>
+          <button type="button" className="button button--ghost" onClick={() => api.retryReview()}>
             <RefreshIcon size={14} /> Split again
           </button>
         )}
         {state.status === "error" && err?.kind === "notLoggedIn" && (
-          <button type="button" className="button button--ghost" onClick={api.openTerminal}>
+          <button type="button" className="button button--ghost" onClick={() => api.openTerminal()}>
             <TerminalIcon size={14} /> Open Terminal
           </button>
         )}
         <span className="spacer" />
         {state.status === "ready" ? (
           <>
-            <button type="button" className="button button--secondary" onClick={api.cancelReview}>
+            <button type="button" className="button button--secondary" onClick={() => api.cancelReview()}>
               Cancel
             </button>
             <button type="button" className="button button--primary" disabled={!valid.length} onClick={commit}>
@@ -252,16 +252,16 @@ export function Review() {
           </>
         ) : state.status === "error" ? (
           <>
-            <button type="button" className="button button--secondary" onClick={api.insertRawReview}>
+            <button type="button" className="button button--secondary" onClick={() => api.insertRawReview()}>
               Add without splitting
             </button>
-            <button type="button" className="button button--primary" onClick={api.retryReview}>
+            <button type="button" className="button button--primary" onClick={() => api.retryReview()}>
               <RefreshIcon size={14} /> Try again
             </button>
           </>
         ) : (
           <>
-            <button type="button" className="button button--secondary" onClick={api.cancelReview}>
+            <button type="button" className="button button--secondary" onClick={() => api.cancelReview()}>
               Cancel
             </button>
             <button type="button" className="button button--primary" disabled>

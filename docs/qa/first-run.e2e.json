@@ -1,0 +1,254 @@
+[
+  {
+    "name": "첫 실행 · 시작하기 창이 열린다",
+    "win": "welcome",
+    "until": "__e2e.text().includes('Welcome') && !__e2e.text().includes('Looking for claude') && !__e2e.text().includes('Checking what')",
+    "timeout": 40000,
+    "snap": true,
+    "note": "Claude Code 위치·버전, 단축키, Claude에 연결된 MCP 서비스가 한 장에 보이는가"
+  },
+  {
+    "name": "시작하기 · Pick your tools → Choose",
+    "win": "welcome",
+    "run": "__e2e.click(__e2e.byText('Choose')); return true;",
+    "wait": 500,
+    "snap": true
+  },
+  {
+    "name": "시작하기 · Start",
+    "win": "welcome",
+    "run": "__e2e.click(__e2e.byText('Start')); return true;",
+    "wait": 600
+  },
+  {
+    "name": "첫 실행 · 메뉴바 목록을 연다",
+    "win": "list",
+    "main": "openList",
+    "wait": 800,
+    "snap": true,
+    "expect": "__e2e.text().includes('Today')",
+    "note": "처음 쓰는 사람이 무엇을 해야 하는지, Claude Code가 준비됐는지 알 수 있는가"
+  },
+  {
+    "name": "빠른 입력 · 짧은 할 일을 적는다",
+    "win": "quick",
+    "run": "__e2e.type('textarea', '운동 가기'); return true;",
+    "wait": 300,
+    "snap": true,
+    "expect": "__e2e.text().includes('straight into today')"
+  },
+  {
+    "name": "빠른 입력 · Enter로 넣는다",
+    "win": "quick",
+    "run": "__e2e.key('textarea', 'Enter'); return true;",
+    "wait": 600
+  },
+  {
+    "name": "목록에 짧은 할 일이 들어갔다",
+    "win": "list",
+    "until": "__e2e.text().includes('운동 가기')",
+    "snap": true
+  },
+  {
+    "name": "빠른 입력 · 긴 생각을 적는다",
+    "win": "quick",
+    "run": "__e2e.type('textarea', '내일 포폴 올리브영 장표 지표 문장 고치고 사일로 발표 자료 봐야 함. 면접 준비도 해야 되고 이력서 PDF는 나중에 다시 뽑기'); return true;",
+    "wait": 300,
+    "snap": true,
+    "expect": "__e2e.text().includes('Claude splits')"
+  },
+  {
+    "name": "빠른 입력 · Enter로 확인 창을 연다",
+    "win": "quick",
+    "run": "__e2e.key('textarea', 'Enter'); return true;",
+    "wait": 500
+  },
+  {
+    "name": "확인 창 · Claude가 나누는 중",
+    "win": "review",
+    "until": "__e2e.text().includes('splitting') || __e2e.text().includes('from your thought')",
+    "snap": true
+  },
+  {
+    "name": "확인 창 · 나눈 결과",
+    "win": "review",
+    "until": "(__e2e.text().includes('from your thought') && __e2e.all('.draft').length > 0) || __e2e.$('.notice')",
+    "timeout": 60000,
+    "snap": true,
+    "expect": "__e2e.all('.draft').length >= 2"
+  },
+  {
+    "name": "확인 창 · Add N tasks",
+    "win": "review",
+    "run": "__e2e.click('.review__footer .button--primary'); return true;",
+    "wait": 800
+  },
+  {
+    "name": "목록 · 나눈 할 일이 들어왔다",
+    "win": "list",
+    "until": "__e2e.text().includes('Later') && __e2e.all('.row, .now-card').length >= 2",
+    "snap": true
+  },
+  {
+    "name": "목록 · 정리 안 된 할 일을 누른다",
+    "win": "list",
+    "run": "__e2e.click(__e2e.$('.row.is-unclear') || __e2e.$('.now-card')); return true;",
+    "until": "__e2e.$('.shape') && !__e2e.text().includes('Reading your tools')",
+    "wait": 400,
+    "snap": true
+  },
+  {
+    "name": "빚기 · Shape it",
+    "win": "list",
+    "run": "__e2e.click('.shape__foot .button--primary'); return true;",
+    "until": "__e2e.$('.result') || __e2e.$('.fs-card')",
+    "timeout": 60000,
+    "snap": true
+  },
+  {
+    "name": "빚기 · Use this step",
+    "win": "list",
+    "run": "const b = __e2e.byText('Use this step'); if (b) __e2e.click(b); return Boolean(b);",
+    "until": "__e2e.$('.header')",
+    "snap": true
+  },
+  {
+    "name": "설정 · General",
+    "win": "settings",
+    "main": "openSettings:general",
+    "snap": true,
+    "expect": "__e2e.text().includes('FOUND')"
+  },
+  {
+    "name": "설정 · 바로가기 추가 시트",
+    "win": "settings",
+    "main": "openSettings:shortcuts",
+    "run": "__e2e.click(__e2e.byText('Add', '.settings__head button')); await new Promise(r => setTimeout(r, 300)); __e2e.type('.sheet .field__input', '포폴'); __e2e.type('.chips-input input', '포트폴리오'); __e2e.key('.chips-input input', 'Enter'); __e2e.type('.sheet input[placeholder^=\"figma.com\"]', 'https://www.figma.com/design/uLkrdQtbosV1DMYSYHsYeB/todoBAN?node-id=63-527'); return true;",
+    "wait": 400,
+    "snap": true,
+    "expect": "__e2e.text().includes('Has a node-id')"
+  },
+  {
+    "name": "설정 · 바로가기 저장",
+    "win": "settings",
+    "run": "__e2e.click('.sheet .button--primary'); return true;",
+    "wait": 500,
+    "snap": true,
+    "expect": "__e2e.text().includes('1 shortcut')"
+  },
+  {
+    "name": "설정 · Tools 탭 (MCP 연결 확인)",
+    "win": "settings",
+    "main": "openSettings:tools",
+    "snap": true,
+    "note": "열자마자 MCP 상태가 보이는가"
+  },
+  {
+    "name": "설정 · Tools 탭 MCP 상태가 나온다",
+    "win": "settings",
+    "until": "!__e2e.text().includes('Checking')",
+    "timeout": 40000,
+    "snap": true,
+    "note": "상태 확인이 몇 초 걸리는가 (1회차 8.2초)"
+  },
+  {
+    "name": "설정 · Notion을 켠다",
+    "win": "settings",
+    "run": "const row = __e2e.byText('Notion', '.setting'); const t = row && row.querySelector('.toggle'); if (!t) return 'Notion 토글 없음'; t.click(); return 'on';",
+    "wait": 600,
+    "snap": true,
+    "until": "__e2e.text().includes('Works') || __e2e.$('.setting__desc.is-error')",
+    "timeout": 45000,
+    "expect": "__e2e.text().includes('Works')",
+    "note": "켤 때 실제로 한 번 읽어 보고 결과를 보여 주는가"
+  },
+  {
+    "name": "설정 · Figma frame을 켠다 (바로가기 프레임 읽기)",
+    "win": "settings",
+    "run": "const row = __e2e.byText('Figma frame', '.setting'); const t = row && row.querySelector('.toggle'); if (!t) return 'Figma frame 토글 없음'; t.click(); return 'on';",
+    "until": "(__e2e.byText('Figma frame', '.setting')?.textContent || '').match(/Works|Couldn|Add a Figma|Needs/)",
+    "timeout": 45000,
+    "snap": true,
+    "expect": "__e2e.byText('Figma frame', '.setting').textContent.includes('Works')"
+  },
+  {
+    "name": "빚기 · Notion을 켠 채로 연다",
+    "win": "list",
+    "main": "shape:*",
+    "until": "__e2e.$('.shape')",
+    "wait": 1500,
+    "snap": true,
+    "note": "오늘 목록의 첫 정리 안 된 할 일"
+  },
+  {
+    "name": "빚기 · Notion 읽기가 끝난다",
+    "win": "list",
+    "until": "!__e2e.text().includes('Reading')",
+    "timeout": 40000,
+    "snap": true
+  },
+  {
+    "name": "빚기 · Notion 자료로 Shape it",
+    "win": "list",
+    "run": "__e2e.click('.shape__foot .button--primary'); return true;",
+    "until": "__e2e.$('.result') || __e2e.$('.fs-card')",
+    "timeout": 60000,
+    "snap": true
+  },
+  {
+    "name": "빚기 · 목록으로 돌아간다",
+    "win": "list",
+    "run": "__e2e.click('.back'); return true;",
+    "until": "__e2e.$('.header')"
+  },
+  {
+    "name": "오류 · claude 경로를 틀리게 바꾼다",
+    "win": "settings",
+    "main": "openSettings:general",
+    "run": "__e2e.type('.setting--stack .field__input', '/nope/claude'); __e2e.key('.setting--stack .field__input', 'Enter'); return true;",
+    "wait": 1200,
+    "snap": true
+  },
+  {
+    "name": "오류 · 긴 생각을 넣으면 안내가 나온다",
+    "win": "quick",
+    "run": "__e2e.type('textarea', '다음 주에 이사 준비하고 관리비 정리하고 친구 결혼식 축사도 써야 함'); __e2e.key('textarea', 'Enter'); return true;",
+    "wait": 300
+  },
+  {
+    "name": "오류 · 확인 창 안내",
+    "win": "review",
+    "until": "__e2e.$('.notice')",
+    "timeout": 30000,
+    "snap": true
+  },
+  {
+    "name": "오류 · 나누지 않고 넣기",
+    "win": "review",
+    "run": "__e2e.click(__e2e.byText('Add without splitting')); return true;",
+    "wait": 800,
+    "snap": false
+  },
+  {
+    "name": "오류 · 나누지 않고 넣은 생각이 목록에 있다",
+    "win": "list",
+    "until": "__e2e.text().includes('이사')",
+    "snap": true,
+    "note": "1회차에서 실패: 버튼이 동작하지 않았음"
+  },
+  {
+    "name": "오류 · 경로를 비워 되돌린다",
+    "win": "settings",
+    "run": "__e2e.type('.setting--stack .field__input', ''); __e2e.key('.setting--stack .field__input', 'Enter'); return true;",
+    "wait": 1500,
+    "snap": true,
+    "expect": "__e2e.text().includes('FOUND')"
+  },
+  {
+    "name": "마지막 · 목록",
+    "win": "list",
+    "main": "openList",
+    "wait": 600,
+    "snap": true
+  }
+]

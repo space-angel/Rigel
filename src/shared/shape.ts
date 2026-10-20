@@ -39,7 +39,9 @@ export interface ShapeInput {
   claudeWeight: number;
 }
 
-const PARTICLES = /(은|는|이|가|을|를|에|에서|의|도|로|으로|와|과|만|까지|부터|이랑|랑|하고)$/;
+// 조사는 떼되, 명사 끝 글자와 겹치기 쉬운 한 글자 조사(이·가·로·와·과·만·랑)는 3글자 넘게 남을 때만 뗀다. ("사일로" → 그대로)
+const PARTICLES = /(에서|으로|까지|부터|이랑|하고|은|는|을|를|의|에|도)$/;
+const WEAK_PARTICLES = /(이|가|로|와|과|만|랑)$/;
 // 무엇을 할지 알려 주지 않는 흔한 말. C1에서 처음부터 꺼 둔다.
 const STOP = new Set([
   "해야",
@@ -71,20 +73,33 @@ export interface WordChip {
   on: boolean;
 }
 
+function stripParticle(token: string): string {
+  const n = [...token].length;
+  if (n > 2 && PARTICLES.test(token)) return token.replace(PARTICLES, "");
+  if (n > 3 && WEAK_PARTICLES.test(token)) return token.replace(WEAK_PARTICLES, "");
+  return token;
+}
+
 // 할 일 제목과 원문을 낱말로 나눈다. 같은 낱말은 한 번만, 조사는 떼고, 흔한 말은 꺼 둔다.
+// 나눈 할 일의 원문에는 다른 할 일 문장도 들어 있으므로, 원문에만 있는 낱말은 꺼 둔 채로 보여 준다.
 export function splitWords(title: string, rawText: string, max = 12): WordChip[] {
   const seen = new Set<string>();
   const chips: WordChip[] = [];
-  for (const token of `${title} ${rawText}`.split(/[\s,.!?·…~()[\]{}"'“”‘’/]+/)) {
-    if (!token) continue;
-    const stripped = token.length > 2 ? token.replace(PARTICLES, "") : token;
-    const word = stripped || token;
-    const key = word.toLowerCase();
-    if (seen.has(key) || [...word].length < 2) continue;
-    seen.add(key);
-    chips.push({ word, on: !STOP.has(word) && !STOP.has(token) });
-    if (chips.length >= max) break;
-  }
+  const titleKeys = new Set<string>();
+  const add = (text: string, fromTitle: boolean) => {
+    for (const token of text.split(/[\s,.!?·…~()[\]{}"'“”‘’/]+/)) {
+      if (!token || chips.length >= max) continue;
+      const word = stripParticle(token) || token;
+      const key = word.toLowerCase();
+      if (fromTitle) titleKeys.add(key);
+      if (seen.has(key) || [...word].length < 2) continue;
+      seen.add(key);
+      chips.push({ word, on: fromTitle && !STOP.has(word) && !STOP.has(token) });
+    }
+  };
+  add(title, true);
+  // 원문이 제목과 같으면(짧은 입력) 원문의 낱말도 켠다.
+  add(rawText, rawText.trim() === title.trim());
   return chips;
 }
 

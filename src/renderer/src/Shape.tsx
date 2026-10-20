@@ -18,7 +18,7 @@ const TOOL_DESC: Record<string, string> = {
   failed: "Couldn't read",
   empty: "Nothing matched",
   loading: "Reading…",
-  "needs-auth": "Sign in to it in Claude Code",
+  "needs-auth": "Needs sign-in · open Settings",
 };
 
 const OPEN_LABEL: Record<string, string> = { shortcut: "Open in Figma", file: "Open file", calendar: "Open Calendar" };
@@ -199,6 +199,18 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
                 </div>
               </>
             )}
+            {state.sources.every((s) => s.source === "claude") &&
+              (state.shape.context.length === 0 && (tools ?? []).length > 0 ? (
+                <p className="result__hint">Made from general knowledge only — nothing in your tools matched these words. Try picking other words.</p>
+              ) : (
+                <p className="result__hint">
+                  Made from general knowledge only.{" "}
+                  <button type="button" className="link" onClick={() => api.openSettings("tools")}>
+                    Turn on tools
+                  </button>{" "}
+                  for a step from your own files and notes.
+                </p>
+              ))}
             {(used.length > 0 || claude) && (
               <div className="result__words">
                 {used.map((w) => (
@@ -297,9 +309,9 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
                     type="button"
                     key={r.source}
                     className={`tool${on ? " is-on" : ""}${loading ? " is-loading" : ""}`}
-                    disabled={r.status !== "ok" && !loading}
+                    disabled={r.status !== "ok" && !loading && r.status !== "needs-auth"}
                     aria-pressed={on}
-                    onClick={() => toggleTool(r.source)}
+                    onClick={() => (r.status === "needs-auth" ? api.openSettings("tools") : toggleTool(r.source))}
                   >
                     <span className="tool__top">
                       <span className="tool__icon">
@@ -309,7 +321,8 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
                       <span className={`toggle toggle--sm${on ? " is-on" : ""}`} />
                     </span>
                     <span className="tool__item">
-                      {loading && <Spinner size={10} />} {r.item?.label ?? TOOL_DESC[r.status]}
+                      {loading && <Spinner size={10} />}{" "}
+                      {r.item?.label ?? (r.source === "figma" && r.status === "empty" && data.shortcuts.length === 0 ? "No shortcuts yet" : TOOL_DESC[r.status])}
                     </span>
                     {isMcp(r.source) ? <span className="badge badge--mcp">MCP · read only</span> : <span className="badge">Local</span>}
                   </button>

@@ -9,7 +9,15 @@ test("제목과 원문을 낱말로 나누고 조사와 흔한 말을 처리한�
   assert.ok(words.includes("자기소개"), "조사 '가'를 뗀다");
   assert.equal(words.filter((w) => w === "면접").length, 1, "같은 낱말은 한 번만");
   assert.equal(chips.find((c) => c.word === "해야")?.on, false);
-  assert.equal(chips.find((c) => c.word === "토스")?.on, true);
+  assert.equal(chips.find((c) => c.word === "면접")?.on, true, "제목 낱말은 켠다");
+  assert.equal(chips.find((c) => c.word === "토스")?.on, false, "원문에만 있는 낱말은 꺼 둔다");
+});
+
+test("짧은 입력(원문 = 제목)은 낱말을 모두 켜고, 명사 끝 글자는 조사로 떼지 않는다", () => {
+  const chips = splitWords("사일로 발표 자료 보기", "사일로 발표 자료 보기");
+  assert.deepEqual(chips.map((c) => c.word), ["사일로", "발표", "자료", "보기"]);
+  assert.ok(chips.every((c) => c.on));
+  assert.deepEqual(splitWords("평가 준비도", "평가 준비도").map((c) => c.word), ["평가", "준비"]);
 });
 
 test("한 글자 낱말은 빼고, 최대 개수를 지킨다", () => {

@@ -6,6 +6,7 @@ import { TodayList } from "./TodayList";
 import { QuickInput } from "./QuickInput";
 import { Review } from "./Review";
 import { Settings } from "./Settings";
+import { Welcome } from "./Welcome";
 
 // 창마다 같은 번들을 쓰고, 주소의 해시로 화면을 고른다.
 const view = window.location.hash.slice(1) || "list";
@@ -14,6 +15,7 @@ const screens = {
   list: <TodayList />,
   quick: <QuickInput />,
   review: <Review />,
+  welcome: <Welcome />,
   "settings-general": <Settings initialTab="general" />,
   "settings-tools": <Settings initialTab="tools" />,
   "settings-shortcuts": <Settings initialTab="shortcuts" />,

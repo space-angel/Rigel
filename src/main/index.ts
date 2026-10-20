@@ -1,4 +1,4 @@
-import { app, BrowserWindow, globalShortcut, ipcMain, Menu, nativeImage, screen, shell, Tray } from "electron";
+import { app, BrowserWindow, dialog, globalShortcut, ipcMain, Menu, nativeImage, screen, shell, Tray } from "electron";
 import { join } from "node:path";
 import { writeFileSync } from "node:fs";
 import type { AppData, TodoAction } from "@shared/types";
@@ -9,10 +9,11 @@ import type { ReviewDraft } from "@shared/review";
 import { ReviewSession, clearPending, loadPending, savePending } from "./review";
 import { FirstStepManager } from "./firstStep";
 import { collectLocal } from "./tools/local";
-import { collectMcp, markNeedsAuth, mcpStatus } from "./tools/mcp";
+import { collectMcp, markNeedsAuth, mcpStatus, verifyMcp } from "./tools/mcp";
 import { safeServiceUrl, type McpSource } from "@shared/mcp";
 import type { ShapeInput, ToolItem } from "@shared/shape";
 import { openShortcut } from "./shortcutOpener";
+import { runE2E } from "./e2e";
 import { claudeVersion, ensureWorkDir, findClaude } from "./claude/setup";
 
 app.setName("todoBAN");
@@ -30,6 +31,15 @@ const DEMO_QUICK = process.env.TODOBAN_QUICK_TEXT;
 const DEMO_SETTINGS = process.env.TODOBAN_SETTINGS_TAB as "general" | "tools" | "shortcuts" | "shortcuts-new" | undefined;
 const DEMO_SHAPE = process.env.TODOBAN_SHAPE_TITLE; // 화면 확인용: 이 할 일로 빚기(C1)를 연다
 const DEMO_SHAPE_GO = process.env.TODOBAN_SHAPE_GO === "1"; // 화면 확인용: 바로 Shape it을 눌러 결과(C2)까지 간다
+// 화면 확인용: 시나리오를 돌리고 결과를 저장한 뒤 종료한다 (src/main/e2e.ts). 창을 띄우지 않고, 다른 앱도 열지 않는다.
+const E2E = process.env.TODOBAN_E2E;
+const HEADLESS = Boolean(SNAPSHOT || E2E);
+
+// 바깥 앱(피그마, 터미널, 브라우저)을 여는 동작. 시나리오 실행 중에는 열지 않고 기록만 한다.
+function openOutside(what: string, fn: () => unknown): void {
+  if (E2E) console.log(`[e2e] 열기 생략: ${what}`);
+  else fn();
+}
 
 async function snapshotAndQuit(win: BrowserWindow | null): Promise<void> {
   if (!SNAPSHOT || !win) return;
@@ -55,6 +65,7 @@ let review: ReviewSession | null = null;
 let quitting = false;
 let firstSteps: FirstStepManager;
 let settingsWindow: BrowserWindow | null = null;
+let welcomeWindow: BrowserWindow | null = null;
 let data: AppData;
 let hotkeyError: string | null = null;
 
@@ -201,7 +212,7 @@ function startReview(rawText: string): void {
   review?.cancel();
   review = new ReviewSession(rawText, () => data, sendReview);
   sendReview();
-  if (reviewWindow && !SNAPSHOT) {
+  if (reviewWindow && !HEADLESS) {
     const area = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea;
     const b = reviewWindow.getBounds();
     reviewWindow.setPosition(Math.round(area.x + (area.width - b.width) / 2), Math.round(area.y + area.height * 0.12));
@@ -247,16 +258,51 @@ function showSettings(tab: "general" | "tools" | "shortcuts" | "shortcuts-new" =
         setTimeout(() => snapshotAndQuit(settingsWindow), 1500);
         return;
       }
+      if (E2E) return;
       app.focus({ steal: true });
       settingsWindow?.show();
     });
     settingsWindow.on("closed", () => (settingsWindow = null));
+    // 터미널에서 연결하고 돌아오면 도구 탭이 상태를 다시 확인할 수 있게 알린다.
+    settingsWindow.on("focus", () => settingsWindow?.webContents.send("settings:focus"));
     return;
   }
   settingsWindow.webContents.send("settings:tab", tab === "shortcuts-new" ? "shortcuts" : tab);
+  if (E2E) return;
   app.focus({ steal: true });
   settingsWindow.show();
   settingsWindow.focus();
+}
+
+// 처음 실행하면 시작하기 창(D4)을 연다. Claude Code, 단축키, 도구를 한 장에서 확인한다.
+function showWelcome(): void {
+  if (welcomeWindow && !welcomeWindow.isDestroyed()) {
+    if (!HEADLESS) welcomeWindow.show();
+    return;
+  }
+  welcomeWindow = new BrowserWindow({
+    width: 480,
+    height: 560,
+    useContentSize: true,
+    show: false,
+    title: "Welcome",
+    titleBarStyle: "hiddenInset",
+    trafficLightPosition: { x: 16, y: 16 },
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    backgroundColor: "#15181d",
+    webPreferences: { preload: join(__dirname, "../preload/index.js"), sandbox: true },
+  });
+  loadView(welcomeWindow, "welcome");
+  welcomeWindow.once("ready-to-show", () => {
+    if (HEADLESS) return;
+    app.focus({ steal: true });
+    welcomeWindow?.show();
+  });
+  welcomeWindow.on("focus", () => welcomeWindow?.webContents.send("settings:focus"));
+  welcomeWindow.on("closed", () => (welcomeWindow = null));
 }
 
 // 한 줄 30자 이하는 그대로 넣고(부르는 말이 있으면 바로가기 연결), 긴 입력은 확인 창에서 Claude에게 나눠 달라고 한다.
@@ -270,6 +316,7 @@ function submitQuick(text: string): { ok: boolean; kind?: "short" | "long" } {
 }
 
 function registerHotkey(): void {
+  if (HEADLESS) return;
   globalShortcut.unregisterAll();
   const accelerator = data.settings.hotkey;
   try {
@@ -304,7 +351,38 @@ app.whenReady().then(() => {
   ipcMain.on("quick:resize", (_e, height: number) => fitHeight(quickWindow, height, QUICK_MAX_HEIGHT));
   ipcMain.on("quick:hide", () => quickWindow?.hide());
 
-  // 한 줄 30자 이하는 그대로 넣고, 긴 입력은 확인 창을 열어 Claude에게 나눠 달라고 한다.
+  // 처음 실행하면 시작하기 창(D4)을 연다. Claude Code, 단축키, 도구를 한 장에서 확인한다.
+function showWelcome(): void {
+  if (welcomeWindow && !welcomeWindow.isDestroyed()) {
+    if (!HEADLESS) welcomeWindow.show();
+    return;
+  }
+  welcomeWindow = new BrowserWindow({
+    width: 480,
+    height: 560,
+    useContentSize: true,
+    show: false,
+    title: "Welcome",
+    titleBarStyle: "hiddenInset",
+    trafficLightPosition: { x: 16, y: 16 },
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    backgroundColor: "#15181d",
+    webPreferences: { preload: join(__dirname, "../preload/index.js"), sandbox: true },
+  });
+  loadView(welcomeWindow, "welcome");
+  welcomeWindow.once("ready-to-show", () => {
+    if (HEADLESS) return;
+    app.focus({ steal: true });
+    welcomeWindow?.show();
+  });
+  welcomeWindow.on("focus", () => welcomeWindow?.webContents.send("settings:focus"));
+  welcomeWindow.on("closed", () => (welcomeWindow = null));
+}
+
+// 한 줄 30자 이하는 그대로 넣고, 긴 입력은 확인 창을 열어 Claude에게 나눠 달라고 한다.
   ipcMain.handle("quick:submit", (_e, text: string) => submitQuick(text));
 
   firstSteps = new FirstStepManager(
@@ -354,21 +432,45 @@ app.whenReady().then(() => {
     for (const [key, a] of mcpAborts) if (key.startsWith(`${todoId}:`)) a.abort();
   });
   ipcMain.handle("tools:mcpStatus", (_e, fresh?: boolean) => mcpStatus(data.settings.claudePath, fresh));
-  ipcMain.on("tools:openMcpGuide", () => shell.openPath("/System/Applications/Utilities/Terminal.app"));
+  ipcMain.handle("tools:verifyMcp", (_e, source: McpSource) => verifyMcp(source, data));
+  ipcMain.on("tools:openMcpGuide", (_e, kind: "terminal" | "connectors" = "terminal") =>
+    kind === "connectors"
+      ? openOutside("claude.ai connectors", () => shell.openExternal("https://claude.ai/settings/connectors"))
+      : openOutside("Terminal", () => shell.openPath("/System/Applications/Utilities/Terminal.app")),
+  );
   ipcMain.on("tools:open", (_e, open: ToolItem["open"]) => {
     if (!open) return;
     listWindow?.hide();
     if (open.kind === "url") {
       const url = safeServiceUrl(open.source, open.url);
-      if (url) shell.openExternal(url);
+      if (url) openOutside(url, () => shell.openExternal(url));
     } else if (open.kind === "shortcut") {
       const s = data.shortcuts.find((x) => x.id === open.id);
-      if (s) openShortcut(s);
-    } else if (open.kind === "file" && openablePaths.has(open.path)) shell.openPath(open.path);
-    else if (open.kind === "calendar") shell.openPath("/System/Applications/Calendar.app");
+      if (s) openOutside(s.url, () => openShortcut(s));
+    } else if (open.kind === "file" && openablePaths.has(open.path)) openOutside(open.path, () => shell.openPath(open.path));
+    else if (open.kind === "calendar") openOutside("Calendar", () => shell.openPath("/System/Applications/Calendar.app"));
   });
 
   ipcMain.on("settings:open", (_e, tab?: "general" | "tools" | "shortcuts") => showSettings(tab));
+  ipcMain.on("welcome:resize", (_e, height: number) => {
+    if (!welcomeWindow) return;
+    const h = Math.min(Math.max(Math.ceil(height), 360), 760);
+    const [w, cur] = welcomeWindow.getContentSize();
+    if (cur !== h) welcomeWindow.setContentSize(w ?? 480, h);
+  });
+  ipcMain.on("welcome:finish", (_e, openList: boolean) => {
+    act({ type: "setSettings", patch: { welcomed: true } });
+    welcomeWindow?.close();
+    if (openList && !HEADLESS) toggleListWindow();
+  });
+  ipcMain.on("welcome:installGuide", () => openOutside("Claude Code install guide", () => shell.openExternal("https://docs.claude.com/en/docs/claude-code/setup")));
+  ipcMain.handle("welcome:chooseClaude", async () => {
+    if (E2E) return null;
+    const r = await dialog.showOpenDialog({ title: "Choose the claude executable", properties: ["openFile", "showHiddenFiles"], defaultPath: join(app.getPath("home"), ".local/bin") });
+    const path = r.canceled ? null : (r.filePaths[0] ?? null);
+    if (path) act({ type: "setSettings", patch: { claudePath: path } });
+    return path;
+  });
   ipcMain.on("settings:resize", (_e, height: number) => {
     if (!settingsWindow) return;
     const h = Math.min(Math.max(Math.ceil(height), 300), 760);
@@ -380,13 +482,14 @@ app.whenReady().then(() => {
     const found = await findClaude(data.settings.claudePath);
     return { ...found, version: found.path ? await claudeVersion(found.path) : null };
   });
-  ipcMain.on("settings:openRules", () => shell.openPath(join(ensureWorkDir(), "CLAUDE.md")));
+  ipcMain.on("settings:openRules", () => openOutside("CLAUDE.md", () => shell.openPath(join(ensureWorkDir(), "CLAUDE.md"))));
   // 단축키를 녹화하는 동안에는 지금 단축키가 눌려도 입력창이 뜨지 않게 잠시 풀어 둔다.
   ipcMain.on("settings:pauseHotkey", (_e, paused: boolean) => (paused ? globalShortcut.unregisterAll() : registerHotkey()));
   ipcMain.handle("shortcut:open", async (_e, id: string) => {
     const s = data.shortcuts.find((x) => x.id === id);
     if (!s) return null;
     listWindow?.hide();
+    if (E2E) return void openOutside(s.url, () => {});
     return openShortcut(s);
   });
 
@@ -410,14 +513,18 @@ app.whenReady().then(() => {
     act({ type: "add", title: firstLine(review.state.rawText), rawText: review.state.rawText });
     endReview();
   });
-  ipcMain.on("review:openTerminal", () => shell.openPath("/System/Applications/Utilities/Terminal.app"));
+  ipcMain.on("review:openTerminal", () => openOutside("Terminal", () => shell.openPath("/System/Applications/Utilities/Terminal.app")));
 
-  const icon = nativeImage.createFromPath(join(__dirname, "../../resources/trayTemplate.png"));
-  icon.setTemplateImage(true);
-  tray = new Tray(icon);
-  tray.setToolTip("todoBAN");
-  tray.on("click", toggleListWindow);
-  tray.on("right-click", () => tray?.popUpContextMenu(trayMenu()));
+  // 화면 확인용 실행에서는 메뉴바 아이콘과 전역 단축키를 만들지 않는다.
+  // 만들면 쓰고 있는 todoBAN과 겹쳐서, 사용자의 입력이 확인용 앱으로 들어간다.
+  if (!HEADLESS) {
+    const icon = nativeImage.createFromPath(join(__dirname, "../../resources/trayTemplate.png"));
+    icon.setTemplateImage(true);
+    tray = new Tray(icon);
+    tray.setToolTip("todoBAN");
+    tray.on("click", toggleListWindow);
+    tray.on("right-click", () => tray?.popUpContextMenu(trayMenu()));
+  }
 
   listWindow = createPopupWindow("list", LIST_WIDTH, 480);
   quickWindow = createPopupWindow("quick", QUICK_WIDTH, 160);
@@ -461,6 +568,39 @@ app.whenReady().then(() => {
     const t = data.todos.find((x) => x.title === DEMO_FIRSTSTEP);
     if (t) listWindow.webContents.once("did-finish-load", () => setTimeout(() => firstSteps.request(t.id), 500));
   }
+
+  if (E2E) {
+    const windows = { list: () => listWindow, quick: () => quickWindow, review: () => reviewWindow, settings: () => settingsWindow, welcome: () => welcomeWindow };
+    listWindow.webContents.once("did-finish-load", () =>
+      setTimeout(async () => {
+        const out = process.env.TODOBAN_E2E_OUT ?? join(app.getPath("userData"), "e2e");
+        await runE2E(E2E, out, {
+          window: (w) => windows[w](),
+          main: async (action) => {
+            const colon = action.indexOf(":");
+            const kind = colon < 0 ? action : action.slice(0, colon);
+            const arg = colon < 0 ? "" : action.slice(colon + 1);
+            if (kind === "openList") listWindow?.webContents.send("list:opened");
+            else if (kind === "openSettings") {
+              showSettings(arg as "general");
+              // 설정 창이 처음 만들어지면 내용을 다 그릴 때까지 기다린다.
+              await new Promise((r) => setTimeout(r, 1500));
+            } else if (kind === "shape") {
+              // "shape:*"는 오늘 목록의 첫 정리 안 된 할 일
+              const today = localDate();
+              const t = arg === "*" ? todayView(data.todos, today).open.find((x) => !x.isClear) : data.todos.find((x) => x.title === arg);
+              if (!t) throw new Error(`할 일 없음: ${arg}`);
+              listWindow?.webContents.send("shape:open", t.id, false);
+            } else throw new Error(`모르는 동작: ${action}`);
+          },
+        });
+        quitting = true;
+        app.quit();
+      }, 800),
+    );
+  }
+
+  if (!data.settings.welcomed && !SNAPSHOT) showWelcome();
 
   // 지난번에 넣거나 취소하지 못한 빠른 입력이 있으면 확인 창을 다시 연다.
   const pending = loadPending();

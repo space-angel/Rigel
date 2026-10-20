@@ -1,0 +1,219 @@
+[
+  {
+    "name": "첫 실행 · 메뉴바 목록을 연다",
+    "win": "list",
+    "ok": true,
+    "ms": 1138,
+    "note": "처음 쓰는 사람이 무엇을 해야 하는지, Claude Code가 준비됐는지 알 수 있는가",
+    "snap": "01-list.png"
+  },
+  {
+    "name": "빠른 입력 · 짧은 할 일을 적는다",
+    "win": "quick",
+    "ok": true,
+    "ms": 638,
+    "value": true,
+    "snap": "02-quick.png"
+  },
+  {
+    "name": "빠른 입력 · Enter로 넣는다",
+    "win": "quick",
+    "ok": true,
+    "ms": 615,
+    "value": true
+  },
+  {
+    "name": "목록에 짧은 할 일이 들어갔다",
+    "win": "list",
+    "ok": true,
+    "ms": 325,
+    "snap": "04-list.png"
+  },
+  {
+    "name": "빠른 입력 · 긴 생각을 적는다",
+    "win": "quick",
+    "ok": true,
+    "ms": 635,
+    "value": true,
+    "snap": "05-quick.png"
+  },
+  {
+    "name": "빠른 입력 · Enter로 확인 창을 연다",
+    "win": "quick",
+    "ok": true,
+    "ms": 506,
+    "value": true
+  },
+  {
+    "name": "확인 창 · Claude가 나누는 중",
+    "win": "review",
+    "ok": true,
+    "ms": 327,
+    "snap": "07-review.png"
+  },
+  {
+    "name": "확인 창 · 나눈 결과",
+    "win": "review",
+    "ok": true,
+    "ms": 3855,
+    "snap": "08-review.png"
+  },
+  {
+    "name": "확인 창 · Add N tasks",
+    "win": "review",
+    "ok": true,
+    "ms": 808,
+    "value": true
+  },
+  {
+    "name": "목록 · 나눈 할 일이 들어왔다",
+    "win": "list",
+    "ok": false,
+    "ms": 15447,
+    "error": "기다림 초과: __e2e.all('.row, .now-card').length >= 4",
+    "snap": "10-list.png"
+  },
+  {
+    "name": "목록 · 정리 안 된 할 일을 누른다",
+    "win": "list",
+    "ok": true,
+    "ms": 1000,
+    "value": true,
+    "snap": "11-list.png"
+  },
+  {
+    "name": "빚기 · Shape it",
+    "win": "list",
+    "ok": true,
+    "ms": 6372,
+    "value": true,
+    "snap": "12-list.png"
+  },
+  {
+    "name": "빚기 · Use this step",
+    "win": "list",
+    "ok": true,
+    "ms": 334,
+    "value": true,
+    "snap": "13-list.png"
+  },
+  {
+    "name": "설정 · General",
+    "win": "settings",
+    "ok": true,
+    "ms": 1858,
+    "snap": "14-settings.png"
+  },
+  {
+    "name": "설정 · 바로가기 추가 시트",
+    "win": "settings",
+    "ok": true,
+    "ms": 2568,
+    "value": true,
+    "snap": "15-settings.png"
+  },
+  {
+    "name": "설정 · 바로가기 저장",
+    "win": "settings",
+    "ok": true,
+    "ms": 840,
+    "value": true,
+    "snap": "16-settings.png"
+  },
+  {
+    "name": "설정 · Tools 탭 (MCP 연결 확인)",
+    "win": "settings",
+    "ok": true,
+    "ms": 1871,
+    "note": "열자마자 MCP 상태가 보이는가",
+    "snap": "17-settings.png"
+  },
+  {
+    "name": "설정 · Tools 탭 MCP 상태가 나온다",
+    "win": "settings",
+    "ok": true,
+    "ms": 8154,
+    "snap": "18-settings.png"
+  },
+  {
+    "name": "설정 · Notion을 켠다",
+    "win": "settings",
+    "ok": true,
+    "ms": 978,
+    "value": "on",
+    "snap": "19-settings.png"
+  },
+  {
+    "name": "빚기 · Notion을 켠 채로 연다",
+    "win": "list",
+    "ok": true,
+    "ms": 1848,
+    "snap": "20-list.png"
+  },
+  {
+    "name": "빚기 · Notion 읽기가 끝난다",
+    "win": "list",
+    "ok": true,
+    "ms": 10182,
+    "snap": "21-list.png"
+  },
+  {
+    "name": "빚기 · Notion 자료로 Shape it",
+    "win": "list",
+    "ok": true,
+    "ms": 4372,
+    "value": true,
+    "snap": "22-list.png"
+  },
+  {
+    "name": "빚기 · 목록으로 돌아간다",
+    "win": "list",
+    "ok": true,
+    "ms": 8,
+    "value": true
+  },
+  {
+    "name": "오류 · claude 경로를 틀리게 바꾼다",
+    "win": "settings",
+    "ok": true,
+    "ms": 3088,
+    "value": true,
+    "snap": "24-settings.png"
+  },
+  {
+    "name": "오류 · 긴 생각을 넣으면 안내가 나온다",
+    "win": "quick",
+    "ok": true,
+    "ms": 306,
+    "value": true
+  },
+  {
+    "name": "오류 · 확인 창 안내",
+    "win": "review",
+    "ok": true,
+    "ms": 328,
+    "snap": "26-review.png"
+  },
+  {
+    "name": "오류 · 나누지 않고 넣기",
+    "win": "review",
+    "ok": true,
+    "ms": 962,
+    "value": true
+  },
+  {
+    "name": "오류 · 경로를 비워 되돌린다",
+    "win": "settings",
+    "ok": true,
+    "ms": 1876,
+    "value": true,
+    "snap": "28-settings.png"
+  },
+  {
+    "name": "마지막 · 목록",
+    "win": "list",
+    "ok": true,
+    "ms": 957,
+    "snap": "29-list.png"
+  }
+]

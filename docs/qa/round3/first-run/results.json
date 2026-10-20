@@ -1,0 +1,260 @@
+[
+  {
+    "name": "첫 실행 · 시작하기 창이 열린다",
+    "win": "welcome",
+    "ok": true,
+    "ms": 5171,
+    "note": "Claude Code 위치·버전, 단축키, Claude에 연결된 MCP 서비스가 한 장에 보이는가",
+    "snap": "01-welcome.png"
+  },
+  {
+    "name": "시작하기 · Pick your tools → Choose",
+    "win": "welcome",
+    "ok": true,
+    "ms": 906,
+    "value": true,
+    "snap": "02-welcome.png"
+  },
+  {
+    "name": "시작하기 · Start",
+    "win": "welcome",
+    "ok": true,
+    "ms": 607,
+    "value": true
+  },
+  {
+    "name": "첫 실행 · 메뉴바 목록을 연다",
+    "win": "list",
+    "ok": true,
+    "ms": 1138,
+    "note": "처음 쓰는 사람이 무엇을 해야 하는지, Claude Code가 준비됐는지 알 수 있는가",
+    "snap": "04-list.png"
+  },
+  {
+    "name": "빠른 입력 · 짧은 할 일을 적는다",
+    "win": "quick",
+    "ok": true,
+    "ms": 650,
+    "value": true,
+    "snap": "05-quick.png"
+  },
+  {
+    "name": "빠른 입력 · Enter로 넣는다",
+    "win": "quick",
+    "ok": true,
+    "ms": 604,
+    "value": true
+  },
+  {
+    "name": "목록에 짧은 할 일이 들어갔다",
+    "win": "list",
+    "ok": true,
+    "ms": 335,
+    "snap": "07-list.png"
+  },
+  {
+    "name": "빠른 입력 · 긴 생각을 적는다",
+    "win": "quick",
+    "ok": true,
+    "ms": 643,
+    "value": true,
+    "snap": "08-quick.png"
+  },
+  {
+    "name": "빠른 입력 · Enter로 확인 창을 연다",
+    "win": "quick",
+    "ok": true,
+    "ms": 504,
+    "value": true
+  },
+  {
+    "name": "확인 창 · Claude가 나누는 중",
+    "win": "review",
+    "ok": true,
+    "ms": 350,
+    "snap": "10-review.png"
+  },
+  {
+    "name": "확인 창 · 나눈 결과",
+    "win": "review",
+    "ok": true,
+    "ms": 4128,
+    "snap": "11-review.png"
+  },
+  {
+    "name": "확인 창 · Add N tasks",
+    "win": "review",
+    "ok": true,
+    "ms": 804,
+    "value": true
+  },
+  {
+    "name": "목록 · 나눈 할 일이 들어왔다",
+    "win": "list",
+    "ok": true,
+    "ms": 339,
+    "snap": "13-list.png"
+  },
+  {
+    "name": "목록 · 정리 안 된 할 일을 누른다",
+    "win": "list",
+    "ok": true,
+    "ms": 1020,
+    "value": true,
+    "snap": "14-list.png"
+  },
+  {
+    "name": "빚기 · Shape it",
+    "win": "list",
+    "ok": true,
+    "ms": 5875,
+    "value": true,
+    "snap": "15-list.png"
+  },
+  {
+    "name": "빚기 · Use this step",
+    "win": "list",
+    "ok": true,
+    "ms": 347,
+    "value": true,
+    "snap": "16-list.png"
+  },
+  {
+    "name": "설정 · General",
+    "win": "settings",
+    "ok": true,
+    "ms": 1848,
+    "snap": "17-settings.png"
+  },
+  {
+    "name": "설정 · 바로가기 추가 시트",
+    "win": "settings",
+    "ok": true,
+    "ms": 2568,
+    "value": true,
+    "snap": "18-settings.png"
+  },
+  {
+    "name": "설정 · 바로가기 저장",
+    "win": "settings",
+    "ok": true,
+    "ms": 837,
+    "value": true,
+    "snap": "19-settings.png"
+  },
+  {
+    "name": "설정 · Tools 탭 (MCP 연결 확인)",
+    "win": "settings",
+    "ok": true,
+    "ms": 1862,
+    "note": "열자마자 MCP 상태가 보이는가",
+    "snap": "20-settings.png"
+  },
+  {
+    "name": "설정 · Tools 탭 MCP 상태가 나온다",
+    "win": "settings",
+    "ok": true,
+    "ms": 364,
+    "note": "상태 확인이 몇 초 걸리는가 (1회차 8.2초)",
+    "snap": "21-settings.png"
+  },
+  {
+    "name": "설정 · Notion을 켠다",
+    "win": "settings",
+    "ok": true,
+    "ms": 16318,
+    "note": "켤 때 실제로 한 번 읽어 보고 결과를 보여 주는가",
+    "value": "on",
+    "snap": "22-settings.png"
+  },
+  {
+    "name": "설정 · Figma frame을 켠다 (바로가기 프레임 읽기)",
+    "win": "settings",
+    "ok": true,
+    "ms": 14715,
+    "value": "on",
+    "snap": "23-settings.png"
+  },
+  {
+    "name": "빚기 · Notion을 켠 채로 연다",
+    "win": "list",
+    "ok": true,
+    "ms": 1847,
+    "note": "오늘 목록의 첫 정리 안 된 할 일",
+    "snap": "24-list.png"
+  },
+  {
+    "name": "빚기 · Notion 읽기가 끝난다",
+    "win": "list",
+    "ok": true,
+    "ms": 8660,
+    "snap": "25-list.png"
+  },
+  {
+    "name": "빚기 · Notion 자료로 Shape it",
+    "win": "list",
+    "ok": true,
+    "ms": 3857,
+    "value": true,
+    "snap": "26-list.png"
+  },
+  {
+    "name": "빚기 · 목록으로 돌아간다",
+    "win": "list",
+    "ok": true,
+    "ms": 6,
+    "value": true
+  },
+  {
+    "name": "오류 · claude 경로를 틀리게 바꾼다",
+    "win": "settings",
+    "ok": true,
+    "ms": 3048,
+    "value": true,
+    "snap": "28-settings.png"
+  },
+  {
+    "name": "오류 · 긴 생각을 넣으면 안내가 나온다",
+    "win": "quick",
+    "ok": true,
+    "ms": 308,
+    "value": true
+  },
+  {
+    "name": "오류 · 확인 창 안내",
+    "win": "review",
+    "ok": true,
+    "ms": 323,
+    "snap": "30-review.png"
+  },
+  {
+    "name": "오류 · 나누지 않고 넣기",
+    "win": "review",
+    "ok": true,
+    "ms": 804,
+    "value": true
+  },
+  {
+    "name": "오류 · 나누지 않고 넣은 생각이 목록에 있다",
+    "win": "list",
+    "ok": true,
+    "ms": 341,
+    "note": "1회차에서 실패: 버튼이 동작하지 않았음",
+    "snap": "32-list.png"
+  },
+  {
+    "name": "오류 · 경로를 비워 되돌린다",
+    "win": "settings",
+    "ok": true,
+    "ms": 1844,
+    "value": true,
+    "snap": "33-settings.png"
+  },
+  {
+    "name": "마지막 · 목록",
+    "win": "list",
+    "ok": true,
+    "ms": 942,
+    "snap": "34-list.png"
+  }
+]

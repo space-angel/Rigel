@@ -1,0 +1,24 @@
+[
+  {
+    "name": "Claude Code 없음 · 시작하기 창",
+    "win": "welcome",
+    "ok": true,
+    "ms": 372,
+    "note": "설치 안내, 파일 고르기, 다시 찾기가 보이고 Claude Code 단계가 주인공인가",
+    "snap": "01-welcome.png"
+  },
+  {
+    "name": "Claude Code 없음 · 짧은 할 일은 그대로 들어간다",
+    "win": "quick",
+    "ok": true,
+    "ms": 653,
+    "value": true
+  },
+  {
+    "name": "Claude Code 없음 · 목록",
+    "win": "list",
+    "ok": true,
+    "ms": 338,
+    "snap": "03-list.png"
+  }
+]
