@@ -3,12 +3,14 @@
 // 실행: node scripts/i18n-check.ts
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { KO } from "../src/shared/i18n.ko.ts";
 
 // 어느 언어에서나 그대로 쓰는 이름
 const SAME = new Set(["Figma", "Notion", "Linear", "Claude", "todoBAN", "Sonnet", "Haiku"]);
 
-const root = new URL("../src/", import.meta.url).pathname;
+// URL.pathname은 윈도우에서 /D:/… 가 되어 경로가 깨진다. fileURLToPath를 쓴다.
+const root = fileURLToPath(new URL("../src/", import.meta.url));
 const files: string[] = [];
 const walk = (dir: string) => {
   for (const name of readdirSync(dir)) {

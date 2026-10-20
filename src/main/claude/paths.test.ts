@@ -48,7 +48,8 @@ test("nvm·volta·bun·pnpm 같은 자리도 찾는다. nvm은 최신 노드부�
 test("셸에 물어볼 때는 사용자의 기본 셸로, 로그인 셸 → 대화형 순서", async () => {
   const { shellLookups } = await import("./paths.ts");
   assert.deepEqual(shellLookups("darwin", "/bin/bash"), [["/bin/bash", ["-lc", "command -v claude"]], ["/bin/bash", ["-ic", "command -v claude"]]]);
-  assert.equal(shellLookups("darwin", undefined)[0]![0], "/bin/zsh");
+  // SHELL이 비어 있으면 zsh (undefined를 넘기면 그 컴퓨터의 SHELL이 기본값으로 쓰여서 빈 문자열로 본다)
+  assert.equal(shellLookups("darwin", "")[0]![0], "/bin/zsh");
   assert.equal(shellLookups("darwin", "/opt/homebrew/bin/fish")[0]![0], "/opt/homebrew/bin/fish");
   assert.deepEqual(shellLookups("win32"), [["where.exe", ["claude"]]]);
 });
