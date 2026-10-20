@@ -12,7 +12,7 @@ test("한국어: 사전에 있으면 바꾸고 자리를 채운다, 없으면 �
 });
 
 test("마감 표시도 언어를 따른다", () => {
-  assert.equal(dueLabel("2026-10-24", "2026-10-21", "ko").text, "3일 남음");
+  assert.equal(dueLabel("2026-10-24", "2026-10-21", "ko").text, "3일 남았어요");
   assert.equal(dueLabel("2026-10-24", "2026-10-21").text, "3 days left");
   assert.equal(dueBadge("2026-10-20", "2026-10-21", "ko").text, "지남");
   assert.equal(deadlineOptions("2026-10-21", "ko")[0]!.label, "오늘");

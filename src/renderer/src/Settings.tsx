@@ -265,7 +265,7 @@ function McpGuide({ source, status, onClose }: { source: McpSource; status: McpS
           <li>
             {currentLang() === "ko" ? (
               <>
-                <kbd>claude</kbd>를 실행하고 <kbd>/mcp</kbd>를 입력해요
+                <kbd>claude</kbd>를 실행한 뒤 <kbd>/mcp</kbd>를 입력해 주세요
               </>
             ) : (
               <>

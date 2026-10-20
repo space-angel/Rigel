@@ -37,7 +37,7 @@ export function DuePicker({ item, onPick, onClose }: { item: TodoItem; onPick: (
       <div className="due-picker__actions">
         {item.dueDate && (
           <button type="button" className="text-button" onClick={() => onPick(null)}>
-            {t("Clear")}
+            {t("Clear deadline")}
           </button>
         )}
         <span className="spacer" />
