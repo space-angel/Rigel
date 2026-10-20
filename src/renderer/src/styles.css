@@ -1614,7 +1614,7 @@ body::-webkit-scrollbar-thumb {
   border-color: rgb(111 166 255 / 55%);
 }
 .dial__scale {
-  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform var(--dur-l) var(--ease-out);
 }
 .dial__tick {
   stroke: #fff;
@@ -2356,26 +2356,6 @@ body::-webkit-scrollbar-thumb {
   background: rgb(94 152 254 / 14%);
 }
 
-/* 방금 넣은 할 일: 파란 테두리가 잠깐 빛났다가 사라진다 */
-.row.is-new,
-.now-card.is-new {
-  animation: just-added 2.4s ease-out;
-}
-@keyframes just-added {
-  0%, 35% { box-shadow: inset 0 0 0 1px rgb(111 166 255 / 85%), 0 0 0 3px rgb(94 152 254 / 22%); }
-  100% { box-shadow: var(--shadow-row); }
-}
-.now-card.is-new {
-  animation-name: just-added-hero;
-}
-@keyframes just-added-hero {
-  0%, 35% { box-shadow: var(--shadow-hero), inset 0 0 0 1px rgb(111 166 255 / 85%), 0 0 0 3px rgb(94 152 254 / 22%); }
-  100% { box-shadow: var(--shadow-hero); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .row.is-new, .now-card.is-new { animation-duration: 0.01s; }
-  .row.is-new { box-shadow: inset 0 0 0 1px rgb(111 166 255 / 85%); }
-}
 
 /* 마감 배지: 지남(주황 진하게) · 오늘·내일(주황) · 여유(흐리게) */
 .due-badge {
@@ -2514,6 +2494,18 @@ body::-webkit-scrollbar-thumb {
   color: var(--orange-200);
 }
 .evidence__body {
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition:
+    height var(--dur-m) var(--ease-out),
+    opacity var(--dur-s) var(--ease-out);
+}
+.evidence.is-open .evidence__body {
+  height: auto;
+  opacity: 1;
+}
+.evidence__inner {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -2583,4 +2575,229 @@ body::-webkit-scrollbar-thumb {
   border-color: rgb(111 166 255 / 55%);
   background: rgb(94 152 254 / 18%);
   color: var(--blue-300);
+}
+
+/* ===== 움직임 (motion) =====
+   transform·opacity만 움직인다(GPU 합성). 예외: 근거 펼치기의 height(작은 영역), 비율 막대 칸 너비(flex-grow), 색 바꾸기.
+   들어올 때 --ease-out, 나갈 때 --ease-in(더 짧게), 손에 닿는 작은 것만 --ease-spring. */
+
+/* 누름: 버튼이 살짝 눌린다 */
+.button,
+.icon-button,
+.text-button,
+.start,
+.small-button,
+.word,
+.pill,
+.capture__send,
+.attach__item,
+.tool,
+.tab,
+.segmented__item {
+  transition:
+    transform var(--dur-press) var(--ease-out),
+    background-color var(--dur-xs) var(--ease-out),
+    border-color var(--dur-xs) var(--ease-out),
+    color var(--dur-xs) var(--ease-out),
+    opacity var(--dur-xs) var(--ease-out);
+}
+:is(.button, .icon-button, .text-button, .start, .small-button, .word, .pill, .capture__send, .attach__item, .tab, .segmented__item):active:not(:disabled) {
+  transform: scale(0.96);
+}
+.tool:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.row,
+.evidence,
+.draft {
+  transition:
+    background-color var(--dur-xs) var(--ease-out),
+    border-color var(--dur-xs) var(--ease-out);
+}
+
+/* 토글: 손잡이가 튕기듯 옮겨 간다 */
+.toggle::after {
+  transition: transform var(--dur-s) var(--ease-spring);
+}
+.toggle {
+  transition: background-color var(--dur-s) var(--ease-out);
+}
+
+/* 창 열기: 메뉴바 아래로 살짝 내려오며 커지고, 안의 내용이 뒤따른다.
+   카드 바탕은 그대로 두고(투명해지면 macOS 창 그림자가 사라진다) 위치·크기만 움직인다. */
+@keyframes open-drop {
+  from { transform: translateY(-6px) scale(0.985); }
+}
+@keyframes content-in {
+  from { opacity: 0; transform: translateY(-4px); }
+}
+.shell.is-opening,
+.quick.is-opening {
+  transform-origin: 50% 0;
+  animation: open-drop var(--dur-m) var(--ease-out);
+}
+.shell.is-opening > *,
+.quick.is-opening > * {
+  animation: content-in var(--dur-m) var(--ease-out) both;
+}
+.shell.is-opening > :nth-child(2) { animation-delay: 30ms; }
+.shell.is-opening > :nth-child(3) { animation-delay: 60ms; }
+.shell.is-opening > :nth-child(n + 4) { animation-delay: 80ms; }
+
+/* 화면 전환: 빚기로 들어가면 오른쪽에서, 목록으로 돌아오면 왼쪽에서 */
+@keyframes push-forward {
+  from { opacity: 0; transform: translateX(18px); }
+}
+@keyframes push-back {
+  from { opacity: 0; transform: translateX(-18px); }
+}
+.shell.view--forward > * {
+  animation: push-forward var(--dur-m) var(--ease-out) both;
+}
+.shell.view--back > * {
+  animation: push-back var(--dur-m) var(--ease-out) both;
+}
+
+/* 차례로 떠오르기: 확인 창 할 일 카드, 빚기 결과, 근거 줄 (--i 순서대로 40ms씩) */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+}
+.motion-rise {
+  animation: rise var(--dur-m) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+@keyframes pop {
+  from { opacity: 0; transform: scale(0.92); }
+}
+.motion-pop {
+  animation: pop var(--dur-s) var(--ease-spring) both;
+}
+@keyframes fade {
+  from { opacity: 0; }
+}
+.motion-fade {
+  animation: fade var(--dur-s) var(--ease-out) both;
+}
+
+/* 아래에서 올라오는 것(되살리기 안내, 마감 고르기): 나갈 때도 움직인다 */
+@keyframes sheet-in {
+  from { opacity: 0; transform: translateY(10px); }
+}
+@keyframes sheet-out {
+  to { opacity: 0; transform: translateY(6px); }
+}
+.motion-sheet[data-motion="enter"] {
+  animation: sheet-in var(--dur-m) var(--ease-out) both;
+}
+.motion-sheet[data-motion="exit"] {
+  animation: sheet-out var(--dur-s) var(--ease-in) both;
+  pointer-events: none;
+}
+
+/* 새 할 일: 위에서 미끄러져 들어오고, 테두리 빛(덧씌운 층의 opacity)이 사라진다 */
+.row,
+.now-card {
+  position: relative;
+}
+@keyframes slide-in {
+  from { opacity: 0; transform: translateY(-8px); }
+}
+@keyframes glow-out {
+  0%, 40% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.row.is-new,
+.now-card.is-new {
+  animation: slide-in var(--dur-m) var(--ease-out) both;
+}
+.row.is-new::after,
+.now-card.is-new::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgb(111 166 255 / 85%), 0 0 0 3px rgb(94 152 254 / 22%);
+  pointer-events: none;
+  animation: glow-out 2.4s var(--ease-out) both;
+}
+
+/* 체크: 체크 표시가 톡 튀고, 취소선이 왼쪽부터 그어지고, 줄이 흐려진다(360ms 뒤 끝낸 할 일로) */
+@keyframes check-pop {
+  0% { transform: scale(0.6); }
+  60% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+.is-completing .checkbox.is-checked {
+  animation: check-pop var(--dur-s) var(--ease-spring);
+}
+.row.is-completing .row__title,
+.now-card.is-completing .now-card__title {
+  position: relative;
+  color: var(--color-text-done);
+  transition: color var(--dur-m) var(--ease-out);
+}
+.row.is-completing .row__title::after,
+.now-card.is-completing .now-card__title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 52%;
+  height: 1.5px;
+  background: currentColor;
+  transform-origin: left;
+  animation: strike var(--dur-m) var(--ease-out) both;
+}
+@keyframes strike {
+  from { transform: scaleX(0); }
+}
+.row.is-completing,
+.now-card.is-completing {
+  animation: fade-down var(--dur-l) var(--ease-in) 120ms both;
+}
+@keyframes fade-down {
+  to { opacity: 0.45; transform: translateY(2px); }
+}
+
+/* 비율 막대: 칸 너비가 바뀐 값으로 따라간다 */
+.ratio__seg,
+.mix__cell {
+  transition: flex-grow var(--dur-m) var(--ease-out);
+}
+/* 다이얼 라벨 색 */
+.dial__label {
+  transition: fill var(--dur-s) var(--ease-out);
+}
+/* 근거 펼치기 화살표 */
+.evidence__chev {
+  transition: transform var(--dur-s) var(--ease-out);
+}
+
+/* 움직임 줄이기: 위치·크기 움직임을 없애고 바로 바꾼다(진행 표시 회전만 남김). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+  .spinner {
+    animation-duration: 0.9s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
+
+/* 머리 한 줄 유지: 버튼이 셋이 되면서 날짜·개수 줄이 접히던 것 */
+.header__title {
+  min-width: 0;
+}
+.header__sub {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.header__sub .chip {
+  flex: none;
 }

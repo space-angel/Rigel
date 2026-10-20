@@ -30,7 +30,9 @@ export function Evidence({
   item,
   words,
   onLeaveOut,
+  index,
 }: {
+  index?: number;
   source: string;
   label: string;
   weight?: number;
@@ -47,7 +49,7 @@ export function Evidence({
   const matched = words.filter((w) => hay.includes(w.toLowerCase()));
   const weak = Boolean(item) && words.length > 0 && matched.length === 0;
   return (
-    <div className={`evidence${open ? " is-open" : ""}${weak ? " is-weak" : ""}`}>
+    <div className={`evidence${open ? " is-open" : ""}${weak ? " is-weak" : ""}${index !== undefined ? " motion-rise" : ""}`} style={index !== undefined ? ({ "--i": index } as React.CSSProperties) : undefined}>
       <button type="button" className="evidence__row" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
         <span className="made__icon">
           <SourceIcon source={source} size={12} />
@@ -57,8 +59,10 @@ export function Evidence({
         {weight !== undefined && <span className="made__pct">{weight}%</span>}
         <ChevronDownIcon size={12} className="evidence__chev" />
       </button>
-      {open && (
-        <div className="evidence__body">
+      {/* 닫혀 있어도 그려 두고 높이로 열고 닫는다(부드럽게 펼치기). 닫혀 있으면 누를 수 없게 inert. */}
+      {(
+        <div className="evidence__body" inert={!open} aria-hidden={!open}>
+          <div className="evidence__inner">
           <p className="evidence__where">
             {isFile ? item?.where : name}
             {!isFile && item?.workspace ? ` · ${item.workspace}` : ""}
@@ -91,6 +95,7 @@ export function Evidence({
                 Leave this out and reshape
               </button>
             )}
+          </div>
           </div>
         </div>
       )}

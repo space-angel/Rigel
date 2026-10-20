@@ -11,6 +11,7 @@ import { FirstStepCard } from "./FirstStepCard";
 import { ShapePanel } from "./Shape";
 import { Attachments } from "./components/Attachments";
 import { DuePicker } from "./components/DuePicker";
+import { Presence } from "./components/Presence";
 import { dueBadge, dueLabel } from "@shared/due";
 
 // 마감 배지. 줄에서는 짧게(D-3), 지금 할 일 카드에서는 말로(3 days left).
@@ -158,6 +159,7 @@ function NowCard({
   onShape,
   edit,
   isNew,
+  completing,
 }: {
   item: TodoItem;
   shortcut?: Shortcut;
@@ -167,11 +169,12 @@ function NowCard({
   onShape: () => void;
   edit: EditProps;
   isNew?: boolean;
+  completing?: boolean;
 }) {
   const click = useSingleClick(item.isClear || edit.editing ? undefined : onShape);
   return (
     <div
-      className={`now-card${selected ? " is-selected" : ""}${isNew ? " is-new" : ""}`}
+      className={`now-card${selected ? " is-selected" : ""}${isNew ? " is-new" : ""}${completing ? " is-completing" : ""}`}
       {...click}
       onContextMenu={(e) => {
         e.preventDefault();
@@ -185,7 +188,7 @@ function NowCard({
         </span>
         <span className="now-card__tools">
           <MoreButton onMenu={edit.onMenu} />
-          <Checkbox checked={false} onToggle={onToggle} variant="now" />
+          <Checkbox checked={Boolean(completing)} onToggle={onToggle} variant="now" />
         </span>
       </div>
       <Title item={item} className="now-card__title" {...edit} />
@@ -228,6 +231,7 @@ function Row({
   onFirstStep,
   edit,
   isNew,
+  completing,
 }: {
   item: TodoItem;
   shortcut?: Shortcut;
@@ -238,19 +242,20 @@ function Row({
   onFirstStep?: () => void;
   edit: EditProps;
   isNew?: boolean;
+  completing?: boolean;
 }) {
   const unclear = !item.isClear && !done;
   const click = useSingleClick(unclear && !edit.editing ? onFirstStep : undefined);
   return (
     <div
-      className={`row${selected ? " is-selected" : ""}${done ? " is-done" : ""}${unclear ? " is-unclear" : ""}${edit.editing ? " is-editing" : ""}${isNew ? " is-new" : ""}`}
+      className={`row${selected ? " is-selected" : ""}${done ? " is-done" : ""}${unclear ? " is-unclear" : ""}${edit.editing ? " is-editing" : ""}${isNew ? " is-new" : ""}${completing ? " is-completing" : ""}`}
       {...click}
       onContextMenu={(e) => {
         e.preventDefault();
         edit.onMenu();
       }}
     >
-      <Checkbox checked={Boolean(done)} onToggle={onToggle} />
+      <Checkbox checked={Boolean(done) || Boolean(completing)} onToggle={onToggle} />
       {unclear && <span className="row__dot" aria-label="Unclear" />}
       <Title item={item} className="row__title" {...edit} />
       {!edit.editing && (
@@ -311,6 +316,10 @@ export function TodayList() {
   const [highlight, setHighlight] = useState<string[]>([]);
   // 마감을 고르는 중인 할 일 (메뉴의 Pick a date…, ⌘D)
   const [duePickId, setDuePickId] = useState<string | null>(null);
+  // 체크한 할 일: 체크·취소선이 그어지는 동안(360ms) 자리에 두었다가 끝낸 할 일로 보낸다.
+  const [completing, setCompleting] = useState<string[]>([]);
+  // 화면 전환 방향(목록 → 빚기는 앞으로, 돌아오면 뒤로)과 창 열기 움직임
+  const [viewDir, setViewDir] = useState<"forward" | "back" | null>(null);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dataRef = useRef<AppData | null>(null);
   dataRef.current = data;
@@ -321,13 +330,17 @@ export function TodayList() {
     const offData = api.onData(setData);
     const offFirst = api.onFirstSteps(setFirstSteps);
     const offOpen = api.onListOpened((opts) => {
+      replayOpen();
       setSelected(0);
       setDial("today");
       setShaping(null);
       rootRef.current?.focus();
       if (opts?.highlight?.length) setHighlight(opts.highlight);
     });
-    const offShape = api.onShapeOpen((id, auto) => setShaping({ id, auto }));
+    const offShape = api.onShapeOpen((id, auto) => {
+      setViewDir("forward");
+      setShaping({ id, auto });
+    });
     // ⋯ 메뉴나 오른쪽 클릭 메뉴에서 고르면 메인이 알려 준다.
     const offRequest = api.onTodoRequest((kind, id) => {
       if (kind === "edit") setEditingId(id);
@@ -363,6 +376,27 @@ export function TodayList() {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     el.scrollIntoView({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
   }, [selected, dial]);
+
+  // 창을 열 때마다 내려오는 움직임을 다시 튼다(같은 요소에 클래스를 뺐다 넣는다).
+  const replayOpen = () => {
+    const el = shellRef.current;
+    if (!el) return;
+    el.classList.remove("is-opening");
+    void el.offsetWidth;
+    el.classList.add("is-opening");
+    // 움직임이 끝나면 클래스를 뺀다(나중에 생기는 요소가 다시 움직이지 않게).
+    setTimeout(() => el.classList.remove("is-opening"), 400);
+  };
+  const complete = (t: TodoItem) => {
+    const toggle = () => api.act({ type: "toggle", id: t.id }).then(setData);
+    if (t.completedAt || completing.includes(t.id)) return void toggle();
+    setCompleting((c) => [...c, t.id]);
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setTimeout(() => {
+      toggle();
+      setCompleting((c) => c.filter((x) => x !== t.id));
+    }, reduce ? 0 : 360);
+  };
 
   // 지우면 바로 지우고, 5초 동안 되살리기 안내를 보여 준다.
   const remove = (t: TodoItem) => {
@@ -416,7 +450,10 @@ export function TodayList() {
   const askFirstStep = (t: TodoItem) => {
     if (!stepOf(t.id)) api.requestFirstStep(t.id);
   };
-  const shape = (t: TodoItem) => setShaping({ id: t.id, auto: false });
+  const shape = (t: TodoItem) => {
+    setViewDir("forward");
+    setShaping({ id: t.id, auto: false });
+  };
   const edit = (t: TodoItem): EditProps => ({
     editing: editingId === t.id,
     onEdit: () => setEditingId(t.id),
@@ -447,7 +484,10 @@ export function TodayList() {
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (shaping) {
-      if (e.key === "Escape") setShaping(null);
+      if (e.key === "Escape") {
+        setViewDir("back");
+        setShaping(null);
+      }
       return;
     }
     const current = rows[selected];
@@ -456,7 +496,7 @@ export function TodayList() {
     else if (e.key === "ArrowUp") setSelected((s) => Math.max(s - 1, 0));
     else if (e.key === "ArrowLeft" && di > 0) turnDial(DIAL_VIEWS[di - 1]!);
     else if (e.key === "ArrowRight" && di < DIAL_VIEWS.length - 1) turnDial(DIAL_VIEWS[di + 1]!);
-    else if (e.key === " " && current) act({ type: "toggle", id: current.id });
+    else if (e.key === " " && current) complete(current);
     else if (e.key === "Enter" && current && !current.isClear && !current.completedAt) (dial === "today" ? askFirstStep(current) : shape(current));
     else if (e.key === "Enter" && current && shortcutOf(current)) api.openShortcut(current.shortcutId!);
     else if (e.key === "," && e.metaKey) api.openSettings();
@@ -482,7 +522,7 @@ export function TodayList() {
   if (shapingTodo)
     return (
       <div className="window" ref={rootRef} tabIndex={0} onKeyDown={onKeyDown}>
-        <div className={`shell${data.settings.listPin.pinned ? " is-pinned" : ""}`} ref={shellRef}>
+        <div className={`shell${data.settings.listPin.pinned ? " is-pinned" : ""}${viewDir ? ` view--${viewDir}` : ""}`} ref={shellRef}>
           <ShapePanel
             key={shapingTodo.id}
             todo={shapingTodo}
@@ -490,6 +530,7 @@ export function TodayList() {
             state={stepOf(shapingTodo.id)}
             auto={shaping.auto}
             onClose={() => {
+              setViewDir("back");
               setShaping(null);
               rootRef.current?.focus();
             }}
@@ -500,7 +541,7 @@ export function TodayList() {
 
   return (
     <div className="window" ref={rootRef} tabIndex={0} onKeyDown={onKeyDown}>
-      <div className={`shell${data.settings.listPin.pinned ? " is-pinned" : ""}`} ref={shellRef}>
+      <div className={`shell${data.settings.listPin.pinned ? " is-pinned" : ""}${viewDir ? ` view--${viewDir}` : ""}`} ref={shellRef}>
         <header className="header">
           <div className="header__title">
             <h1>Today</h1>
@@ -553,7 +594,8 @@ export function TodayList() {
                   shortcut={shortcutOf(t)}
                   selected={selected === i}
                   done={dial === "done"}
-                  onToggle={() => act({ type: "toggle", id: t.id })}
+                  onToggle={() => complete(t)}
+                  completing={completing.includes(t.id)}
                   onFirstStep={() => shape(t)}
                   edit={edit(t)}
                   isNew={highlight.includes(t.id)}
@@ -619,14 +661,14 @@ export function TodayList() {
               <div className="list">
                 {now && (
                   <SortableItem id={now.id}>
-                    <NowCard item={now} shortcut={shortcutOf(now)} selected={selected === 0} onToggle={() => act({ type: "toggle", id: now.id })} onFirstStep={() => askFirstStep(now)} onShape={() => shape(now)} edit={edit(now)} isNew={highlight.includes(now.id)} />
+                    <NowCard item={now} shortcut={shortcutOf(now)} selected={selected === 0} onToggle={() => complete(now)} completing={completing.includes(now.id)} onFirstStep={() => askFirstStep(now)} onShape={() => shape(now)} edit={edit(now)} isNew={highlight.includes(now.id)} />
                   </SortableItem>
                 )}
                 {now && stepCard(now)}
                 {rest.map((t, i) => (
                   <div key={t.id}>
                     <SortableItem id={t.id}>
-                      <Row item={t} shortcut={shortcutOf(t)} selected={selected === i + 1} onToggle={() => act({ type: "toggle", id: t.id })} onFirstStep={() => shape(t)} edit={edit(t)} isNew={highlight.includes(t.id)} />
+                      <Row item={t} shortcut={shortcutOf(t)} selected={selected === i + 1} onToggle={() => complete(t)} completing={completing.includes(t.id)} onFirstStep={() => shape(t)} edit={edit(t)} isNew={highlight.includes(t.id)} />
                     </SortableItem>
                     {stepCard(t)}
                   </div>
@@ -650,30 +692,34 @@ export function TodayList() {
           )}
         </div>
 
-        {duePickId && data.todos.some((t) => t.id === duePickId) && (
-          <DuePicker
-            item={data.todos.find((t) => t.id === duePickId)!}
-            onPick={(date) => {
-              act({ type: "setDue", id: duePickId, dueDate: date });
-              setDuePickId(null);
-              rootRef.current?.focus();
-            }}
-            onClose={() => {
-              setDuePickId(null);
-              rootRef.current?.focus();
-            }}
-          />
-        )}
-        {undo && (
-          <div className="toast" role="status">
-            <span className="toast__text">
-              Deleted “{undo.title}”
-            </span>
-            <button type="button" className="toast__undo" onClick={restore}>
-              Undo <kbd>⌘Z</kbd>
-            </button>
-          </div>
-        )}
+        <Presence value={duePickId ? data.todos.find((t) => t.id === duePickId) : null}>
+          {(item, state) => (
+            <div className="motion-sheet" data-motion={state}>
+              <DuePicker
+                item={item}
+                onPick={(date) => {
+                  act({ type: "setDue", id: item.id, dueDate: date });
+                  setDuePickId(null);
+                  rootRef.current?.focus();
+                }}
+                onClose={() => {
+                  setDuePickId(null);
+                  rootRef.current?.focus();
+                }}
+              />
+            </div>
+          )}
+        </Presence>
+        <Presence value={undo}>
+          {(u, state) => (
+            <div className="toast motion-sheet" data-motion={state} role="status">
+              <span className="toast__text">Deleted “{u.title}”</span>
+              <button type="button" className="toast__undo" onClick={restore}>
+                Undo <kbd>⌘Z</kbd>
+              </button>
+            </div>
+          )}
+        </Presence>
         <footer className="capture">
           <AiSparkle size={14} className="capture__icon" />
           <input

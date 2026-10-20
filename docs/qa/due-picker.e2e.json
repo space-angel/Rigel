@@ -24,7 +24,7 @@
     "run": "__e2e.click(__e2e.all('.due-picker .word')[2]); return true;",
     "wait": 500,
     "snap": true,
-    "expect": "!__e2e.$('.due-picker') && __e2e.all('.row').some(r => r.textContent.includes('우테크') && r.querySelector('.due-badge')?.textContent === 'D-3')"
+    "expect": "!__e2e.$('.due-picker') && __e2e.all('.row').some(r => r.textContent.includes('우테크') && /^D-\\d$/.test(r.querySelector('.due-badge')?.textContent ?? ''))"
   },
   {
     "name": "짧은 입력 · 금요일 면접",
@@ -33,11 +33,11 @@
     "wait": 200
   },
   {
-    "name": "Tomorrow·Later 쪽에 D-3",
+    "name": "Tomorrow·Later 쪽에 D-n",
     "win": "list",
     "until": "__e2e.$('.is-new')",
     "wait": 500,
     "snap": true,
-    "expect": "__e2e.$('.is-new .due-badge')?.textContent === 'D-3'"
+    "expect": "/^D-\\d$/.test(__e2e.$('.is-new .due-badge')?.textContent ?? '')"
   }
 ]

@@ -14,6 +14,14 @@ export function QuickInput() {
   useEffect(
     () =>
       api.onQuickOpened(() => {
+        // 열 때마다 내려오는 움직임을 다시 튼다.
+        const el = panelRef.current;
+        if (el) {
+          el.classList.remove("is-opening");
+          void el.offsetWidth;
+          el.classList.add("is-opening");
+          setTimeout(() => el.classList.remove("is-opening"), 400);
+        }
         setBusy(false);
         inputRef.current?.focus();
         inputRef.current?.select();
@@ -69,12 +77,12 @@ export function QuickInput() {
         </div>
         <div className="quick__hint">
           {kind === "short" && (
-            <span className="quick__kind">
+            <span className="quick__kind motion-fade" key="short">
               <ArrowRightIcon size={12} /> {count} chars · straight into today
             </span>
           )}
           {kind === "long" && (
-            <span className="quick__kind quick__kind--ai">
+            <span className="quick__kind quick__kind--ai motion-fade" key="long">
               <AiSparkle size={12} /> {count} chars · Claude splits it into tasks
             </span>
           )}

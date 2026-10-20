@@ -1,0 +1,76 @@
+[
+  {
+    "name": "M1 목록 열기",
+    "win": "list",
+    "main": "openList",
+    "run": "await new Promise(r => requestAnimationFrame(() => setTimeout(r, 20))); const a = document.getAnimations(); a.forEach(x => { x.pause(); x.currentTime = 90; }); return [...new Set(a.map(x => x.animationName + ' ' + x.effect.getTiming().duration + 'ms'))];",
+    "snap": true
+  },
+  {
+    "name": "M1 이어서",
+    "win": "list",
+    "run": "document.getAnimations().forEach(x => x.play()); await new Promise(r => setTimeout(r, 500)); return document.getAnimations().length;"
+  },
+  {
+    "name": "M2 체크",
+    "win": "list",
+    "run": "__e2e.key('.window', 'ArrowDown'); await new Promise(r => setTimeout(r, 300)); __e2e.key('.window', ' '); await new Promise(r => setTimeout(r, 30)); const a = document.getAnimations(); a.forEach(x => { x.pause(); x.currentTime = 200; }); return [...new Set(a.map(x => x.animationName + ' ' + x.effect.getTiming().duration + 'ms'))];",
+    "snap": true
+  },
+  {
+    "name": "M2 이어서 → 끝낸 할 일로",
+    "win": "list",
+    "run": "document.getAnimations().forEach(x => x.play()); await new Promise(r => setTimeout(r, 700)); return __e2e.all('.row.is-completing').length;"
+  },
+  {
+    "name": "M3 새 할 일",
+    "win": "quick",
+    "run": "__e2e.type('textarea', '우유 사기'); __e2e.key('textarea', 'Enter'); return true;"
+  },
+  {
+    "name": "M3 새 할 일 움직임",
+    "win": "list",
+    "until": "__e2e.$('.is-new')",
+    "run": "await new Promise(r => setTimeout(r, 30)); const a = document.getAnimations().filter(x => x.effect.target.closest?.('.is-new') || x.effect.target === __e2e.$('.is-new')); a.forEach(x => { x.pause(); x.currentTime = 120; }); return [...new Set(a.map(x => x.animationName + ' ' + x.effect.getTiming().duration + 'ms'))];",
+    "snap": true
+  },
+  {
+    "name": "M3 이어서",
+    "win": "list",
+    "run": "document.getAnimations().forEach(x => x.play()); await new Promise(r => setTimeout(r, 300)); return true;"
+  },
+  {
+    "name": "M4 빚기로 (앞으로)",
+    "win": "list",
+    "run": "await new Promise(r => setTimeout(r, 40)); const a = document.getAnimations(); a.forEach(x => { x.pause(); x.currentTime = 100; }); return [...new Set(a.map(x => (x.animationName ?? 'transition') + ' ' + x.effect.getTiming().duration + 'ms'))];",
+    "snap": true,
+    "main": "shape:*"
+  },
+  {
+    "name": "M4 목록으로 (뒤로)",
+    "win": "list",
+    "run": "document.getAnimations().forEach(x => x.finish?.()); await new Promise(r => setTimeout(r, 200)); __e2e.click('.back'); await new Promise(r => setTimeout(r, 30)); const a = document.getAnimations(); a.forEach(x => { x.pause(); x.currentTime = 100; }); return [...new Set(a.map(x => x.animationName + ' ' + x.effect.getTiming().duration + 'ms'))];",
+    "snap": true
+  },
+  {
+    "name": "M5 지우기 → 안내 올라옴",
+    "win": "list",
+    "run": "document.getAnimations().forEach(x => x.finish?.()); __e2e.key('.window', 'Backspace', { metaKey: true }); await new Promise(r => setTimeout(r, 30)); return document.getAnimations().map(x => x.animationName + ' ' + x.effect.getTiming().duration + 'ms');"
+  },
+  {
+    "name": "M5 되살리기 → 안내 내려감",
+    "win": "list",
+    "run": "await new Promise(r => setTimeout(r, 300)); __e2e.key('.window', 'z', { code: 'KeyZ', metaKey: true }); await new Promise(r => setTimeout(r, 30)); return { anims: document.getAnimations().map(x => x.animationName + ' ' + x.effect.getTiming().duration + 'ms'), toastStill: !!__e2e.$('.toast') };"
+  },
+  {
+    "name": "M5 끝나면 사라짐",
+    "win": "list",
+    "wait": 300,
+    "expect": "!__e2e.$('.toast')"
+  },
+  {
+    "name": "M6 ⌘D 마감 고르기",
+    "win": "list",
+    "run": "__e2e.key('.window', 'd', { code: 'KeyD', metaKey: true }); await new Promise(r => setTimeout(r, 30)); return document.getAnimations().map(x => x.animationName);"
+  }
+]

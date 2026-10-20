@@ -1,0 +1,139 @@
+[
+  {
+    "name": "M1 목록 열기",
+    "win": "list",
+    "ok": true,
+    "ms": 353,
+    "value": [
+      "open-drop 240ms",
+      "content-in 240ms"
+    ],
+    "snap": "01-list.png"
+  },
+  {
+    "name": "M1 이어서",
+    "win": "list",
+    "ok": true,
+    "ms": 502,
+    "value": 0
+  },
+  {
+    "name": "M2 체크",
+    "win": "list",
+    "ok": true,
+    "ms": 690,
+    "value": [
+      "undefined 240ms",
+      "fade-down 320ms",
+      "check-pop 180ms",
+      "strike 240ms"
+    ],
+    "snap": "03-list.png"
+  },
+  {
+    "name": "M2 이어서 → 끝낸 할 일로",
+    "win": "list",
+    "ok": true,
+    "ms": 706,
+    "value": 0
+  },
+  {
+    "name": "M3 새 할 일",
+    "win": "quick",
+    "ok": true,
+    "ms": 25,
+    "value": true
+  },
+  {
+    "name": "M3 새 할 일 움직임",
+    "win": "list",
+    "ok": true,
+    "ms": 404,
+    "value": [
+      "slide-in 240ms",
+      "glow-out 2400ms"
+    ],
+    "snap": "06-list.png"
+  },
+  {
+    "name": "M3 이어서",
+    "win": "list",
+    "ok": true,
+    "ms": 305,
+    "value": true
+  },
+  {
+    "name": "M4 빚기로 (앞으로)",
+    "win": "list",
+    "ok": true,
+    "ms": 603,
+    "value": [
+      "push-forward 240ms"
+    ],
+    "snap": "08-list.png"
+  },
+  {
+    "name": "M4 목록으로 (뒤로)",
+    "win": "list",
+    "ok": true,
+    "ms": 588,
+    "value": [
+      "push-back 240ms",
+      "slide-in 240ms",
+      "glow-out 2400ms"
+    ],
+    "snap": "09-list.png"
+  },
+  {
+    "name": "M5 지우기 → 안내 올라옴",
+    "win": "list",
+    "ok": true,
+    "ms": 33,
+    "value": [
+      "undefined 240ms",
+      "push-back 240ms",
+      "push-back 240ms",
+      "push-back 240ms",
+      "sheet-in 240ms",
+      "push-back 240ms"
+    ]
+  },
+  {
+    "name": "M5 되살리기 → 안내 내려감",
+    "win": "list",
+    "ok": true,
+    "ms": 339,
+    "value": {
+      "anims": [
+        "undefined 240ms",
+        "push-back 240ms",
+        "push-back 240ms",
+        "push-back 240ms",
+        "slide-in 240ms",
+        "glow-out 2400ms",
+        "sheet-out 180ms",
+        "push-back 240ms"
+      ],
+      "toastStill": true
+    }
+  },
+  {
+    "name": "M5 끝나면 사라짐",
+    "win": "list",
+    "ok": true,
+    "ms": 302
+  },
+  {
+    "name": "M6 ⌘D 마감 고르기",
+    "win": "list",
+    "ok": true,
+    "ms": 33,
+    "value": [
+      "push-back",
+      "push-back",
+      "push-back",
+      "sheet-in",
+      "push-back"
+    ]
+  }
+]

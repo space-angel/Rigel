@@ -629,7 +629,9 @@ export function Settings({ initialTab, openSheet }: { initialTab: Tab; openSheet
           </button>
         </div>
       </div>
-      {tab === "general" ? <GeneralTab data={data} /> : tab === "tools" ? <ToolsTab data={data} /> : <ShortcutsTab data={data} openSheet={openSheet} />}
+      <div className="motion-fade" key={tab}>
+        {tab === "general" ? <GeneralTab data={data} /> : tab === "tools" ? <ToolsTab data={data} /> : <ShortcutsTab data={data} openSheet={openSheet} />}
+      </div>
     </div>
   );
 }

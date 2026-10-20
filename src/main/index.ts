@@ -182,6 +182,12 @@ function toggleListWindow(): void {
   listWindow.invalidateShadow();
   listWindow.focus();
   listWindow.webContents.send("list:opened");
+  settleShadow(listWindow);
+}
+
+// 여는 움직임(240ms)이 끝난 뒤 그림자를 다시 계산한다. 움직이는 중 모양으로 그림자가 남지 않게.
+function settleShadow(win: BrowserWindow): void {
+  setTimeout(() => !win.isDestroyed() && win.invalidateShadow(), 280);
 }
 
 // 빠른 입력창은 마우스가 있는 화면의 가운데보다 조금 위에 띄운다.
@@ -199,6 +205,7 @@ function showQuickWindow(): void {
   quickWindow.show();
   quickWindow.invalidateShadow();
   quickWindow.focus();
+  settleShadow(quickWindow);
   quickWindow.webContents.send("quick:opened");
 }
 

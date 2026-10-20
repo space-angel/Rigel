@@ -3,6 +3,8 @@
    L2 주요 동작: 파란 테두리 · L3 나머지: 흰 글래스 행. */
 :root {
   color-scheme: dark;
+  /* height: auto까지 부드럽게 열고 닫는다(근거 펼치기). */
+  interpolate-size: allow-keywords;
 
   --ink-0: #07080a;
   --ink-1: #0b0d11;
@@ -75,6 +77,16 @@
   --radius-r4: 16px;
   --radius-r5: 20px;
   --radius-full: 9999px;
+
+  /* 움직임: transform·opacity만 움직인다. 들어올 때는 감속(out), 나갈 때는 짧게 가속(in), 손에 닿는 작은 것만 살짝 튄다(spring). */
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --dur-press: 100ms;
+  --dur-xs: 120ms;
+  --dur-s: 180ms;
+  --dur-m: 240ms;
+  --dur-l: 320ms;
 
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Pretendard Variable", Pretendard, system-ui, sans-serif;
   --font-mono: "Geist Mono", "SF Mono", ui-monospace, Menlo, monospace;

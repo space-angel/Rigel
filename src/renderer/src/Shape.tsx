@@ -202,7 +202,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
       <div className="shape">
         {header("Your first step")}
         <div className="shape__body">
-          <div className="result">
+          <div className="result motion-rise">
             <div className="result__top">
               <span className="eyebrow">First step</span>
               {state.minutes && (
@@ -218,8 +218,9 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
                 <div className="made">
                   {state.sources
                     .filter((s) => s.source !== "claude")
-                    .map((s) => (
+                    .map((s, i) => (
                       <Evidence
+                        index={i + 1}
                         key={`${s.source}-${s.label}`}
                         source={s.source}
                         label={s.label}

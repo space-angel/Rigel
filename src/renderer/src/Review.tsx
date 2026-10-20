@@ -27,7 +27,7 @@ function DraftNotes({ notes, loading, onRemove }: { notes: ContextNote[]; loadin
   return (
     <div className="draft__notes">
       {notes.map((n) => (
-        <span className="note-chip" key={n.source}>
+        <span className="note-chip motion-pop" key={n.source}>
           <SourceIcon source={n.source} size={11} />
           <button
             type="button"
@@ -58,7 +58,9 @@ function DraftRow({
   onChange,
   onRemove,
   children,
+  index = 0,
 }: {
+  index?: number;
   draft: ReviewDraft;
   shortcuts: Shortcut[];
   onChange: (patch: Partial<ReviewDraft>) => void;
@@ -74,7 +76,7 @@ function DraftRow({
     onChange({ plannedDate: options[(i + 1) % options.length] ?? today });
   };
   return (
-    <div className={`draft${draft.isClear ? "" : " is-unclear"}`}>
+    <div className={`draft motion-rise${draft.isClear ? "" : " is-unclear"}`} style={{ "--i": index } as React.CSSProperties}>
       <div className="draft__top">
         <input
           className="draft__title"
@@ -275,8 +277,9 @@ export function Review() {
               </p>
             )}
             <div className="drafts">
-              {drafts.map((d) => (
+              {drafts.map((d, i) => (
                 <DraftRow
+                  index={i}
                   key={d.key}
                   draft={d}
                   shortcuts={shortcuts}
