@@ -1789,3 +1789,12 @@ body[data-view="review"] {
   align-items: center;
   gap: 8px;
 }
+.badge--mcp {
+  background: rgb(255 106 42 / 14%);
+  color: var(--orange-200);
+}
+.tool.is-loading .tool__item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

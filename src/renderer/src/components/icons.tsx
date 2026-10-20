@@ -102,3 +102,5 @@ export function FigmaMark({ size = 12 }: { size?: number }) {
 export const DocIcon = make(["M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8.414A2 2 0 0 0 19.414 7L15 2.586A2 2 0 0 0 13.586 2H6zm0 2h7v4a1 1 0 0 0 1 1h4v11H6V4z"], "DocIcon");
 export const ChevronLeftIcon = make(["M14.707 5.293a1 1 0 0 1 0 1.414L9.414 12l5.293 5.293a1 1 0 0 1-1.414 1.414l-6-6a1 1 0 0 1 0-1.414l6-6a1 1 0 0 1 1.414 0z"], "ChevronLeftIcon");
 export const UserIcon = make(["M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM6 8a6 6 0 1 1 12 0A6 6 0 0 1 6 8zm2 10a3 3 0 0 0-3 3 1 1 0 1 1-2 0 5 5 0 0 1 5-5h8a5 5 0 0 1 5 5 1 1 0 1 1-2 0 3 3 0 0 0-3-3H8z"], "UserIcon");
+export const NoteIcon = make(["M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5H5zm3 3h8a1 1 0 1 1 0 2H8a1 1 0 1 1 0-2zm0 4h8a1 1 0 1 1 0 2H8a1 1 0 1 1 0-2z"], "NoteIcon");
+export const IssueIcon = make(["M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12zm10-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"], "IssueIcon");

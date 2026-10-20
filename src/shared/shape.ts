@@ -1,28 +1,33 @@
 // 첫 행동 빚기(C1)의 순수 로직: 낱말 나누기, 크기, 출처별 비율.
 
+import type { McpSource } from "./mcp.ts";
+
 export const LOCAL_SOURCES = ["figma", "calendar", "files", "todoban"] as const;
 export type LocalSource = (typeof LOCAL_SOURCES)[number];
-export type SourceId = LocalSource | "claude";
+export type ToolSource = LocalSource | McpSource;
+export type SourceId = ToolSource | "claude";
 
 // 도구에서 찾은 자료 하나. open은 맥 안에서만 쓰고 Claude에게 보내지 않는다.
 export interface ToolItem {
-  source: LocalSource;
+  source: ToolSource;
   label: string;
+  text?: string; // MCP 도구가 읽은 요약 (400자 이내). LOCAL 도구는 없음
   date: string | null; // 일정이나 끝낸 날짜 (YYYY-MM-DD)
-  open: { kind: "shortcut"; id: string } | { kind: "file"; path: string } | { kind: "calendar" } | null;
+  open: { kind: "shortcut"; id: string } | { kind: "file"; path: string } | { kind: "calendar" } | { kind: "url"; source: McpSource; url: string } | null;
 }
 
-export type ToolStatus = "ok" | "empty" | "slow" | "denied" | "failed";
+export type ToolStatus = "ok" | "empty" | "slow" | "denied" | "failed" | "loading" | "needs-auth";
 export interface ToolResult {
-  source: LocalSource;
+  source: ToolSource;
   status: ToolStatus;
   item: ToolItem | null;
 }
 
-// Claude에게 보내는 자료. 제목 한 줄과 비율만 보낸다.
+// Claude에게 보내는 자료. 제목 한 줄과 비율, MCP 자료는 요약까지 보낸다.
 export interface ContextItem {
-  source: LocalSource;
+  source: ToolSource;
   label: string;
+  text?: string;
   date: string | null;
   weight: number;
 }
@@ -104,7 +109,7 @@ export function defaultMinutes(deadline: string | null, today: string): { minute
 export const CLAUDE_MIN = 10;
 
 // 고른 도구만으로 기본 비율을 다시 나눈다. 합은 100, Claude 몫은 최소 10이다.
-export function normalizeMix(defaults: Partial<Record<SourceId, number>>, selected: LocalSource[]): Record<string, number> {
+export function normalizeMix(defaults: Partial<Record<string, number>>, selected: ToolSource[]): Record<string, number> {
   if (!selected.length) return { claude: 100 };
   const raw = selected.map((s) => Math.max(1, defaults[s] ?? 15));
   const claudeRaw = Math.max(1, defaults.claude ?? 20);

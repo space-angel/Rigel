@@ -23,7 +23,7 @@
 ## type: firstStep
 입력: {"type":"firstStep","today":"YYYY-MM-DD","title":"면접 준비","rawText":"...","answer":null 또는 "사용자 답","previous":["이미 제안한 첫 행동", ...],"shortcuts":[...],
       "words":["면접","토스"] 또는 없음,"minutes":30 또는 없음,
-      "context":[{"source":"calendar","label":"Toss PO interview","date":"YYYY-MM-DD" 또는 null,"weight":20}] 또는 없음,"claudeWeight":20 또는 없음}
+      "context":[{"source":"calendar","label":"Toss PO interview","text":"요약" 또는 없음,"date":"YYYY-MM-DD" 또는 null,"weight":20}] 또는 없음,"claudeWeight":20 또는 없음}
 출력: {"title":"첫 행동 제목" 또는 null,"question":"질문 하나" 또는 null,"shortcut":"포폴" 또는 null,
       "minutes":30 또는 null,"sources":[{"source":"calendar","label":"면접 일정 금 2시","weight":20},{"source":"claude","label":"일반 지식","weight":20}]}
 - 첫 행동을 정할 수 있으면 title을 쓰고 question은 null이다.
@@ -40,3 +40,12 @@
   weight의 합은 100이고, 입력 weight에서 시작해 실제로 기댄 만큼 고친다. 쓰지 않은 자료는 넣지 않는다.
 - context에 없는 사실(메일 내용, 일정, 파일 이름)을 지어내지 않는다.
 - words, minutes, context가 없으면 minutes는 null이고 sources는 빈 배열이다.
+- context의 text는 Notion, Linear, 피그마 프레임에서 읽어 온 요약이다. 첫 행동의 구체적인 대상(질문, 장표 번호, 이슈 이름)을 여기서 가져온다.
+
+## type: collect
+입력: {"type":"collect","source":"notion" 또는 "linear" 또는 "frame","words":["면접","토스"],"today":"YYYY-MM-DD","target":{"fileKey":"...","nodeId":"12:408" 또는 null} 또는 없음}
+출력: {"items":[{"label":"제목 한 줄","text":"요약 400자 이내","date":"YYYY-MM-DD" 또는 null,"url":"https://..." 또는 null}]} 또는 {"items":[]}
+- source에 해당하는 MCP 도구만 쓴다. 읽기만 하고 만들기, 고치기, 보내기, 댓글은 하지 않는다.
+- notion, linear: words로 검색해 가장 맞는 페이지나 이슈를 최대 1개 고른다. 없으면 items는 빈 배열이다. url에는 그 페이지나 이슈 주소를 쓴다.
+- frame: target의 피그마 파일과 노드를 읽는다. label은 "프레임 이름 · 무엇이 있는지", text는 words와 관련된 화면 속 글을 요약한다. url은 null이다.
+- text에는 첫 행동을 정하는 데 필요한 사실만 쓴다. 전화번호, 주소 같은 개인정보는 빼고 쓴다.

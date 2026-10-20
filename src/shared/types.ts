@@ -28,6 +28,8 @@ export type Shortcut = z.infer<typeof Shortcut>;
 // 첫 행동을 빚을 때 쓸 도구. LOCAL은 앱이 맥 안에서 직접 읽는다. MCP 도구는 7-c에서 붙인다.
 export const ToolSettings = z.object({
   local: z.object({ figma: z.boolean(), calendar: z.boolean(), files: z.boolean(), todoban: z.boolean() }),
+  // MCP 도구(notion, linear, frame) 켜기. Claude가 읽어서 느리고 구독 사용량을 쓰므로 처음엔 모두 꺼 둔다.
+  mcp: z.record(z.string(), z.boolean()).default({}),
   defaultMix: z.record(z.string(), z.number()),
 });
 export type ToolSettings = z.infer<typeof ToolSettings>;
@@ -35,7 +37,8 @@ export type ToolSettings = z.infer<typeof ToolSettings>;
 // 캘린더와 파일은 맥 권한이나 자료 범위를 사용자가 보고 켜도록 처음엔 꺼 둔다.
 export const DEFAULT_TOOLS: ToolSettings = {
   local: { figma: true, calendar: false, files: false, todoban: true },
-  defaultMix: { figma: 30, calendar: 20, files: 15, todoban: 15, claude: 20 },
+  mcp: {},
+  defaultMix: { figma: 30, calendar: 20, files: 15, todoban: 15, notion: 20, linear: 15, frame: 25, claude: 20 },
 };
 
 export const Settings = z.object({

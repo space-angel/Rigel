@@ -9,6 +9,8 @@ import type { ReviewDraft } from "@shared/review";
 import { ReviewSession, clearPending, loadPending, savePending } from "./review";
 import { FirstStepManager } from "./firstStep";
 import { collectLocal } from "./tools/local";
+import { collectMcp, markNeedsAuth, mcpStatus } from "./tools/mcp";
+import { safeServiceUrl, type McpSource } from "@shared/mcp";
 import type { ShapeInput, ToolItem } from "@shared/shape";
 import { openShortcut } from "./shortcutOpener";
 import { claudeVersion, ensureWorkDir, findClaude } from "./claude/setup";
@@ -335,10 +337,31 @@ app.whenReady().then(() => {
     for (const r of results) if (r.item?.open?.kind === "file") openablePaths.add(r.item.open.path);
     return results;
   });
+  // MCP 도구는 서비스마다 따로 읽는다. 같은 할 일·서비스의 이전 요청은 취소한다.
+  const mcpAborts = new Map<string, AbortController>();
+  ipcMain.handle("tools:collectMcp", async (_e, todoId: string, source: McpSource, words: string[]) => {
+    const todo = data.todos.find((t) => t.id === todoId);
+    if (!todo || !data.settings.tools.mcp[source]) return { source, status: "empty", item: null };
+    const key = `${todoId}:${source}`;
+    mcpAborts.get(key)?.abort();
+    const abort = new AbortController();
+    mcpAborts.set(key, abort);
+    const r = await collectMcp(source, todo, words, data, abort.signal);
+    if (r.status === "needs-auth") markNeedsAuth(source);
+    return r;
+  });
+  ipcMain.on("tools:cancelMcp", (_e, todoId: string) => {
+    for (const [key, a] of mcpAborts) if (key.startsWith(`${todoId}:`)) a.abort();
+  });
+  ipcMain.handle("tools:mcpStatus", (_e, fresh?: boolean) => mcpStatus(data.settings.claudePath, fresh));
+  ipcMain.on("tools:openMcpGuide", () => shell.openPath("/System/Applications/Utilities/Terminal.app"));
   ipcMain.on("tools:open", (_e, open: ToolItem["open"]) => {
     if (!open) return;
     listWindow?.hide();
-    if (open.kind === "shortcut") {
+    if (open.kind === "url") {
+      const url = safeServiceUrl(open.source, open.url);
+      if (url) shell.openExternal(url);
+    } else if (open.kind === "shortcut") {
       const s = data.shortcuts.find((x) => x.id === open.id);
       if (s) openShortcut(s);
     } else if (open.kind === "file" && openablePaths.has(open.path)) shell.openPath(open.path);

@@ -354,6 +354,7 @@ claude -p --output-format stream-json --verbose --no-session-persistence --model
 |---|---|---|---|
 | Notion | `claude.ai Notion` | `notion-search`, `notion-fetch` | 7-a에서 3번 성공 |
 | Linear | `claude.ai Linear` | `list_issues`, `get_issue` | 7-a에서 1번 성공 (해당 이슈 없음) |
+| Figma frame | `claude.ai Figma` | `get_metadata` | 7-c에서 확인. 할 일에 연결된(없으면 낱말이 맞는) 피그마 바로가기의 프레임을 읽어 화면 속 글을 요약합니다. 최근 파일 목록을 주는 도구는 없습니다 |
 | Gmail | `claude.ai Gmail` | 미정 | 이 맥에서 `needs-auth`. Claude Code 안에서 다시 인증한 뒤 도구 이름을 확인합니다 |
 | Google Calendar | `claude.ai Google Calendar` | 미정 | 이 맥에서 `needs-auth`. LOCAL 캘린더(osascript)를 먼저 씁니다 |
 
@@ -507,7 +508,7 @@ scripts/claude-probe.ts    // 0단계 측정 스크립트
 | 6.5 | 기본 디자인을 다크 글래스로 바꿉니다 (v0.3) | 네 창이 Full flow 시안의 색, 글래스 단계, 글로우 위계, 영어 문구를 따릅니다. 주인공 카드가 화면마다 하나입니다. 스냅숏으로 확인했습니다 |
 | 7-a | `scripts/collect-probe.ts`로 collect를 측정합니다 ✅ | 어떤 설정에서 claude.ai 커넥터가 보이는지, `--allowedTools`로 읽기 도구만 열리는지, `claude mcp list` 출력 형식, collect 응답 시간 3번을 이 문서에 기록했습니다. Gmail은 인증이 필요해서 Notion으로 쟀습니다 |
 | 7-b | LOCAL 도구, C1·C2 화면, 도구 탭, firstStep 요청 확장 ✅ | “면접 준비”에서 낱말·도구·크기·비율을 고르면 그 자료가 들어간 첫 행동이 나오고, C2에 출처별 비율이 보입니다. 도구를 다 끄면 지금의 firstStep과 같게 동작합니다 |
-| 7-c | MCP collect를 연결합니다 | Notion을 켜면 C1 카드에 페이지 한 줄이 채워지고, 연결을 끊어도 나머지 도구로 첫 행동이 나옵니다. 쓰기 도구는 열리지 않습니다. Gmail은 인증 후 같은 기준으로 확인합니다 |
+| 7-c | MCP collect를 연결합니다 ✅ | Notion을 켜면 C1 카드에 페이지 한 줄이 채워지고, 연결을 끊어도 나머지 도구로 첫 행동이 나옵니다. 쓰기 도구는 열리지 않습니다. Gmail은 인증 후 같은 기준으로 확인합니다 |
 | 7-d | 시작하기 창(D4) | data.json이 없는 상태로 실행하면 시작하기 창이 열리고, Claude Code를 못 찾는 경우 안내 카드가 보입니다 |
 | 8 | Phantom 테마를 만들고 설정 Theme 탭에서 테마를 바꿀 수 있게 합니다 | 설정에서 Phantom을 고르면 네 창이 모두 바뀌고, 창 크기는 그대로입니다. 다시 실행해도 선택이 유지됩니다 |
 | 9 | 일주일 동안 매일 씁니다 | 매일 넣은 할 일 수, 정리 안 된 할 일 수, 시작 버튼을 누른 횟수, 첫 행동에 도구를 쓴 횟수를 기록했습니다 |
@@ -554,6 +555,16 @@ scripts/claude-probe.ts    // 0단계 측정 스크립트
 - Claude는 보낸 비율보다 일반 지식 몫을 크게 돌려주는 편입니다(보냄 25% → 받음 55~60%). C2는 받은 값을 보여 줍니다.
 - 캘린더는 macOS 자동화 권한 창이 뜨기 때문에 아직 실제로 켜 보지 않았습니다. 코드와 권한 거부 처리는 있고, 처음 켤 때 확인합니다.
 - 도구 탭에는 LOCAL 묶음과 기본 비율만 있습니다. MCP 묶음은 7-c에서 붙입니다.
+
+### 7-c 확인 결과 (2026-10-20)
+
+- 연결한 MCP 도구: Notion(`notion-search`, `notion-fetch`), Linear(`list_issues`, `get_issue`), Figma frame(`get_metadata`). 도구 이름은 서비스마다 앱에 고정합니다. 시작 메시지(init)에서 도구 목록을 3초 만에 읽을 수 있지만, Notion만 해도 세션 시작·메시지 보내기·삭제 도구가 섞여 있어 이름 패턴으로 자동 허용하지 않습니다.
+- Figma frame은 피그마 파일 키와 노드를 Claude에게 보냅니다(사용자 자신의 파일). 도구 탭 안내에 적었습니다.
+- “면접 준비”에 Notion과 Figma frame을 켜고 실제로 빚었습니다. Notion에서 “모의면접 1회차 자기소개 피드백” 페이지를 찾아 “1분 자기소개 PM·강점·가치관 순으로 쓰기”가 나왔습니다(Notion 80%). C1을 연 뒤 결과까지 29초(collect 약 12초 + firstStep 약 8초, collect는 C1을 여는 순간 시작).
+- C1에서 MCP 카드는 “Reading…”으로 시작하고, 읽는 중에 Shape it을 누르면 “Waiting for Notion”으로 기다렸다가 보냅니다. 15초가 지나면 “Skip Notion”이 나옵니다.
+- 낱말을 바꾸면 LOCAL은 0.35초, MCP는 1.2초 뒤에 다시 읽습니다. MCP는 구독 사용량을 쓰므로 도구 탭에서 처음엔 모두 꺼져 있습니다.
+- 도구 탭의 연결 상태는 `claude mcp list`(약 10초)를 5분 동안 기억합니다. collect에서 `needs-auth`를 보면 그 서비스를 인증 필요로 바꿉니다. 연결이 안 된 서비스는 “Connect”가 터미널을 열고 `claude` → `/mcp` 안내를 보여 줍니다.
+- 아직 확인 못 한 것: Linear를 앱 안에서 실제로 켠 경우, Gmail(인증 필요).
 
 ## 11. 테마: v1은 구조만, v1.1에서 Claude랑 테마를 만듭니다
 

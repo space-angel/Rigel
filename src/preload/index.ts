@@ -3,6 +3,7 @@ import type { AppData, TodoAction } from "@shared/types";
 import type { ReviewDraft, ReviewState } from "@shared/review";
 import type { FirstStepState } from "@shared/firstStep";
 import type { ShapeInput, ToolItem, ToolResult } from "@shared/shape";
+import type { McpSource, McpStatus } from "@shared/mcp";
 
 const api = {
   getData: (): Promise<AppData> => ipcRenderer.invoke("data:get"),
@@ -59,6 +60,10 @@ const api = {
   acceptFirstStep: (id: string, opts: { toToday?: boolean } = {}) => ipcRenderer.send("firstStep:accept", id, opts),
   collectTools: (todoId: string, words: string[]): Promise<ToolResult[]> => ipcRenderer.invoke("tools:collect", todoId, words),
   openToolItem: (open: ToolItem["open"]) => ipcRenderer.send("tools:open", open),
+  collectMcp: (todoId: string, source: McpSource, words: string[]): Promise<ToolResult> => ipcRenderer.invoke("tools:collectMcp", todoId, source, words),
+  cancelMcp: (todoId: string) => ipcRenderer.send("tools:cancelMcp", todoId),
+  mcpStatus: (fresh?: boolean): Promise<Record<string, McpStatus>> => ipcRenderer.invoke("tools:mcpStatus", fresh),
+  openMcpGuide: () => ipcRenderer.send("tools:openMcpGuide"),
   onShapeOpen: (fn: (todoId: string, auto: boolean) => void) => {
     const listener = (_e: unknown, id: string, auto: boolean) => fn(id, auto);
     ipcRenderer.on("shape:open", listener);

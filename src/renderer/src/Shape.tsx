@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { AppData, TodoItem } from "@shared/types";
 import type { FirstStepState } from "@shared/firstStep";
 import { localDate } from "@shared/todos";
-import { defaultMinutes, normalizeMix, sizeLabel, splitWords, type LocalSource, type ShapeInput, type ToolResult, type WordChip } from "@shared/shape";
+import { defaultMinutes, normalizeMix, sizeLabel, splitWords, type ShapeInput, type ToolResult, type ToolSource, type WordChip } from "@shared/shape";
+import { MCP_SERVICES, MCP_SOURCES, type McpSource } from "@shared/mcp";
 import { AiSparkle, ChevronLeftIcon, RefreshIcon, Spinner } from "./components/icons";
 import { SizeDial } from "./components/SizeDial";
 import { MixBar } from "./components/MixBar";
@@ -16,9 +17,13 @@ const TOOL_DESC: Record<string, string> = {
   denied: "Allow Calendar in System Settings",
   failed: "Couldn't read",
   empty: "Nothing matched",
+  loading: "Reading…",
+  "needs-auth": "Sign in to it in Claude Code",
 };
 
 const OPEN_LABEL: Record<string, string> = { shortcut: "Open in Figma", file: "Open file", calendar: "Open Calendar" };
+const isMcp = (s: string): s is McpSource => s in MCP_SERVICES;
+const SKIP_AFTER_MS = 15_000;
 
 function dayName(date: string): string {
   return new Date(`${date}T00:00:00`).toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
@@ -28,8 +33,14 @@ function dayName(date: string): string {
 export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoItem; data: AppData; state?: FirstStepState; auto?: boolean; onClose: () => void }) {
   const today = localDate();
   const [words, setWords] = useState<WordChip[]>(() => splitWords(todo.title, todo.rawText));
-  const [tools, setTools] = useState<ToolResult[] | null>(null);
-  const [picked, setPicked] = useState<Set<LocalSource> | null>(null);
+  const [local, setLocal] = useState<ToolResult[] | null>(null);
+  const mcpOn = MCP_SOURCES.filter((s) => data.settings.tools.mcp[s]);
+  const [mcp, setMcp] = useState<Partial<Record<McpSource, ToolResult>>>(() =>
+    Object.fromEntries(mcpOn.map((s) => [s, { source: s, status: "loading", item: null }])),
+  );
+  const [picked, setPicked] = useState<Set<ToolSource> | null>(null);
+  const [waitingSince, setWaitingSince] = useState<number | null>(null);
+  const [now, setNow] = useState(Date.now());
   const [minutes, setMinutes] = useState<number | null>(null);
   const [mix, setMix] = useState<Record<string, number> | null>(null);
   const [toToday, setToToday] = useState(true);
@@ -38,21 +49,38 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
   const onWords = useMemo(() => words.filter((w) => w.on).map((w) => w.word), [words]);
   const wordKey = onWords.join("\u0000");
 
-  // 낱말이 바뀌면 잠시 기다렸다가 도구를 다시 읽는다.
+  // 낱말이 바뀌면 잠시 기다렸다가 도구를 다시 읽는다. MCP는 한 번에 10초쯤 걸리고 구독 사용량을 쓰므로 더 오래 기다린다.
   useEffect(() => {
     let live = true;
     const t = setTimeout(() => {
-      api.collectTools(todo.id, onWords).then((r) => live && setTools(r));
-    }, tools ? 350 : 0);
+      api.collectTools(todo.id, onWords).then((r) => live && setLocal(r));
+    }, local ? 350 : 0);
+    const first = !mcpStarted.current;
+    mcpStarted.current = true;
+    const tm = setTimeout(
+      () => {
+        for (const s of mcpOn) {
+          setMcp((m) => ({ ...m, [s]: { source: s, status: "loading", item: null } }));
+          api.collectMcp(todo.id, s, onWords).then((r) => live && setMcp((m) => ({ ...m, [s]: r })));
+        }
+      },
+      first ? 0 : 1200,
+    );
     return () => {
       live = false;
       clearTimeout(t);
+      clearTimeout(tm);
     };
   }, [todo.id, wordKey]);
+  const mcpStarted = useRef(false);
+  useEffect(() => () => api.cancelMcp(todo.id), [todo.id]);
 
+  const tools = local === null ? null : [...local, ...mcpOn.map((s) => mcp[s] ?? { source: s, status: "loading" as const, item: null })];
+  const wanted = (s: ToolSource) => (picked ? picked.has(s) : true);
+  const waiting = (tools ?? []).filter((r) => r.status === "loading" && wanted(r.source));
   const found = (tools ?? []).filter((r) => r.status === "ok");
   const foundKey = found.map((r) => `${r.source}:${r.item?.label}`).join("|");
-  const selected = found.filter((r) => (picked ? picked.has(r.source) : true)).map((r) => r.source);
+  const selected = found.filter((r) => wanted(r.source)).map((r) => r.source);
   const selectedKey = selected.join(",");
   const deadline = found.find((r) => r.source === "calendar" && selected.includes("calendar"))?.item?.date ?? null;
   const dial = defaultMinutes(deadline, today);
@@ -73,23 +101,45 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
       minutes: size,
       context: found
         .filter((r) => selected.includes(r.source))
-        .map((r) => ({ source: r.source, label: r.item!.label, date: r.item!.date, weight: m[r.source] ?? 0 })),
+        .map((r) => ({ source: r.source, label: r.item!.label, ...(r.item!.text && { text: r.item!.text }), date: r.item!.date, weight: m[r.source] ?? 0 })),
       claudeWeight: m.claude ?? 100,
     };
   };
   const send = () => api.requestFirstStep(todo.id, { shape: shape() });
+  // MCP가 아직 읽는 중이면 끝날 때까지 기다렸다가 보낸다. 15초가 지나면 그 도구를 빼고 보낼 수 있다.
+  const shapeIt = () => {
+    if (waiting.length) setWaitingSince(Date.now());
+    else send();
+  };
+  useEffect(() => {
+    if (waitingSince !== null && waiting.length === 0 && mixFits) {
+      setWaitingSince(null);
+      send();
+    }
+  }, [waitingSince, waiting.length, mixFits]);
+  useEffect(() => {
+    if (waitingSince === null) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [waitingSince]);
+  const skipWaiting = () =>
+    setPicked((p) => {
+      const next = new Set(p ?? (tools ?? []).map((r) => r.source));
+      for (const r of waiting) next.delete(r.source);
+      return next;
+    });
 
   useEffect(() => {
     if (auto && tools && mixFits && !autoSent.current) {
       autoSent.current = true;
-      send();
+      shapeIt();
     }
   }, [auto, tools, mixFits]);
 
-  const busy = state?.status === "loading";
-  const toggleTool = (s: LocalSource) =>
+  const busy = state?.status === "loading" || waitingSince !== null;
+  const toggleTool = (s: ToolSource) =>
     setPicked((p) => {
-      const next = new Set(p ?? found.map((r) => r.source));
+      const next = new Set(p ?? (tools ?? []).map((r) => r.source));
       if (next.has(s)) next.delete(s);
       else next.add(s);
       return next;
@@ -169,7 +219,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
             )}
             {top?.open && (
               <button type="button" className="button button--secondary button--sm" onClick={() => api.openToolItem(top.open)}>
-                <SourceIcon source={top.source} size={12} /> {OPEN_LABEL[top.open.kind]}
+                <SourceIcon source={top.source} size={12} /> {top.open.kind === "url" ? `Open in ${MCP_SERVICES[top.open.source].name.replace(" frame", "")}` : OPEN_LABEL[top.open.kind]}
               </button>
             )}
           </div>
@@ -240,13 +290,14 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
           ) : (
             <div className="tools">
               {tools.map((r) => {
-                const on = r.status === "ok" && selected.includes(r.source);
+                const loading = r.status === "loading";
+                const on = (r.status === "ok" && selected.includes(r.source)) || (loading && wanted(r.source));
                 return (
                   <button
                     type="button"
                     key={r.source}
-                    className={`tool${on ? " is-on" : ""}`}
-                    disabled={r.status !== "ok"}
+                    className={`tool${on ? " is-on" : ""}${loading ? " is-loading" : ""}`}
+                    disabled={r.status !== "ok" && !loading}
                     aria-pressed={on}
                     onClick={() => toggleTool(r.source)}
                   >
@@ -257,8 +308,10 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
                       <span className="tool__name">{SOURCE_NAME[r.source]}</span>
                       <span className={`toggle toggle--sm${on ? " is-on" : ""}`} />
                     </span>
-                    <span className="tool__item">{r.item?.label ?? TOOL_DESC[r.status]}</span>
-                    <span className="badge">Local</span>
+                    <span className="tool__item">
+                      {loading && <Spinner size={10} />} {r.item?.label ?? TOOL_DESC[r.status]}
+                    </span>
+                    {isMcp(r.source) ? <span className="badge badge--mcp">MCP · read only</span> : <span className="badge">Local</span>}
                   </button>
                 );
               })}
@@ -291,10 +344,19 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
         {state && state.status !== "loading" && <FirstStepCard state={state} originalTitle={todo.title} />}
       </div>
       <footer className="shape__foot">
-        <span className="shape__note">Sends titles only · {sizeLabel(size)}</span>
+        {waitingSince !== null && now - waitingSince > SKIP_AFTER_MS ? (
+          <button type="button" className="text-button" onClick={skipWaiting}>
+            Skip {waiting.map((r) => MCP_SERVICES[r.source as McpSource]?.name ?? r.source).join(", ")}
+          </button>
+        ) : (
+          <span className="shape__note">
+            {mcpOn.length ? "MCP reads via Claude Code" : "Sends titles only"} · {sizeLabel(size)}
+          </span>
+        )}
         <span className="spacer" />
-        <button type="button" className="button button--primary" disabled={busy || tools === null} onClick={send}>
-          {busy ? <Spinner size={12} /> : <AiSparkle size={12} />} {busy ? "Shaping…" : "Shape it"}
+        <button type="button" className="button button--primary" disabled={busy || tools === null} onClick={shapeIt}>
+          {busy ? <Spinner size={12} /> : <AiSparkle size={12} />}{" "}
+          {waitingSince !== null ? `Waiting for ${waiting.map((r) => MCP_SERVICES[r.source as McpSource]?.name ?? r.source).join(", ")}` : busy ? "Shaping…" : "Shape it"}
         </button>
       </footer>
     </div>

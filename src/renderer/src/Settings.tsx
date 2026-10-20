@@ -5,6 +5,7 @@ import { figmaLinkInfo } from "@shared/todos";
 import { displayAccelerator, toAccelerator } from "@shared/hotkey";
 import { CheckIcon, EditIcon, FigmaMark, LinkIcon, PlusIcon, TerminalIcon, TrashIcon, UserIcon } from "./components/icons";
 import { LOCAL_SOURCES, normalizeMix, type LocalSource } from "@shared/shape";
+import { MCP_SERVICES, MCP_SOURCES, statusOf, type McpSource, type McpStatus } from "@shared/mcp";
 import { MixBar } from "./components/MixBar";
 import { SOURCE_NAME, SourceIcon } from "./components/SourceIcon";
 
@@ -172,10 +173,24 @@ const LOCAL_DESC: Record<LocalSource, (data: AppData) => string> = {
   todoban: () => "Done & later tasks",
 };
 
-// 첫 행동을 빚을 때 쓸 도구 (D2). MCP 도구는 7-c에서 붙인다.
+const MCP_DESC: Record<McpSource, string> = {
+  notion: "Pages that match your words",
+  linear: "Issues that match your words",
+  frame: "Reads the frame of the task's Figma shortcut",
+};
+
+// 첫 행동을 빚을 때 쓸 도구 (D2). LOCAL은 앱이 읽고, MCP는 Claude Code가 읽기 전용으로 읽는다.
 function ToolsTab({ data }: { data: AppData }) {
   const tools = data.settings.tools;
-  const on = LOCAL_SOURCES.filter((s) => tools.local[s]);
+  const [status, setStatus] = useState<Record<string, McpStatus> | null>(null);
+  const [guide, setGuide] = useState(false);
+  const check = (fresh = false) => {
+    setStatus(null);
+    api.mcpStatus(fresh).then(setStatus);
+  };
+  useEffect(() => check(), []);
+  const mcpUsable = (s: McpSource) => status !== null && statusOf(status, s) === "connected";
+  const on = [...LOCAL_SOURCES.filter((s) => tools.local[s]), ...MCP_SOURCES.filter((s) => tools.mcp[s])];
   const save = (patch: Partial<typeof tools>) => api.act({ type: "setSettings", patch: { tools: { ...tools, ...patch } } });
   return (
     <div className="settings__body">
@@ -194,6 +209,56 @@ function ToolsTab({ data }: { data: AppData }) {
           </div>
         ))}
       </Group>
+      <section className="group">
+        <div className="settings__head">
+          <h2 className="group__label">MCP · read only · ~10s</h2>
+          <button type="button" className="text-button" onClick={() => check(true)} disabled={status === null}>
+            {status === null ? "Checking…" : "Check again"}
+          </button>
+        </div>
+        <div className="group__box">
+          {MCP_SOURCES.map((s) => {
+            const st = status && statusOf(status, s);
+            return (
+              <div className="setting" key={s}>
+                <span className="setting__icon">
+                  <SourceIcon source={s} size={13} />
+                </span>
+                <div className="setting__text">
+                  <p>{MCP_SERVICES[s].name}</p>
+                  <p className="setting__desc">
+                    {st === null ? "Checking Claude Code…" : st === "connected" ? MCP_DESC[s] : st === "needs-auth" ? "Sign in again in Claude Code" : "Not connected in Claude Code"}
+                  </p>
+                </div>
+                {mcpUsable(s) ? (
+                  <>
+                    <span className="badge badge--mcp">MCP</span>
+                    <Toggle on={Boolean(tools.mcp[s])} onChange={(v) => save({ mcp: { ...tools.mcp, [s]: v } })} />
+                  </>
+                ) : (
+                  st !== null && (
+                    <button
+                      type="button"
+                      className="button button--secondary button--sm"
+                      onClick={() => {
+                        setGuide(true);
+                        api.openMcpGuide();
+                      }}
+                    >
+                      Connect
+                    </button>
+                  )
+                )}
+              </div>
+            );
+          })}
+        </div>
+        {guide && (
+          <p className="field__help">
+            In Terminal, run <kbd>claude</kbd> then <kbd>/mcp</kbd> and sign in. Come back and press Check again.
+          </p>
+        )}
+      </section>
       {on.length > 0 && (
         <section className="group">
           <h2 className="group__label">Default mix</h2>
@@ -201,7 +266,7 @@ function ToolsTab({ data }: { data: AppData }) {
         </section>
       )}
       <div className="tip">
-        <UserIcon size={14} /> Only titles of what you pick are sent to Claude. Links, paths and file contents stay on your Mac.
+        <UserIcon size={14} /> Local tools send titles only — links, paths and file contents stay on your Mac. MCP tools are read by Claude Code itself; a Figma frame sends its file key.
       </div>
     </div>
   );
