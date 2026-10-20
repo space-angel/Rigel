@@ -328,22 +328,32 @@ Gmail, Notion, Linear처럼 앱이 직접 못 읽는 서비스는 사용자가 C
 
 1. C1이 열리면 앱은 켜 둔 MCP 도구마다 `collect` 요청을 바로 보냅니다. 그동안 카드에 로딩 표시를 보여 주고, 사용자는 낱말과 크기를 고릅니다.
 2. `collect`는 낱말로 검색해 가장 맞는 자료 하나를 제목 한 줄과 요약(400자 이내)으로 돌려줍니다. 결과가 오면 카드에 보여 줍니다.
-3. 사용자가 “Shape it”을 누를 때 `collect`가 안 끝났으면, 카드에 “Still reading…”을 보여 주고 버튼을 “Shape it · waiting for Gmail”로 바꿔 끝날 때까지 기다립니다. 20초를 넘기면 그 도구를 빼고 진행할 수 있게 “Skip Gmail”을 보여 줍니다.
+3. 사용자가 “Shape it”을 누를 때 `collect`가 안 끝났으면, 카드에 “Still reading…”을 보여 주고 버튼을 “Shape it · waiting for Notion”으로 바꿔 끝날 때까지 기다립니다. 15초를 넘기면 그 도구를 빼고 진행할 수 있게 “Skip Notion”을 보여 줍니다. (7-a 측정 평균 10초, 최대 13초)
 4. 실패하면(연결 끊김, 시간 초과) 그 카드만 “Couldn't read Gmail”로 바꾸고 나머지 도구로 진행합니다.
 
-호출 방법 (확인 필요 항목은 7-a 단계에서 측정합니다):
+호출 방법 (7-a에서 확인):
 
 ```
 cwd: ~/Library/Application Support/todoBAN/claude
-stdin: {"type":"collect","source":"gmail","words":["면접","토스","PO"],"today":"YYYY-MM-DD"}
-claude -p --output-format json --setting-sources project --no-session-persistence --model sonnet \
-  --allowedTools "<읽기 도구 이름들>" --disallowedTools "<쓰기 도구 이름들>" --permission-mode default
+stdin: {"type":"collect","source":"notion","words":["면접","포트폴리오"],"today":"YYYY-MM-DD"}
+claude -p --output-format stream-json --verbose --no-session-persistence --model sonnet \
+  --setting-sources user,project --tools ToolSearch \
+  --permission-mode dontAsk --allowedTools ToolSearch mcp__claude_ai_Notion__notion-search mcp__claude_ai_Notion__notion-fetch
 ```
 
-- 내장 도구(Bash, 파일 읽기·쓰기, 웹)는 계속 막고 MCP의 **읽기 도구만** `--allowedTools`에 이름으로 적습니다. 쓰기 도구(메일 보내기, 페이지 만들기, 이슈 만들기)는 `--disallowedTools`에 적습니다.
-- 도구 이름 목록은 앱에 서비스별로 고정해 둡니다. 예: Gmail은 검색과 메일 읽기만.
-- `--setting-sources project`일 때 사용자 MCP 서버와 claude.ai 커넥터가 보이는지 확인해야 합니다. 안 보이면 `--mcp-config`로 서버를 명시합니다.
-- 서버 연결 상태는 설정을 열 때 `claude mcp list`를 실행해 읽습니다. 출력 형식은 7-a에서 확인합니다.
+- **`--setting-sources user,project`**: claude.ai 커넥터(Gmail, Notion, Linear …)는 user 설정에서만 보입니다. `project`나 `project,local`만 주면 MCP 서버가 하나도 뜨지 않습니다. `project`는 전용 폴더의 CLAUDE.md(collect 규칙)를 읽으려고 함께 줍니다. `split`과 `firstStep`은 지금처럼 `project`만 씁니다.
+- **`--tools ToolSearch`**: 내장 도구(Bash, 파일, 웹)는 모두 막고, MCP 도구를 불러오는 ToolSearch 하나만 엽니다. `--tools ""`로 ToolSearch까지 막으면 MCP 도구가 지연 로드 상태라 부를 수 없습니다. `ENABLE_TOOL_SEARCH=false`로 MCP 도구를 처음부터 다 싣는 방법은 도구 222개가 프롬프트에 들어가서 더 느렸습니다(평균 15.7초).
+- **`--permission-mode dontAsk` + `--allowedTools`**: 목록에 없는 도구는 묻지 않고 막힙니다. 서비스별 **읽기 도구 이름만** 앱에 고정해 두고 적습니다. 쓰기 도구는 목록에 넣지 않는 것만으로 막히므로 `--disallowedTools`는 쓰지 않습니다. (목록 밖의 `notion-get-users`를 부르게 했을 때 `permission_denials`로 막힌 것을 확인)
+- **`stream-json`**: 첫 줄(init)에 서버별 상태(`connected`, `pending`, `needs-auth`, `failed`)가 있어서, 결과가 비었을 때 연결 문제인지 자료가 없는지 구분합니다. `pending`이어도 호출 중에 연결되어 정상 동작했습니다.
+
+서비스별 읽기 도구 (앱에 고정):
+
+| 서비스 | 서버 이름 | 여는 도구 | 확인 |
+|---|---|---|---|
+| Notion | `claude.ai Notion` | `notion-search`, `notion-fetch` | 7-a에서 3번 성공 |
+| Linear | `claude.ai Linear` | `list_issues`, `get_issue` | 7-a에서 1번 성공 (해당 이슈 없음) |
+| Gmail | `claude.ai Gmail` | 미정 | 이 맥에서 `needs-auth`. Claude Code 안에서 다시 인증한 뒤 도구 이름을 확인합니다 |
+| Google Calendar | `claude.ai Google Calendar` | 미정 | 이 맥에서 `needs-auth`. LOCAL 캘린더(osascript)를 먼저 씁니다 |
 
 CLAUDE.md에 추가할 규칙:
 
@@ -371,9 +381,9 @@ CLAUDE.md에 추가할 규칙:
 ### 설정 → 도구 탭 (D2)
 
 - LOCAL · FAST 묶음: Figma, Calendar, Files, todoBAN. 각 행에 설명, LOCAL 배지, 토글.
-- MCP · READ ONLY · ~20S 묶음: `claude mcp list`에 있는 서버는 MCP 배지와 토글, 없는 서비스는 “Connect” 버튼. Connect는 터미널을 열고 `claude mcp add` 안내를 보여 줍니다. 앱이 직접 OAuth를 하지 않습니다.
+- MCP · READ ONLY · ~10S 묶음: 앱이 고정해 둔 서비스(Notion, Linear, Gmail)만 보여 줍니다. 연결된 서비스는 MCP 배지와 토글, 아닌 서비스는 “Connect” 버튼입니다. Connect는 터미널을 열고 Claude Code 안에서 `/mcp`로 인증하라고 안내합니다. 앱이 직접 OAuth를 하지 않습니다.
+- 연결 상태는 두 단계로 판단합니다. 설정을 열 때 `claude mcp list`(약 11초, 한 줄에 `이름: 주소 - ✔ Connected` / `! Needs authentication` / `✘ Failed to connect`)를 백그라운드로 읽어 먼저 표시하고, collect를 실행했을 때 init의 상태가 `needs-auth`면 그 값으로 바꿉니다. **`mcp list`가 Connected라고 해도 print 모드에서는 `needs-auth`일 수 있습니다**(이 맥의 Gmail, Google Calendar).
 - DEFAULT MIX: 출처별 기본 비율 막대.
-- `~20S`는 시안의 예상값입니다. 7-a에서 잰 값으로 바꿉니다.
 
 ### 오류 처리
 
@@ -383,6 +393,7 @@ CLAUDE.md에 추가할 규칙:
 | 캘린더 권한 거부 | 토글을 끄고 “Allow Calendar in System Settings” 안내를 보여 줍니다 |
 | MCP 서버가 목록에 없음 | 도구 탭에서 Connect 버튼으로 바꾸고, C1 카드는 숨깁니다 |
 | `collect` 시간 초과(30초) | 그 카드만 실패로 표시하고 나머지로 진행합니다 |
+| init 상태가 `needs-auth` | 카드를 “Sign in to Notion in Claude Code”로 바꾸고 도구 탭의 상태도 바꿉니다 |
 | `firstStep` 응답의 sources에 보내지 않은 출처가 있음 | 그 항목은 버리고 보여 주지 않습니다 |
 
 ## 8. Electron 메뉴바 앱으로 만듭니다
@@ -492,9 +503,9 @@ scripts/claude-probe.ts    // 0단계 측정 스크립트
 | 5 | 바로가기 설정과 피그마 열기를 만듭니다 | “포폴” 바로가기를 등록한 뒤 “포폴 장표 고쳐야 함”을 입력하면 바로가기가 연결됩니다. 시작 버튼을 누르면 피그마 앱에서 지정한 프레임이 열립니다 |
 | 6 | 어제 못 끝낸 할 일 가져오기를 만듭니다 | plannedDate가 어제인 할 일을 만들어 두고 목록을 열면 가져오기 질문이 나옵니다 |
 | 6.5 | 기본 디자인을 다크 글래스로 바꿉니다 (v0.3) | 네 창이 Full flow 시안의 색, 글래스 단계, 글로우 위계, 영어 문구를 따릅니다. 주인공 카드가 화면마다 하나입니다. 스냅숏으로 확인했습니다 |
-| 7-a | `scripts/claude-probe.ts`에 collect 측정을 추가합니다 | `--setting-sources project`에서 MCP 서버와 claude.ai 커넥터가 보이는지, `--allowedTools`로 읽기 도구만 열리는지, `claude mcp list` 출력 형식, Gmail collect 응답 시간 3번을 이 문서에 기록했습니다 |
+| 7-a | `scripts/collect-probe.ts`로 collect를 측정합니다 ✅ | 어떤 설정에서 claude.ai 커넥터가 보이는지, `--allowedTools`로 읽기 도구만 열리는지, `claude mcp list` 출력 형식, collect 응답 시간 3번을 이 문서에 기록했습니다. Gmail은 인증이 필요해서 Notion으로 쟀습니다 |
 | 7-b | LOCAL 도구, C1·C2 화면, 도구 탭, firstStep 요청 확장 | “면접 준비”에서 낱말·도구·크기·비율을 고르면 그 자료가 들어간 첫 행동이 나오고, C2에 출처별 비율이 보입니다. 도구를 다 끄면 지금의 firstStep과 같게 동작합니다 |
-| 7-c | MCP collect를 연결합니다 | Gmail을 켜면 C1 카드에 메일 한 줄이 채워지고, 연결을 끊어도 나머지 도구로 첫 행동이 나옵니다. 쓰기 도구는 열리지 않습니다 |
+| 7-c | MCP collect를 연결합니다 | Notion을 켜면 C1 카드에 페이지 한 줄이 채워지고, 연결을 끊어도 나머지 도구로 첫 행동이 나옵니다. 쓰기 도구는 열리지 않습니다. Gmail은 인증 후 같은 기준으로 확인합니다 |
 | 7-d | 시작하기 창(D4) | data.json이 없는 상태로 실행하면 시작하기 창이 열리고, Claude Code를 못 찾는 경우 안내 카드가 보입니다 |
 | 8 | Phantom 테마를 만들고 설정 Theme 탭에서 테마를 바꿀 수 있게 합니다 | 설정에서 Phantom을 고르면 네 창이 모두 바뀌고, 창 크기는 그대로입니다. 다시 실행해도 선택이 유지됩니다 |
 | 9 | 일주일 동안 매일 씁니다 | 매일 넣은 할 일 수, 정리 안 된 할 일 수, 시작 버튼을 누른 횟수, 첫 행동에 도구를 쓴 횟수를 기록했습니다 |
@@ -514,6 +525,25 @@ scripts/claude-probe.ts    // 0단계 측정 스크립트
 - 확인할 점: “포트폴리오 사이트 도메인 알아보기”가 키워드 “포트폴리오” 때문에 포폴 바로가기에 연결됐습니다. 확인 창에서 바꿀 수 있으니 일주일 사용 중에 얼마나 자주 생기는지 봅니다.
 - `isClear` 판단은 같은 문장에서도 조건마다 조금씩 달랐습니다(예: “운동 루틴 다시 짜기”). 확인 창에서 사용자가 고칠 수 있어서 문제는 아닙니다.
 - 6~7초가 걸리므로 확인 창의 “나누는 중” 화면은 꼭 필요합니다. 10초가 넘으면 “조금 오래 걸리고 있어요”를 띄웁니다.
+
+### 7-a 측정 결과 (2026-10-20)
+
+`scripts/collect-probe.ts`, Claude Code 2.1.304, 모델 sonnet. 자료 내용은 기록하지 않고 시간과 상태만 봤습니다.
+
+| 조건 | 결과 | 평균 | 최대 |
+|---|---|---|---|
+| `--setting-sources project` (split과 같은 설정) | MCP 서버 0개. collect 불가 | - | - |
+| `--setting-sources project,local` | MCP 서버 0개 | - | - |
+| `--setting-sources user`, `--tools ToolSearch` | Notion 성공 1/1 | 7.5s | 7.5s |
+| **`--setting-sources user,project`, `--tools ToolSearch`, `dontAsk`** | **Notion 성공 6/6** (두 번 실행) | **10.4s** | **13.2s** |
+| 위 + `ENABLE_TOOL_SEARCH=false`, `--tools ""` | Notion 성공 3/3, 도구 222개 적재 | 15.7s | 16.4s |
+| Linear (위 굵은 조건) | 도구 호출 성공, 해당 이슈 없음 | 10.1s | 10.1s |
+| Gmail (위 굵은 조건) | 서버 `needs-auth`. ToolSearch만 부르고 빈 결과 | - | - |
+
+- 목록 밖 도구는 막힙니다. `notion-get-users`를 부르게 하자 `permission_denials`에 남고 실행되지 않았습니다.
+- 대부분 ToolSearch → 검색 도구, 3턴으로 끝났습니다. 시안의 `~20S`는 `~10S`로 고칩니다.
+- `claude mcp list`는 서버 상태 확인에 약 11초가 걸리므로 화면을 막지 않고 백그라운드로 읽습니다.
+- Gmail과 Google Calendar는 `mcp list`에서 Connected인데 실제 도구는 인증 도구만 보입니다. Claude Code 안에서 `/mcp`로 다시 인증해야 합니다. 7-c는 Notion으로 먼저 연결하고, Gmail은 인증 후 도구 이름을 확인해 표에 채웁니다.
 
 ## 11. 테마: v1은 구조만, v1.1에서 Claude랑 테마를 만듭니다
 
@@ -578,6 +608,7 @@ CLAUDE.md에 추가할 규칙:
 - [ ] 로그인할 때 앱을 자동으로 실행할지 (설정에 스위치는 둡니다)
 - [ ] 기본 단축키 ⌥ Space가 다른 앱과 겹치는지. Alfred와 ChatGPT 데스크톱 앱이 같은 조합을 씁니다. 2단계에서 `globalShortcut.register`가 실패하면 설정에서 다른 조합을 고르게 안내합니다. ⌃Space는 입력 소스 전환 키라서 쓰지 않습니다.
 - [x] 기본으로 쓸 테마 → 다크 글래스 기본 테마
-- [ ] MCP collect가 `--setting-sources project`에서 동작하는지, 응답 시간이 20초 안쪽인지 (7-a)
+- [x] MCP collect 설정 → `--setting-sources user,project --tools ToolSearch --permission-mode dontAsk`, 평균 10.4초 (7-a)
+- [ ] `user` 설정을 읽으면 이 맥의 전역 훅과 플러그인도 같이 돕니다. collect에만 쓰지만, 훅이 느려지거나 부작용이 생기면 collect 전용 설정 파일(`--settings`)로 훅을 끄는 방법을 봅니다
 - [ ] 출처별 비율을 사용자가 실제로 만지는지. 안 만지면 C1에서 접어 둡니다 (9단계 사용 기록)
 - [ ] 캘린더 읽기를 osascript로 할지, 작은 도우미 앱으로 할지. osascript가 1초를 넘기면 다시 정합니다 (7-b)
