@@ -73,7 +73,8 @@ export type TodoAction =
   | { type: "setShortcut"; id: string; shortcutId: string | null }
   | { type: "saveShortcut"; shortcut: ShortcutInput & { id?: string } }
   | { type: "removeShortcut"; id: string }
-  | { type: "setSettings"; patch: Partial<Settings> };
+  | { type: "setSettings"; patch: Partial<Settings> }
+  | { type: "carryOver"; to: "today" | "later" };
 
 export interface ShortcutInput {
   name: string;

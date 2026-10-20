@@ -13,6 +13,16 @@ export function isToday(t: TodoItem, today: string): boolean {
   return t.plannedDate !== null && t.plannedDate <= today;
 }
 
+// 할 날짜가 오늘보다 앞인데 끝나지 않은 할 일. 그날 처음 목록을 열 때 오늘로 가져올지 묻는다.
+export function overdue(todos: TodoItem[], today: string): TodoItem[] {
+  return todos.filter((t) => !t.completedAt && t.plannedDate !== null && t.plannedDate < today).sort(byOrder);
+}
+
+// 오늘 아직 묻지 않았고 가져올 할 일이 있으면 그 목록을, 아니면 빈 배열을 돌려준다.
+export function pendingCarryOver(data: AppData, today: string): TodoItem[] {
+  return data.settings.lastCarryOverCheck === today ? [] : overdue(data.todos, today);
+}
+
 export interface TodayView {
   open: TodoItem[]; // 오늘, 끝나지 않음. 맨 앞이 지금 할 일
   done: TodoItem[]; // 오늘 끝낸 할 일
@@ -20,8 +30,10 @@ export interface TodayView {
   unclearCount: number;
 }
 
-export function todayView(todos: TodoItem[], today: string): TodayView {
-  const open = todos.filter((t) => !t.completedAt && isToday(t, today)).sort(byOrder);
+// hidden: 오늘 목록에서 잠시 빼 둘 할 일(가져올지 묻는 중인 어제 할 일)
+export function todayView(todos: TodoItem[], today: string, hidden: TodoItem[] = []): TodayView {
+  const hide = new Set(hidden.map((t) => t.id));
+  const open = todos.filter((t) => !t.completedAt && isToday(t, today) && !hide.has(t.id)).sort(byOrder);
   const done = todos
     .filter((t) => t.completedAt && localDate(new Date(t.completedAt)) === today)
     .sort((a, b) => (a.completedAt! < b.completedAt! ? -1 : 1));
@@ -153,6 +165,10 @@ export function applyAction(data: AppData, action: TodoAction, now: Date = new D
       // 지운 바로가기에 연결된 할 일은 연결만 끊는다.
       for (const t of todos) if (t.shortcutId === action.id) t.shortcutId = null;
       return { ...data, todos, shortcuts: data.shortcuts.filter((s) => s.id !== action.id) };
+    }
+    case "carryOver": {
+      for (const t of overdue(todos, today)) t.plannedDate = action.to === "today" ? today : null;
+      return { ...data, todos, settings: { ...data.settings, lastCarryOverCheck: today } };
     }
     case "setSettings":
       return { ...data, todos, settings: { ...data.settings, ...action.patch } };

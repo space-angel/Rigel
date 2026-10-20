@@ -2,7 +2,7 @@ import { app, BrowserWindow, globalShortcut, ipcMain, Menu, nativeImage, screen,
 import { join } from "node:path";
 import { writeFileSync } from "node:fs";
 import type { AppData, TodoAction } from "@shared/types";
-import { applyAction, localDate, todayView } from "@shared/todos";
+import { applyAction, localDate, pendingCarryOver, todayView } from "@shared/todos";
 import { classifyQuickInput, firstLine, matchShortcutByKeywords } from "@shared/quickInput";
 import { loadData, saveData } from "./store";
 import type { ReviewDraft } from "@shared/review";
@@ -53,7 +53,8 @@ let data: AppData;
 let hotkeyError: string | null = null;
 
 function updateTray(): void {
-  const { open } = todayView(data.todos, localDate());
+  const today = localDate();
+  const { open } = todayView(data.todos, today, pendingCarryOver(data, today));
   tray?.setTitle(open.length ? ` ${open.length}` : "", { fontType: "monospacedDigit" });
 }
 
@@ -375,11 +376,20 @@ app.whenReady().then(() => {
   reviewWindow = createReviewWindow();
   registerHotkey();
   updateTray();
+  // 날짜가 바뀌면 메뉴바 숫자와 목록을 다시 계산한다.
+  let lastDay = localDate();
+  setInterval(() => {
+    if (localDate() === lastDay) return;
+    lastDay = localDate();
+    broadcast();
+  }, 60_000);
 
   if (SHOW_ON_START === "list" || SHOW_ON_START === "1") listWindow.once("ready-to-show", toggleListWindow);
   if (SHOW_ON_START === "quick") quickWindow.once("ready-to-show", showQuickWindow);
 
   if (DEMO_SETTINGS) showSettings(DEMO_SETTINGS);
+  if (SNAPSHOT && process.env.TODOBAN_SNAPSHOT_VIEW === "list")
+    listWindow.webContents.once("did-finish-load", () => setTimeout(() => snapshotAndQuit(listWindow), 1500));
   if (DEMO_QUICK)
     listWindow.webContents.once("did-finish-load", () => {
       submitQuick(DEMO_QUICK);

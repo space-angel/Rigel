@@ -3,9 +3,9 @@ import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type D
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { AppData, Shortcut, TodoItem } from "@shared/types";
-import { localDate, todayView } from "@shared/todos";
+import { localDate, pendingCarryOver, todayView } from "@shared/todos";
 import type { FirstStepState } from "@shared/firstStep";
-import { AiSparkle, BrandMark, CheckIcon, ChevronRightIcon, PlayIcon, PlusIcon, SettingsIcon } from "./components/icons";
+import { AiSparkle, BrandMark, CalendarIcon, CheckIcon, ChevronRightIcon, PlayIcon, PlusIcon, SettingsIcon } from "./components/icons";
 import { FirstStepCard } from "./FirstStepCard";
 
 const api = window.todoban;
@@ -174,7 +174,8 @@ export function TodayList() {
     return () => ro.disconnect();
   }, [hasData]);
 
-  const view = useMemo(() => (data ? todayView(data.todos, localDate()) : null), [data]);
+  const carry = useMemo(() => (data ? pendingCarryOver(data, localDate()) : []), [data]);
+  const view = useMemo(() => (data ? todayView(data.todos, localDate(), carry) : null), [data, carry]);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
   if (!data || !view) return null;
@@ -242,6 +243,23 @@ export function TodayList() {
         </header>
 
         <div className="scroll">
+          {carry.length > 0 && (
+            <div className="carry">
+              <CalendarIcon size={16} />
+              <div className="carry__body">
+                <p className="carry__title">어제 할 일 {carry.length}개가 남아 있어요. 오늘로 가져올까요?</p>
+                <p className="carry__desc">{carry.map((t) => t.title).join(", ")}</p>
+                <div className="carry__actions">
+                  <button type="button" className="button button--primary button--sm" onClick={() => act({ type: "carryOver", to: "today" })}>
+                    오늘로 가져오기
+                  </button>
+                  <button type="button" className="text-button" onClick={() => act({ type: "carryOver", to: "later" })}>
+                    나중에 할게요
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           {adding && (
             <div className="add-row">
               <input
@@ -266,7 +284,7 @@ export function TodayList() {
             </div>
           )}
 
-          {open.length === 0 && !adding && (
+          {open.length === 0 && !adding && carry.length === 0 && (
             <div className="empty">
               <p className="empty__title">{done.length ? "오늘 할 일을 다 끝냈어요" : "오늘 할 일이 없어요"}</p>
               <p className="empty__sub">⌥ Space로 떠오른 생각을 적어 두세요</p>

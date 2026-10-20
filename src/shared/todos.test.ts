@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { applyAction, figmaLinkInfo, orderBetween, todayView, localDate } from "./todos.ts";
+import { applyAction, figmaLinkInfo, orderBetween, pendingCarryOver, todayView, localDate } from "./todos.ts";
 import { emptyData } from "./types.ts";
 
 const now = new Date(2026, 9, 20, 9, 12);
@@ -135,4 +135,33 @@ test("설정 바꾸기", () => {
   const d = applyAction(emptyData(), { type: "setSettings", patch: { hotkey: "Alt+Shift+Space" } }, now);
   assert.equal(d.settings.hotkey, "Alt+Shift+Space");
   assert.equal(d.settings.model, "sonnet");
+});
+
+test("어제 못 끝낸 할 일 가져오기", () => {
+  let d = emptyData();
+  for (const t of ["어제 것", "그제 것", "오늘 것", "어제 끝낸 것"]) d = applyAction(d, { type: "add", title: t }, now);
+  d.todos[0]!.plannedDate = "2026-10-19";
+  d.todos[1]!.plannedDate = "2026-10-18";
+  d.todos[3]!.plannedDate = "2026-10-19";
+  d.todos[3]!.completedAt = new Date(2026, 9, 19).toISOString();
+  const pending = pendingCarryOver(d, today);
+  assert.deepEqual(pending.map((t) => t.title).sort(), ["그제 것", "어제 것"]);
+  // 묻는 동안에는 오늘 목록에 넣지 않는다
+  assert.deepEqual(todayView(d.todos, today, pending).open.map((t) => t.title), ["오늘 것"]);
+
+  const toToday = applyAction(d, { type: "carryOver", to: "today" }, now);
+  assert.equal(toToday.settings.lastCarryOverCheck, today);
+  assert.equal(pendingCarryOver(toToday, today).length, 0);
+  assert.equal(todayView(toToday.todos, today).open.length, 3);
+
+  const toLater = applyAction(d, { type: "carryOver", to: "later" }, now);
+  assert.equal(todayView(toLater.todos, today).later.length, 2);
+  assert.equal(todayView(toLater.todos, today).open.length, 1);
+});
+
+test("오늘 이미 물었으면 다시 묻지 않는다", () => {
+  let d = applyAction(emptyData(), { type: "add", title: "어제 것" }, now);
+  d.todos[0]!.plannedDate = "2026-10-19";
+  d = { ...d, settings: { ...d.settings, lastCarryOverCheck: today } };
+  assert.equal(pendingCarryOver(d, today).length, 0);
 });

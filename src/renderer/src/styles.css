@@ -1161,3 +1161,45 @@ body[data-view="settings"] {
 .setting--button {
   padding: 0;
 }
+
+/* 어제 못 끝낸 할 일 가져오기 (A2) */
+.carry {
+  display: flex;
+  gap: 10px;
+  margin: 0 8px 8px;
+  padding: 12px 14px;
+  border-radius: var(--radius-r3);
+  background: var(--gradient-gray-soft);
+}
+.carry > svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--color-text-secondary);
+}
+.carry__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.carry__title {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+  word-break: keep-all;
+}
+.carry__desc {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.carry__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+}
