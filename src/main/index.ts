@@ -315,9 +315,10 @@ function cancelReview(): void {
 }
 
 // 설정 창은 탭이 늘 같은 자리에 있게 위쪽을 고정하고 아래로만 늘린다.
-// 가장 긴 탭(SETTINGS_MAX)이 들어갈 자리를 화면 가운데에 잡아 두고, 그 안에서만 늘어난다. 더 길면 창 안에서 스크롤한다.
+// 가장 긴 탭(SETTINGS_MAX)이 들어갈 자리를 화면 가운데에 잡아 두고, 그 안에서만 늘어난다.
+// 도구 탭(연결 안내까지 펼친 경우)도 스크롤 없이 다 보이도록 넉넉히 잡는다. 화면이 그보다 작을 때만 창 안에서 스크롤한다.
 const SETTINGS_WIDTH = 560;
-const SETTINGS_MAX = 760;
+const SETTINGS_MAX = 960;
 const SCREEN_GAP = 24;
 function settingsFrame(): { x: number; y: number; maxHeight: number } {
   const wa = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea;

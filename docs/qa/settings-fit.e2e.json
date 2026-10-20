@@ -1,0 +1,4 @@
+[{"name":"도구 탭 · 스크롤 없이 다 보이나","win":"settings","main":"openSettings:tools","until":"__e2e.$('.group')","wait":1500,"snap":true,
+  "run":"return { inner: window.innerHeight, content: document.documentElement.scrollHeight, screenAvail: screen.availHeight, scrollable: document.documentElement.scrollHeight > window.innerHeight + 1 };",
+  "expect":"document.documentElement.scrollHeight <= window.innerHeight + 1"},
+ {"name":"일반 탭으로 돌아오면 다시 줄어든다","win":"settings","run":"__e2e.click(__e2e.byText('일반')); await new Promise(r => setTimeout(r, 900)); return { inner: window.innerHeight, content: document.documentElement.scrollHeight };"}]
