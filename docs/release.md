@@ -68,3 +68,9 @@ npm run dist:mac
 
 `bash scripts/new-user-matrix.sh <결과 폴더>` — 빈 홈 폴더와 최소 PATH로 앱을 띄워, claude가 없는 경우·로그인 안 한 경우·사용량 한도·
 인터넷 끊김·npm/nvm으로 깐 경우 등을 가짜 claude(`docs/qa/fixtures/fake-claude.mjs`)로 돌린다. 결과는 `docs/qa/new-user-report.md`.
+
+## 맥 서명(지금은 ad-hoc)
+
+Developer ID가 없어서 `mac.identity: "-"`로 앱 전체를 ad-hoc 서명한다(electron-builder.yml).
+서명이 아예 없으면(0.1.3까지) 받은 앱에 링커 서명만 남아 "손상되었기 때문에 열 수 없습니다"로 막힌다.
+확인: `codesign --verify --deep --strict dist/mac-arm64/Rigel.app`가 통과해야 한다. 그러면 처음 열 때 "확인할 수 없는 개발자"로 뜨고 개인정보 보호 및 보안 → 그래도 열기로 열 수 있다.
