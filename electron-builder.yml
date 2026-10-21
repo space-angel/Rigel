@@ -20,7 +20,7 @@ asar: true
 publish:
   provider: github
   owner: space-angel
-  repo: todoban-releases
+  repo: rigel-releases
   releaseType: release
 # 앱 안의 Chromium 언어 파일은 한국어·영어만(앱 크기를 줄인다)
 electronLanguages:

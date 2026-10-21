@@ -81,13 +81,13 @@ Rigel은 **내 컴퓨터의 Claude Code**로 할 일을 나누고 첫 행동을 
 
 ### 2. Rigel 받기
 
-**[다운로드 페이지](https://space-angel.github.io/todoban-releases/)**에서 내 컴퓨터에 맞는 버튼을 눌러요.
+**[다운로드 페이지](https://space-angel.github.io/rigel-releases/)**에서 내 컴퓨터에 맞는 버튼을 눌러요.
 
 | 컴퓨터 | 바로 받기 |
 |---|---|
-| Mac (Apple Silicon) | [Rigel-mac-arm64.dmg](https://github.com/space-angel/todoban-releases/releases/latest/download/Rigel-mac-arm64.dmg) |
-| Mac (Intel) | [Rigel-mac-x64.dmg](https://github.com/space-angel/todoban-releases/releases/latest/download/Rigel-mac-x64.dmg) |
-| Windows | [Rigel-win-x64-setup.exe](https://github.com/space-angel/todoban-releases/releases/latest/download/Rigel-win-x64-setup.exe) |
+| Mac (Apple Silicon) | [Rigel-mac-arm64.dmg](https://github.com/space-angel/rigel-releases/releases/latest/download/Rigel-mac-arm64.dmg) |
+| Mac (Intel) | [Rigel-mac-x64.dmg](https://github.com/space-angel/rigel-releases/releases/latest/download/Rigel-mac-x64.dmg) |
+| Windows | [Rigel-win-x64-setup.exe](https://github.com/space-angel/rigel-releases/releases/latest/download/Rigel-win-x64-setup.exe) |
 
 아직 서명하지 않은 앱이라 처음 열 때 경고가 떠요. 한 번만 허용하면 돼요.
 

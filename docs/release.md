@@ -49,8 +49,8 @@ npm run dist:mac
 
 ## 배포와 업데이트
 
-설치 파일은 공개 레포 **space-angel/todoban-releases**의 GitHub Releases에 올린다(코드 레포 ban-todo는 비공개).
-- 다운로드 페이지: https://space-angel.github.io/todoban-releases/ (소스는 이 레포의 `site/`)
+설치 파일은 공개 레포 **space-angel/rigel-releases**의 GitHub Releases에 올린다(코드 레포 ban-todo는 비공개).
+- 다운로드 페이지: https://space-angel.github.io/rigel-releases/ (소스는 이 레포의 `site/`)
 - 파일 이름에 버전이 없어서 `releases/latest/download/<파일>`이 늘 최신을 가리킨다
 - 앱은 켜고 15초 뒤, 그 뒤 6시간마다 최신 릴리스를 확인한다(`src/main/updater.ts`)
   - 윈도우: electron-updater가 뒤에서 받고 다시 켤 때 설치(`latest.yml`)

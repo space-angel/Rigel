@@ -12,6 +12,6 @@ test("버전 비교: 자릿수별로, v는 무시, 정식이 미리 보기보다
 });
 
 test("맥 설치 파일은 늘 최신 릴리스를 가리킨다", () => {
-  assert.equal(macDownloadUrl("arm64"), "https://github.com/space-angel/todoban-releases/releases/latest/download/Rigel-mac-arm64.dmg");
-  assert.equal(macDownloadUrl("x64"), "https://github.com/space-angel/todoban-releases/releases/latest/download/Rigel-mac-x64.dmg");
+  assert.equal(macDownloadUrl("arm64"), "https://github.com/space-angel/rigel-releases/releases/latest/download/Rigel-mac-arm64.dmg");
+  assert.equal(macDownloadUrl("x64"), "https://github.com/space-angel/rigel-releases/releases/latest/download/Rigel-mac-x64.dmg");
 });

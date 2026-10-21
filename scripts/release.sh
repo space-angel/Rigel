@@ -1,5 +1,5 @@
 #!/bin/bash
-# 새 버전 올리기: CI가 만든 설치 파일을 공개 레포(space-angel/todoban-releases)의 릴리스로 올린다.
+# 새 버전 올리기: CI가 만든 설치 파일을 공개 레포(space-angel/rigel-releases)의 릴리스로 올린다.
 # 그러면 다운로드 페이지 버튼과 앱의 업데이트 확인이 이 버전을 가리킨다.
 #
 # 1. package.json의 version을 올리고 커밋·푸시한다(CI가 설치 파일을 만든다)
@@ -8,8 +8,8 @@
 set -euo pipefail
 RUN=${1:?CI 실행 번호}
 NOTES=${2:-""}
-REPO=space-angel/ban-todo
-RELEASES=space-angel/todoban-releases
+REPO=space-angel/Rigel
+RELEASES=space-angel/rigel-releases
 VERSION=$(node -p "require('./package.json').version")
 WORK=$(mktemp -d -t todoban-release)
 
