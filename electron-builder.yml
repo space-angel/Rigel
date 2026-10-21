@@ -40,8 +40,11 @@ mac:
   extendInfo:
     LSUIElement: true
     NSAppleEventsUsageDescription: 캘린더 도구를 켜면 다가오는 일정의 제목과 시간을 읽어 첫 행동의 크기를 정해요.
-  hardenedRuntime: true
-  # 서명·공증은 Apple Developer ID가 있을 때 CSC_LINK·APPLE_ID 등 환경 변수로 켠다(docs/release.md)
+  # Developer ID가 없어 ad-hoc 서명("-")으로 앱 전체를 서명한다. 서명이 아예 없으면(링커 서명만) 받은 앱이
+  # 애플 실리콘에서 "손상되었기 때문에 열 수 없습니다"로 막힌다. ad-hoc이면 "확인할 수 없는 개발자" 안내로 바뀌어 열 수 있다.
+  # Developer ID로 서명·공증할 때는 identity를 지우고 hardenedRuntime을 다시 켠다(docs/release.md)
+  identity: "-"
+  hardenedRuntime: false
   notarize: false
 # 파일 이름에 버전을 넣지 않는다. 다운로드 페이지가 늘 releases/latest/download/<이름>으로 최신을 가리킨다.
 dmg:

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
 import { charCount, classifyQuickInput } from "@shared/quickInput";
-import { AiSparkle, ArrowRightIcon } from "./components/icons";
+import { ArrowRightIcon, RigelIcon } from "./components/icons";
 import { t } from "./i18n";
 
 const api = window.todoban;
@@ -65,7 +65,7 @@ export function QuickInput() {
     <div className="quick-window">
       <div className="quick" ref={panelRef}>
         <div className="quick__input">
-          <AiSparkle size={22} className="quick__icon" />
+          <RigelIcon size={24} className="quick__icon" />
           <textarea
             ref={inputRef}
             autoFocus
@@ -84,7 +84,7 @@ export function QuickInput() {
           )}
           {kind === "long" && (
             <span className="quick__kind quick__kind--ai motion-fade" key="long">
-              <AiSparkle size={12} /> {t("{n} chars · Claude splits it into tasks", { n: count })}
+              <RigelIcon size={13} /> {t("{n} chars · Claude splits it into tasks", { n: count })}
             </span>
           )}
           <span className="quick__keys">

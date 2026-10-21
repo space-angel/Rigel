@@ -115,6 +115,15 @@
   .btn-t:hover { color: var(--text); }
   .spin { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid rgb(255 255 255 / 25%); border-top-color: var(--blue-2); animation: spin 0.8s linear infinite; flex: none; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  /* Rigel 로더(앱과 같음): 작은 원 둘이 떨어졌다가 로고 모양으로 붙는다 */
+  .rl { flex: none; margin: -2px; color: var(--blue-2); vertical-align: middle; }
+  .rl circle { transform-box: fill-box; transform-origin: center; }
+  .rl-l { animation: rl-l 1.8s cubic-bezier(0.45, 0, 0.3, 1) infinite; }
+  .rl-s { animation: rl-s 1.8s cubic-bezier(0.45, 0, 0.3, 1) infinite 0.1s; }
+  .rl-b { animation: rl-b 1.8s cubic-bezier(0.45, 0, 0.3, 1) infinite; }
+  @keyframes rl-l { 0%, 12%, 88%, 100% { transform: none; } 50% { transform: translate(-6px, -2px); } }
+  @keyframes rl-s { 0%, 12%, 88%, 100% { transform: none; } 50% { transform: translate(2px, -6px); } }
+  @keyframes rl-b { 0%, 78%, 100% { transform: none; } 90% { transform: scale(1.05); } }
   .sparkle { width: 13px; height: 13px; color: var(--blue-2); flex: none; }
 
   /* 빠른 입력 */
@@ -257,6 +266,7 @@
   summary::-webkit-details-marker { display: none; }
   summary span { color: var(--text-3); font-weight: 400; font-size: 14px; }
   details .open { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding: 0 26px 26px; }
+  details .open .note { margin: 12px 0 0; font-size: 13px; line-height: 1.55; color: var(--text-3); }
   details h4 { margin: 0 0 8px; font-size: 15px; }
   details ol { margin: 0; padding-left: 20px; color: var(--text-2); font-size: 15px; }
   details li { margin: 4px 0; }
@@ -279,6 +289,7 @@
     .reveal { opacity: 1; transform: none; transition: none; }
     .pop, .fade, .now.handoff .flash, .split .raw.go { animation: none; }
     .spin { animation-duration: 2.4s; }
+    .rl circle { animation: none; }
     html { scroll-behavior: auto; }
   }
 
@@ -299,7 +310,8 @@
 </head>
 <body>
   <svg width="0" height="0" style="position: absolute" aria-hidden="true">
-    <symbol id="i-spark" viewBox="0 0 16 16"><path fill="currentColor" d="M8 1.5c.4 2.9 1.6 4.1 4.5 4.5-2.9.4-4.1 1.6-4.5 4.5-.4-2.9-1.6-4.1-4.5-4.5C6.4 5.6 7.6 4.4 8 1.5Zm4.6 7.3c.2 1.4.8 2 2.2 2.2-1.4.2-2 .8-2.2 2.2-.2-1.4-.8-2-2.2-2.2 1.4-.2 2-.8 2.2-2.2Z" /></symbol>
+    <symbol id="i-spark" viewBox="9.8 1.4 68 68"><path fill="currentColor" d="M62.5871 26.2235C70.34 27.9228 76.0751 34.7199 76.6061 42.579C77.2433 53.518 68.1097 62.4392 57.1707 61.5896C48.6743 60.8462 41.771 54.1553 40.8152 45.7651C40.4966 42.8976 40.8152 40.2425 41.6648 37.7998C41.8773 36.9502 42.6207 35.7819 43.1517 35.1447C43.2579 35.0385 43.3641 34.9323 43.3641 34.9323C43.4703 34.7199 43.5765 34.6137 43.5765 34.5075C43.6827 34.1888 43.7889 33.9764 43.7889 33.6578C43.7889 33.5516 43.7889 33.5516 43.7889 33.4454C43.7889 31.8523 42.6207 30.6841 41.1338 30.6841C40.0718 30.6841 39.2221 31.2151 38.7973 32.0647C38.5849 32.2772 38.4787 32.4896 38.4787 32.8082C38.4787 33.0206 38.3725 33.233 38.3725 33.4454C38.3725 34.6137 38.1601 35.8881 37.7353 36.9502C35.7174 42.048 30.832 45.4465 24.9907 45.4465C16.9192 45.4465 10.4407 38.437 11.2904 30.0469C12.0338 23.7808 17.0254 18.7892 23.2915 17.9396C26.9024 17.5147 30.1948 18.4706 32.8499 20.3823C34.0181 21.1257 35.0802 22.2939 35.8236 23.4622C36.036 23.7808 36.3546 24.0994 36.6732 24.2056C36.9918 24.5242 37.5229 24.6304 38.0539 24.6304C39.5408 24.6304 40.709 23.4622 40.709 21.9753C40.709 21.7629 40.709 21.5505 40.6028 21.3381C40.6028 21.0195 40.4966 20.8071 40.3904 20.5947C40.2842 20.5947 40.2842 20.4885 40.178 20.4885C39.3283 19.3202 38.7973 17.9396 38.7973 16.4527C38.7973 11.8859 42.9393 8.27495 47.6123 9.12459C50.4798 9.65561 52.8163 11.8859 53.4535 14.7534C53.8784 16.9837 53.4535 19.0016 52.2853 20.5947C51.7543 21.3381 50.9046 21.8691 50.055 22.1877C49.9488 22.1877 49.9488 22.1877 49.8426 22.1877C49.6302 22.2939 49.4178 22.5063 49.2054 22.6126C48.8867 22.825 48.6743 23.1436 48.4619 23.4622C48.1433 23.887 48.0371 24.418 48.0371 24.949C48.0371 25.2677 48.0371 25.5863 48.2495 25.9049C48.6743 27.2855 50.2674 27.8166 51.5419 27.2855C51.7543 27.1793 51.9667 27.0731 52.1791 26.9669C52.6039 26.8607 52.9142 26.6704 53.3473 26.5421C56.2149 25.6925 59.2948 25.4801 62.5871 26.2235Z" /></symbol>
+    <filter id="goo-l" filterUnits="userSpaceOnUse" x="-10" y="-10" width="92" height="80"><feGaussianBlur in="SourceGraphic" stdDeviation="2.6" result="b" /><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 14 -5.5" /></filter>
     <symbol id="i-check" viewBox="0 0 16 16"><path d="m3.5 8.4 2.9 2.9 6.1-6.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
     <symbol id="i-chev" viewBox="0 0 16 16"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></symbol>
     <symbol id="i-figma" viewBox="0 0 16 24"><path fill="#f24e1e" d="M4 0h4v8H4a4 4 0 0 1 0-8Z" /><path fill="#ff7262" d="M8 0h4a4 4 0 0 1 0 8H8V0Z" /><path fill="#a259ff" d="M4 8h4v8H4a4 4 0 0 1 0-8Z" /><circle fill="#1abcfe" cx="12" cy="12" r="4" /><path fill="#0acf83" d="M4 16h4v4a4 4 0 1 1-4-4Z" /></symbol>
@@ -438,7 +450,7 @@
           <div><span class="no">02 — 나누기</span><h2>긴 생각은<br />할 일로 나눠요</h2></div>
           <div>
             <p class="value">한 문장에 섞인 일을 Claude가 <b>할 일 하나하나로</b> 나눠요. 언제 할지, 언제까지인지도 함께요.</p>
-            <ul class="facts"><li>넣기 전에 한 번 확인해요</li><li>마감 전에 할 준비는 오늘로 잡아요</li></ul>
+            <ul class="facts"><li>넣기 전에 한 번 확인해요</li><li>마감 전에 할 준비는 오늘로 잡아요</li><li>말하지 않은 마감은 붙이지 않아요</li></ul>
           </div>
         </div>
         <div class="demo reveal" id="split-demo">
@@ -458,7 +470,7 @@
           <div><span class="no">03 — 첫 행동</span><h2>막막한 일은<br />첫 행동으로</h2></div>
           <div>
             <p class="value">큰 일 대신 <b>지금 시작할 수 있는 작은 행동 하나</b>를 제안해요. 맨 위 할 일은 미리 찾아 두어서, 누르자마자 보여요.</p>
-            <ul class="facts"><li>필요하면 답하기 쉬운 질문 하나만 해요</li><li>마음에 안 들면 다시 만들어요</li></ul>
+            <ul class="facts"><li>같은 목록의 다른 할 일과 겹치지 않게 골라요</li><li>필요하면 답하기 쉬운 질문 하나만 해요</li><li>마음에 안 들면 다시 만들어요</li></ul>
           </div>
         </div>
         <div class="demo reveal" id="redo-demo">
@@ -552,6 +564,7 @@
                 <li><b>시스템 설정 → 개인정보 보호 및 보안</b> 맨 아래 <b>그래도 열기</b></li>
                 <li>다시 열고 <b>열기</b>를 누르면 메뉴바에 아이콘이 생겨요</li>
               </ol>
+              <p class="note">‘손상되었기 때문에 열 수 없습니다’가 뜨면 0.1.3 이하 파일이에요. 휴지통에 넣고 새로 받아 주세요.</p>
             </div>
             <div>
               <h4>Windows</h4>
@@ -565,7 +578,7 @@
           </div>
         </details>
         <div class="trust reveal">
-          <div><h4>내 컴퓨터에만</h4><p>할 일과 설정은 내 컴퓨터에만 저장해요. Claude에는 이름만 보내고, 파일 내용과 링크는 보내지 않아요.</p></div>
+          <div><h4>내 컴퓨터에만</h4><p>할 일과 설정은 내 컴퓨터에만 저장해요. Claude에는 첫 행동에 필요한 할 일과 고른 자료의 요약만 보내고, 내 파일의 내용과 링크는 보내지 않아요.</p></div>
           <div><h4>내 Claude로</h4><p>Rigel은 내 Claude Code를 실행만 해요. 계정 정보는 직접 다루지 않아요.</p></div>
           <div><h4>알아서 새 버전</h4><p>새 버전이 나오면 앱이 알려 줘요. 윈도우는 다시 켤 때 자동으로 바뀌어요.</p></div>
         </div>
@@ -810,7 +823,7 @@
     // 3) 물어보면 실제로 일어나는 일만 보여 준다
     ask.remove();
     fsSlot.innerHTML = "";
-    var prog = el('<div class="progress fade"><p class="done">' + CHECK + 'Claude에 할 일을 보냈어요</p><p><span class="spin"></span>첫 행동을 찾고 있어요<span class="meta2">보통 6초</span></p></div>');
+    var prog = el('<div class="progress fade"><p class="done">' + CHECK + 'Claude에 할 일을 보냈어요</p><p><svg class="rl" width="20" height="17.4" viewBox="-10 -10 92 80" fill="currentColor" aria-hidden="true"><g filter="url(#goo-l)"><circle class="rl-b" cx="48.7" cy="37.6" r="17.6"/><circle class="rl-l" cx="16.5" cy="26.3" r="13.4"/><circle class="rl-s" cx="37.8" cy="12" r="7.2"/></g></svg>첫 행동을 찾고 있어요<span class="meta2">보통 6초</span></p></div>');
     fsSlot.appendChild(prog);
     await wait(1700);
     if (my !== run) return;
@@ -893,7 +906,7 @@
   async function playSplit() {
     out.innerHTML = ""; raw.classList.remove("go");
     await wait(300);
-    var p = el('<div class="progress fade" style="padding-left: 4px"><p><span class="spin"></span>할 일로 나누고 있어요</p></div>');
+    var p = el('<div class="progress fade" style="padding-left: 4px"><p><svg class="rl" width="20" height="17.4" viewBox="-10 -10 92 80" fill="currentColor" aria-hidden="true"><g filter="url(#goo-l)"><circle class="rl-b" cx="48.7" cy="37.6" r="17.6"/><circle class="rl-l" cx="16.5" cy="26.3" r="13.4"/><circle class="rl-s" cx="37.8" cy="12" r="7.2"/></g></svg>할 일로 나누고 있어요</p></div>');
     out.appendChild(p);
     await wait(1300);
     out.innerHTML = ""; void raw.offsetWidth; raw.classList.add("go");
@@ -919,7 +932,7 @@
   rTitle.textContent = REDO[0];
   $(redo, ".redo").addEventListener("click", async function () {
     var btn = this; btn.disabled = true;
-    rTitle.innerHTML = '<span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:var(--text-2)"><span class="spin"></span>다시 만들고 있어요</span>';
+    rTitle.innerHTML = '<span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:var(--text-2)"><svg class="rl" width="20" height="17.4" viewBox="-10 -10 92 80" fill="currentColor" aria-hidden="true"><g filter="url(#goo-l)"><circle class="rl-b" cx="48.7" cy="37.6" r="17.6"/><circle class="rl-l" cx="16.5" cy="26.3" r="13.4"/><circle class="rl-s" cx="37.8" cy="12" r="7.2"/></g></svg>다시 만들고 있어요</span>';
     await wait(800);
     ri = (ri + 1) % REDO.length;
     rTitle.textContent = REDO[ri]; rTitle.classList.remove("pop"); void rTitle.offsetWidth; rTitle.classList.add("pop");

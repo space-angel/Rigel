@@ -5,7 +5,7 @@ import type { FirstStepState } from "@shared/firstStep";
 import { localDate } from "@shared/todos";
 import { defaultMinutes, noteOpen, normalizeMix, sizeLabel, splitWords, toNote, type ShapeInput, type ToolResult, type ToolSource, type WordChip } from "@shared/shape";
 import { MCP_SERVICES, MCP_SOURCES, type McpSource } from "@shared/mcp";
-import { AiSparkle, CheckIcon, ChevronLeftIcon, RefreshIcon, Spinner } from "./components/icons";
+import { CheckIcon, ChevronLeftIcon, RefreshIcon, RigelIcon, Spinner } from "./components/icons";
 import { SizeDial } from "./components/SizeDial";
 import { MixBar } from "./components/MixBar";
 import { SourceIcon, sourceName } from "./components/SourceIcon";
@@ -336,7 +336,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
           </div>
           {tools === null ? (
             <p className="shape__empty">
-              <RigelLoader size={16} /> {t("Reading your tools…")}
+              <RigelLoader size={20} /> {t("Reading your tools…")}
             </p>
           ) : tools.length === 0 ? (
             <p className="shape__empty">
@@ -433,7 +433,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
                   </p>
                 )}
                 <p className="fs-progress__row">
-                  <RigelLoader size={16} /> {t("Reading {names}…", { names: waiting.map((r) => sourceName(r.source)).join(", ") })}
+                  <RigelLoader size={20} /> {t("Reading {names}…", { names: waiting.map((r) => sourceName(r.source)).join(", ") })}
                 </p>
               </div>
             ) : (
@@ -449,12 +449,12 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
           </button>
         ) : (
           <span className="shape__note">
-            {mcpOn.length ? t("MCP reads via Claude Code") : t("Sends titles only")} · {sizeLabel(size, currentLang())}
+            {mcpOn.length ? t("MCP reads via Claude Code") : t("File contents stay here")} · {sizeLabel(size, currentLang())}
           </span>
         )}
         <span className="spacer" />
         <button type="button" className="button button--primary" disabled={busy || tools === null} onClick={shapeIt}>
-          {busy ? <Spinner size={12} /> : <AiSparkle size={12} />}{" "}
+          {busy ? <RigelLoader size={16} /> : <RigelIcon size={13} />}{" "}
           {waitingSince !== null ? t("Waiting for {names}", { names: waiting.map((r) => sourceName(r.source)).join(", ") }) : busy ? t("Shaping…") : t("Shape it")}
         </button>
       </footer>

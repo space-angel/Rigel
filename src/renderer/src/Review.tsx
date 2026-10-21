@@ -11,7 +11,7 @@ import { currentLang, t } from "./i18n";
 import { modKey } from "./platform";
 import { limitReset } from "@shared/claude";
 import { resetTime } from "./claudeLabels";
-import { AiSparkle, ChevronDownIcon, CloseIcon, PlusIcon, RefreshIcon, TerminalIcon, WarningIcon } from "./components/icons";
+import { ChevronDownIcon, CloseIcon, PlusIcon, RefreshIcon, RigelIcon, TerminalIcon, WarningIcon } from "./components/icons";
 
 const api = window.todoban;
 const SLOW_AFTER_MS = 10_000;
@@ -49,7 +49,7 @@ function DraftNotes({ notes, loading, onRemove }: { notes: ContextNote[]; loadin
       ))}
       {loading.length > 0 && (
         <span className="note-loading">
-          <RigelLoader size={15} /> {t("Looking in {names}…", { names: loading.map(serviceName).join(", ") })}
+          <RigelLoader size={18} /> {t("Looking in {names}…", { names: loading.map(serviceName).join(", ") })}
         </span>
       )}
     </div>
@@ -223,7 +223,7 @@ export function Review() {
           // B2: 나누는 동안 할 일 카드가 될 빈 글래스 카드들이 흩어져 떠 있다.
           <div className="splitting motion-fade">
             <div className="splitting__pill">
-              <RigelLoader size={16} /> {slow ? t("Taking a little longer…") : t("Splitting into tasks…")}
+              <RigelLoader size={20} /> {slow ? t("Taking a little longer…") : t("Splitting into tasks…")}
             </div>
             {[0, 1, 2, 3].map((i) => (
               <div className={`ghost ghost--${i}`} key={i} aria-hidden="true">
@@ -287,7 +287,7 @@ export function Review() {
               </Notice>
             ) : (
               <h2 className="review__heading">
-                <AiSparkle size={14} /> {drafts.length === 1 ? t("1 task from your thought") : t("{n} tasks from your thought", { n: drafts.length })}
+                <RigelIcon size={14} /> {drafts.length === 1 ? t("1 task from your thought") : t("{n} tasks from your thought", { n: drafts.length })}
               </h2>
             )}
             {(state.mentions ?? []).length > 0 && (
