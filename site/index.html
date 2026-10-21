@@ -612,8 +612,7 @@
       aln: [256, 390, 0.95], alm: [300, 374, 1.0], min: [344, 357, 0.9],
       sai: [216, 568, 0.9], rig: [424, 586, 1.6],
     };
-    // 선은 긋지 않는다. 별 무리와 허리띠 아래 성운(칼)만으로 거인이 읽히게
-    var NEB = [300, 468];
+    // 선은 긋지 않는다. 별 무리만으로 거인이 읽히게
 
     // 빛나는 점을 미리 그려 둔다(색마다 한 장). 그릴 때는 찍기만 한다.
     function sprite(rgb) {
@@ -623,7 +622,7 @@
       g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
       return c;
     }
-    var SPR = { w: sprite("236,241,255"), b: sprite("150,188,255"), o: sprite("255,178,138"), r: sprite("255,110,80"), B: sprite("110,160,255"), p: sprite("236,120,190"), t: sprite("110,190,230") };
+    var SPR = { w: sprite("236,241,255"), b: sprite("150,188,255"), o: sprite("255,178,138"), r: sprite("255,110,80"), B: sprite("110,160,255") };
 
     var W = 0, H = 0, dpr = 1, box = { x: 0, y: 0, s: 1 }, parts = [], seed = 11;
     var rnd = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
@@ -646,14 +645,10 @@
       var n = Math.round(Math.min(3200, Math.max(1200, (W * H) / 420)));
       for (var i = 0; i < n; i++) {
         var kind = rnd(), tx, ty, col = rnd() < 0.22 ? "b" : rnd() < 0.08 ? "o" : "w", size = 0.35 + rnd() * rnd() * 1.6, alpha = 0.25 + rnd() * 0.55;
-        if (kind < 0.5) {
+        if (kind < 0.7) {
           // 하늘에 남는 별. 거인 쪽으로 조금 더 모인다
           var gx = rnd() < 0.35 ? map([300 + gauss() * 260, 340 + gauss() * 320]) : [rnd() * W, rnd() * H];
           tx = gx[0]; ty = gx[1]; alpha *= 0.5; size *= 0.75;
-        } else if (kind < 0.7) {
-          // 허리띠 아래 오리온 성운: 분홍·청록 안개
-          var m = map([NEB[0] + gauss() * 46, NEB[1] + gauss() * 66]); tx = m[0]; ty = m[1];
-          col = rnd() < 0.55 ? "p" : rnd() < 0.6 ? "t" : "w"; alpha *= 0.22; size *= 0.9;
         } else {
           // 큰 별 둘레의 별 무리(리겔·베텔게우스는 더 촘촘하게, 제 색으로)
           var keys = ["mei", "bet", "bet", "bel", "aln", "alm", "min", "sai", "rig", "rig", "rig"], key = keys[Math.floor(rnd() * keys.length)], st = STARS[key];
@@ -692,9 +687,6 @@
         ctx.globalAlpha = a;
         ctx.drawImage(SPR[p.col], x - s / 2, y - s / 2, s, s);
       }
-      var neb = map(NEB), nr = 120 * box.s, nf = clamp01((t - 1800) / 2000);
-      ctx.globalAlpha = 0.26 * nf; ctx.drawImage(SPR.p, neb[0] - nr * 0.8 + mx, neb[1] - nr * 1.1 + my, nr * 1.6, nr * 2.2);
-      ctx.globalAlpha = 0.16 * nf; ctx.drawImage(SPR.t, neb[0] - nr * 0.5 + mx, neb[1] - nr * 0.9 + my, nr, nr * 1.8);
       // 큰 별: 모인 뒤 밝아지고, 베텔게우스는 붉게, 리겔은 파랗게 가장 밝게
       var form = clamp01((t - 2300) / 1200);
       for (var key in STARS) {
