@@ -5,7 +5,7 @@ import type { FirstStepState } from "@shared/firstStep";
 import { localDate } from "@shared/todos";
 import { defaultMinutes, noteOpen, normalizeMix, sizeLabel, splitWords, toNote, type ShapeInput, type ToolResult, type ToolSource, type WordChip } from "@shared/shape";
 import { MCP_SERVICES, MCP_SOURCES, type McpSource } from "@shared/mcp";
-import { AiSparkle, CheckIcon, ChevronLeftIcon, RefreshIcon, Spinner } from "./components/icons";
+import { CheckIcon, ChevronLeftIcon, RefreshIcon, RigelIcon, Spinner } from "./components/icons";
 import { SizeDial } from "./components/SizeDial";
 import { MixBar } from "./components/MixBar";
 import { SourceIcon, sourceName } from "./components/SourceIcon";
@@ -454,7 +454,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
         )}
         <span className="spacer" />
         <button type="button" className="button button--primary" disabled={busy || tools === null} onClick={shapeIt}>
-          {busy ? <Spinner size={12} /> : <AiSparkle size={12} />}{" "}
+          {busy ? <RigelLoader size={16} /> : <RigelIcon size={13} />}{" "}
           {waitingSince !== null ? t("Waiting for {names}", { names: waiting.map((r) => sourceName(r.source)).join(", ") }) : busy ? t("Shaping…") : t("Shape it")}
         </button>
       </footer>

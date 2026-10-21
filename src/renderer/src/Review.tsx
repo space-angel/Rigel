@@ -11,7 +11,7 @@ import { currentLang, t } from "./i18n";
 import { modKey } from "./platform";
 import { limitReset } from "@shared/claude";
 import { resetTime } from "./claudeLabels";
-import { AiSparkle, ChevronDownIcon, CloseIcon, PlusIcon, RefreshIcon, TerminalIcon, WarningIcon } from "./components/icons";
+import { ChevronDownIcon, CloseIcon, PlusIcon, RefreshIcon, RigelIcon, TerminalIcon, WarningIcon } from "./components/icons";
 
 const api = window.todoban;
 const SLOW_AFTER_MS = 10_000;
@@ -287,7 +287,7 @@ export function Review() {
               </Notice>
             ) : (
               <h2 className="review__heading">
-                <AiSparkle size={14} /> {drafts.length === 1 ? t("1 task from your thought") : t("{n} tasks from your thought", { n: drafts.length })}
+                <RigelIcon size={14} /> {drafts.length === 1 ? t("1 task from your thought") : t("{n} tasks from your thought", { n: drafts.length })}
               </h2>
             )}
             {(state.mentions ?? []).length > 0 && (

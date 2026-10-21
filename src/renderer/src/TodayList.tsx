@@ -6,8 +6,9 @@ import type { AppData, Shortcut, TodoItem } from "@shared/types";
 import { localDate, pendingCarryOver, todayView } from "@shared/todos";
 import { modKey, modLabel, showHotkey } from "./platform";
 import type { FirstStepState } from "@shared/firstStep";
-import { AiSparkle, ArrowRightIcon, CalendarIcon, CheckIcon, ChevronRightIcon, FigmaMark, MoreIcon, PinIcon, PlayIcon, SettingsIcon } from "./components/icons";
+import { ArrowRightIcon, CalendarIcon, CheckIcon, ChevronRightIcon, FigmaMark, MoreIcon, PinIcon, PlayIcon, RigelIcon, SettingsIcon } from "./components/icons";
 import { EmptyArt, type EmptyMood } from "./components/EmptyArt";
+import { RigelLoader } from "./components/RigelLoader";
 import { FirstStepCard } from "./FirstStepCard";
 import { ShapePanel } from "./Shape";
 import { Attachments } from "./components/Attachments";
@@ -282,7 +283,8 @@ function NowCard({
             onFirstStep();
           }}
         >
-          <AiSparkle size={12} /> {ready ? t("A first step is ready") : t("Let Claude find a first step")}
+          {/* 로고는 가만히 있다가 Claude가 찾는 동안만 움직인다 */}
+          {thinking ? <RigelLoader size={16} /> : <RigelIcon size={13} />} {ready ? t("A first step is ready") : t("Let Claude find a first step")}
         </button>
       )}
     </div>
@@ -332,7 +334,7 @@ function Row({
           <Due item={item} />
           {unclear && onFirstStep && (
             <span className="row__hint">
-              <AiSparkle size={12} /> {t("Shape")}
+              <RigelIcon size={13} /> {t("Shape")}
             </span>
           )}
           <Attachments notes={item.context.filter((n) => !(shortcut && n.source === "figma"))} variant="icons" />
@@ -985,7 +987,7 @@ export function TodayList() {
           )}
         </Presence>
         <footer className="capture">
-          <AiSparkle size={14} className="capture__icon" />
+          <RigelIcon size={16} className="capture__icon" />
           <input
             ref={captureRef}
             value={draft}
