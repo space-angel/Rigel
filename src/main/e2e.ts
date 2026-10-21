@@ -9,7 +9,7 @@ export type E2EWindow = "list" | "quick" | "review" | "settings" | "welcome";
 export interface E2EStep {
   name: string;
   win: E2EWindow;
-  main?: string; // 메인 프로세스 동작: "openSettings:<tab>", "openList", "shape:<할 일 제목>", "setData:<json patch path>" 등
+  main?: string; // 메인 프로세스 동작: "openSettings:<tab>", "openList", "shape:<할 일 제목>", "setData:<json patch path>", "key:<창>:<키>:<modifier,…>" 등
   run?: string; // 렌더러에서 실행할 JS (await 가능). __e2e 도우미를 쓸 수 있다
   until?: string; // 참이 될 때까지 기다릴 JS 식
   expect?: string; // 마지막에 참이어야 하는 JS 식

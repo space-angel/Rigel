@@ -4,7 +4,7 @@ import type { AppData, Shortcut } from "@shared/types";
 import { FIGMA_BUNDLE_ID } from "@shared/types";
 import { figmaLinkInfo } from "@shared/todos";
 import { toAccelerator } from "@shared/hotkey";
-import { IS_MAC, LOCAL_AVAILABLE, showHotkey } from "./platform";
+import { IS_MAC, LOCAL_AVAILABLE, modLabel, showHotkey } from "./platform";
 import type { ClaudeInfo } from "@shared/claude";
 import { authLabel, shortVersion } from "./claudeLabels";
 import { useUpdate } from "./useUpdate";
@@ -262,6 +262,19 @@ function GeneralTab({ data }: { data: AppData }) {
           <Toggle on={data.settings.openAtLogin} onChange={(v) => api.act({ type: "setSettings", patch: { openAtLogin: v } })} />
         </div>
         <VersionRow />
+        <div className="setting">
+          <div className="setting__text">
+            <p>{t("Quit Rigel")}</p>
+            <p className="setting__desc">
+              {IS_MAC
+                ? t("Closing windows keeps Rigel in the menu bar. {key} in any Rigel window quits it.", { key: modLabel("Q") })
+                : t("Closing windows keeps Rigel in the tray. {key} in any Rigel window quits it.", { key: modLabel("Q") })}
+            </p>
+          </div>
+          <button type="button" className="button button--secondary button--sm" onClick={() => api.quitApp()}>
+            {t("Quit")}
+          </button>
+        </div>
       </Group>
     </div>
   );

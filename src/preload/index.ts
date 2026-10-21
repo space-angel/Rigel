@@ -20,6 +20,7 @@ const api = {
     };
   },
   checkUpdate: () => ipcRenderer.send("update:check"),
+  quitApp: () => ipcRenderer.send("app:quit"),
   downloadUpdate: () => ipcRenderer.send("update:download"),
   installUpdate: () => ipcRenderer.send("update:install"),
   act: (action: TodoAction): Promise<AppData> => ipcRenderer.invoke("todo:action", action),
