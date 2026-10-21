@@ -588,6 +588,7 @@ app.whenReady().then(() => {
   });
   ipcMain.handle("update:get", () => updater.state);
   ipcMain.on("update:check", () => void updater.check());
+  ipcMain.on("app:quit", () => app.quit());
   ipcMain.on("update:download", () => {
     const s = updater.state;
     if (s.status === "available") openOutside(s.url, () => shell.openExternal(s.url));
@@ -868,6 +869,13 @@ app.whenReady().then(() => {
                     : data.todos.find((x) => x.title === arg);
               if (!t) throw new Error(`할 일 없음: ${arg}`);
               listWindow?.webContents.send("shape:open", t.id, false);
+            } else if (kind === "key") {
+              // "key:<창>:<키>:<modifier,…>" 창에 실제 키 입력을 보낸다(before-input-event를 거친다). 예: "key:list:Q:meta"
+              const [win, keyCode, mods] = arg.split(":");
+              const w = windows[win as keyof typeof windows]();
+              const modifiers = (mods ? mods.split(",") : []) as Electron.InputEvent["modifiers"];
+              w?.webContents.sendInputEvent({ type: "keyDown", keyCode: keyCode!, modifiers });
+              w?.webContents.sendInputEvent({ type: "keyUp", keyCode: keyCode!, modifiers });
             } else throw new Error(`모르는 동작: ${action}`);
           },
         });
@@ -906,6 +914,18 @@ app.whenReady().then(() => {
   // 지난번에 넣거나 취소하지 못한 빠른 입력이 있으면 확인 창을 다시 연다.
   const pending = loadPending();
   if (pending) reviewWindow.once("ready-to-show", () => startReview(pending));
+});
+
+// 맥 메뉴바 아이콘의 오른쪽 클릭이 보통 클릭으로 들어와 메뉴가 안 뜨는 경우가 있다(Electron 44).
+// 메뉴에만 기대지 않게, Rigel 창 어디서든 ⌘Q(윈도우 Ctrl+Q)로 끈다. 설정 → 일반에도 끄기 줄이 있다.
+app.on("web-contents-created", (_e, contents) => {
+  contents.on("before-input-event", (event, input) => {
+    if (input.type !== "keyDown" || input.key.toLowerCase() !== "q" || input.alt || input.shift) return;
+    if (IS_MAC ? input.meta : input.control) {
+      event.preventDefault();
+      app.quit();
+    }
+  });
 });
 
 app.on("before-quit", () => {
