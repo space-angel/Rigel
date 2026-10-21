@@ -440,6 +440,7 @@ kbd {
   padding: 8px 16px 32px;
   text-align: center;
 }
+/* 빈 화면 마크: Rigel 로고(앱 아이콘과 같은 밤하늘 사각형). 빛은 쓰지 않는다 — 다 끝낸 날 한 번만 반짝인다 */
 .empty__mark {
   width: 44px;
   height: 44px;
@@ -447,8 +448,17 @@ kbd {
   place-items: center;
   margin-bottom: 6px;
   border-radius: 14px;
-  background: var(--gradient-blue);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 30%);
+  color: rgb(255 255 255 / 92%);
+  background: linear-gradient(#121a33, #05070d);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 12%);
+}
+.empty__mark--lit svg {
+  animation: rigel-twinkle 1.6s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) 0.35s both;
+}
+@keyframes rigel-twinkle {
+  0% { filter: drop-shadow(0 0 0 rgb(111 166 255 / 0%)); transform: scale(1); }
+  30% { filter: drop-shadow(0 0 7px rgb(111 166 255 / 95%)); transform: scale(1.12); color: #fff; }
+  100% { filter: drop-shadow(0 0 0 rgb(111 166 255 / 0%)); transform: scale(1); }
 }
 .empty__title {
   font-size: 15px;
@@ -2239,7 +2249,6 @@ body::-webkit-scrollbar-thumb {
 }
 .splitting__pill svg {
   color: var(--blue-300);
-  animation: pulse 1.4s ease-in-out infinite;
 }
 .ghost {
   position: absolute;
@@ -3225,4 +3234,48 @@ html[lang="ko"] :is(.eyebrow,
   border-radius: 50%;
   background: var(--blue-300);
   box-shadow: 0 0 0 2px var(--ink-2);
+}
+
+/* Rigel 로더: 왼쪽·위 원이 떨어졌다가 큰 원으로 흘러 모이고, 모일 때 큰 원이 살짝 커진다(transform만) */
+.rigel-loader {
+  flex: none;
+  overflow: visible;
+  color: var(--blue-300);
+}
+.rigel-loader circle {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.rigel-loader__left {
+  animation: rigel-left 1.8s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+.rigel-loader__small {
+  animation: rigel-small 1.8s cubic-bezier(0.45, 0, 0.25, 1) infinite 0.12s;
+}
+.rigel-loader__big {
+  animation: rigel-big 1.8s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+@keyframes rigel-left {
+  0%, 100% { transform: translate(0, 0); }
+  45% { transform: translate(-7px, -3px) scale(0.86); }
+  75% { transform: translate(4px, 2px); }
+}
+@keyframes rigel-small {
+  0%, 100% { transform: translate(0, 0); }
+  45% { transform: translate(3px, -7px) scale(0.8); }
+  75% { transform: translate(-2px, 4px); }
+}
+@keyframes rigel-big {
+  0%, 60%, 100% { transform: scale(1); }
+  80% { transform: scale(1.07); }
+}
+/* 첫 행동 카드가 나오면 마크가 한 번 파랗게 켜진다 */
+.rigel-lit {
+  animation: rigel-twinkle 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s both;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* 움직이지 않고 옅게 숨쉬기만: 일하는 중이라는 건 알 수 있게 */
+  .rigel-loader circle { animation: none !important; }
+  .rigel-loader { animation: rigel-breathe 1.6s ease-in-out infinite !important; }
+  @keyframes rigel-breathe { 50% { opacity: 0.45; } }
 }
