@@ -1,7 +1,7 @@
 {
   "name": "todoban",
   "productName": "Rigel",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "description": "해야 하는 건 아는데 뭐부터 할지 몰라 시작을 못 할 때, 첫 행동을 찾아 주는 메뉴바·트레이 할 일 앱",
   "main": "./out/main/index.js",
