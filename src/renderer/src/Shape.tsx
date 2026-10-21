@@ -449,7 +449,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
           </button>
         ) : (
           <span className="shape__note">
-            {mcpOn.length ? t("MCP reads via Claude Code") : t("Sends titles only")} · {sizeLabel(size, currentLang())}
+            {mcpOn.length ? t("MCP reads via Claude Code") : t("File contents stay here")} · {sizeLabel(size, currentLang())}
           </span>
         )}
         <span className="spacer" />

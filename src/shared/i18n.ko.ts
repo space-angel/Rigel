@@ -219,7 +219,7 @@ export const KO: Record<string, string> = {
   "Drag to change the mix": "끌어서 비율 바꾸기",
   "Skip {names}": "{names} 없이 하기",
   "MCP reads via Claude Code": "MCP 자료는 Claude Code가 읽어요",
-  "Sends titles only": "할 일 이름만 보내요",
+  "File contents stay here": "파일 내용은 안 보내요",
   "Waiting for {names}": "{names} 기다리는 중",
   "Shaping…": "만들고 있어요",
   "Shape it": "첫 행동 만들기",
