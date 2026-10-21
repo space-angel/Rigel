@@ -48,7 +48,7 @@ export function FirstStepProgress({ state }: { state: FirstStepState }) {
         <CheckIcon size={11} /> {sent}
       </p>
       <p className="fs-progress__row">
-        <RigelLoader size={16} /> {state.answer && !shape ? t("Shaping a step from your answer…") : t("Finding a first step…")}
+        <RigelLoader size={20} /> {state.answer && !shape ? t("Shaping a step from your answer…") : t("Finding a first step…")}
         {meta && <span className="fs-progress__meta">{meta}</span>}
       </p>
     </div>

@@ -336,7 +336,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
           </div>
           {tools === null ? (
             <p className="shape__empty">
-              <RigelLoader size={16} /> {t("Reading your tools…")}
+              <RigelLoader size={20} /> {t("Reading your tools…")}
             </p>
           ) : tools.length === 0 ? (
             <p className="shape__empty">
@@ -433,7 +433,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
                   </p>
                 )}
                 <p className="fs-progress__row">
-                  <RigelLoader size={16} /> {t("Reading {names}…", { names: waiting.map((r) => sourceName(r.source)).join(", ") })}
+                  <RigelLoader size={20} /> {t("Reading {names}…", { names: waiting.map((r) => sourceName(r.source)).join(", ") })}
                 </p>
               </div>
             ) : (
