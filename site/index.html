@@ -612,13 +612,8 @@
       aln: [256, 390, 0.95], alm: [300, 374, 1.0], min: [344, 357, 0.9],
       sai: [216, 568, 0.9], rig: [424, 586, 1.6],
     };
-    // 거인으로 읽히게: 몸(선) + 든 몽둥이(왼팔) + 방패(오른쪽)
-    var LINES = [
-      ["mei", "bet"], ["mei", "bel"], ["bet", "aln"], ["bel", "min"], ["aln", "alm"], ["alm", "min"], ["aln", "sai"], ["min", "rig"],
-      [[188, 200], [150, 128]], [[150, 128], [168, 54]], [[150, 128], [118, 92]],
-      [[412, 222], [470, 190]], [[470, 190], [498, 236]], [[498, 236], [504, 290]], [[504, 290], [488, 340]],
-    ];
-    var pt = function (p) { return typeof p === "string" ? [STARS[p][0], STARS[p][1]] : p; };
+    // 선은 긋지 않는다. 별 무리와 허리띠 아래 성운(칼)만으로 거인이 읽히게
+    var NEB = [300, 468];
 
     // 빛나는 점을 미리 그려 둔다(색마다 한 장). 그릴 때는 찍기만 한다.
     function sprite(rgb) {
@@ -628,7 +623,7 @@
       g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
       return c;
     }
-    var SPR = { w: sprite("236,241,255"), b: sprite("150,188,255"), o: sprite("255,178,138"), r: sprite("255,110,80"), B: sprite("110,160,255") };
+    var SPR = { w: sprite("236,241,255"), b: sprite("150,188,255"), o: sprite("255,178,138"), r: sprite("255,110,80"), B: sprite("110,160,255"), p: sprite("236,120,190"), t: sprite("110,190,230") };
 
     var W = 0, H = 0, dpr = 1, box = { x: 0, y: 0, s: 1 }, parts = [], seed = 11;
     var rnd = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
@@ -641,7 +636,7 @@
       var narrow = W < 860;
       var fh = narrow ? H * 0.56 : H * 0.8, s = Math.min(fh / 700, (W * (narrow ? 0.92 : 0.5)) / 600);
       box = { s: s, x: W / 2 - 300 * s, y: (narrow ? H * 0.5 : H * 0.47) - 350 * s };
-      var r = map(pt("rig"));
+      var r = map([STARS.rig[0], STARS.rig[1]]);
       root.style.setProperty("--rx", r[0] + "px"); root.style.setProperty("--ry", r[1] + "px");
       build();
     }
@@ -649,23 +644,20 @@
     function build() {
       seed = 11; parts = [];
       var n = Math.round(Math.min(3200, Math.max(1200, (W * H) / 420)));
-      var total = LINES.reduce(function (a, l) { var p = pt(l[0]), q = pt(l[1]); return a + Math.hypot(q[0] - p[0], q[1] - p[1]); }, 0);
       for (var i = 0; i < n; i++) {
         var kind = rnd(), tx, ty, col = rnd() < 0.22 ? "b" : rnd() < 0.08 ? "o" : "w", size = 0.35 + rnd() * rnd() * 1.6, alpha = 0.25 + rnd() * 0.55;
-        if (kind < 0.34) {
-          // 하늘에 남는 별
-          tx = rnd() * W; ty = rnd() * H; alpha *= 0.55; size *= 0.8;
-        } else if (kind < 0.74) {
-          // 선을 따라 흐르는 별
-          var d = rnd() * total, l = LINES[0];
-          for (var k = 0; k < LINES.length; k++) { var p0 = pt(LINES[k][0]), q0 = pt(LINES[k][1]), len = Math.hypot(q0[0] - p0[0], q0[1] - p0[1]); if (d < len) { l = LINES[k]; break; } d -= len; }
-          var p = pt(l[0]), q = pt(l[1]), u = rnd(), nx = -(q[1] - p[1]), ny = q[0] - p[0], nl = Math.hypot(nx, ny) || 1, off = gauss() * 7;
-          var m = map([p[0] + (q[0] - p[0]) * u + (nx / nl) * off, p[1] + (q[1] - p[1]) * u + (ny / nl) * off]); tx = m[0]; ty = m[1];
-          alpha *= 0.8;
+        if (kind < 0.5) {
+          // 하늘에 남는 별. 거인 쪽으로 조금 더 모인다
+          var gx = rnd() < 0.35 ? map([300 + gauss() * 260, 340 + gauss() * 320]) : [rnd() * W, rnd() * H];
+          tx = gx[0]; ty = gx[1]; alpha *= 0.5; size *= 0.75;
+        } else if (kind < 0.7) {
+          // 허리띠 아래 오리온 성운: 분홍·청록 안개
+          var m = map([NEB[0] + gauss() * 46, NEB[1] + gauss() * 66]); tx = m[0]; ty = m[1];
+          col = rnd() < 0.55 ? "p" : rnd() < 0.6 ? "t" : "w"; alpha *= 0.22; size *= 0.9;
         } else {
           // 큰 별 둘레의 별 무리(리겔·베텔게우스는 더 촘촘하게, 제 색으로)
           var keys = ["mei", "bet", "bet", "bel", "aln", "alm", "min", "sai", "rig", "rig", "rig"], key = keys[Math.floor(rnd() * keys.length)], st = STARS[key];
-          var sp = key === "rig" ? 16 : key === "bet" ? 13 : 9;
+          var sp = key === "rig" ? 11 : key === "bet" ? 9 : 5;
           var m2 = map([st[0] + gauss() * sp, st[1] + gauss() * sp]); tx = m2[0]; ty = m2[1];
           if (key === "rig") col = rnd() < 0.7 ? "B" : "b"; else if (key === "bet") col = rnd() < 0.6 ? "r" : "o";
           size *= 1.15; alpha = Math.min(1, alpha * 1.25);
@@ -700,6 +692,9 @@
         ctx.globalAlpha = a;
         ctx.drawImage(SPR[p.col], x - s / 2, y - s / 2, s, s);
       }
+      var neb = map(NEB), nr = 120 * box.s, nf = clamp01((t - 1800) / 2000);
+      ctx.globalAlpha = 0.26 * nf; ctx.drawImage(SPR.p, neb[0] - nr * 0.8 + mx, neb[1] - nr * 1.1 + my, nr * 1.6, nr * 2.2);
+      ctx.globalAlpha = 0.16 * nf; ctx.drawImage(SPR.t, neb[0] - nr * 0.5 + mx, neb[1] - nr * 0.9 + my, nr, nr * 1.8);
       // 큰 별: 모인 뒤 밝아지고, 베텔게우스는 붉게, 리겔은 파랗게 가장 밝게
       var form = clamp01((t - 2300) / 1200);
       for (var key in STARS) {
