@@ -81,18 +81,20 @@ todoBAN은 **내 컴퓨터의 Claude Code**로 할 일을 나누고 첫 행동�
 
 ### 2. todoBAN 받기
 
-레포의 [Actions](../../actions/workflows/ci.yml)에서 가장 최근의 성공한 실행을 열고, 아래쪽 **Artifacts**에서 받아요(GitHub 로그인 필요).
+**[다운로드 페이지](https://space-angel.github.io/todoban-releases/)**에서 내 컴퓨터에 맞는 버튼을 눌러요.
 
-| 컴퓨터 | 받을 것 | 파일 |
-|---|---|---|
-| 맥 (Apple Silicon) | `installer-macos-latest` | `todoBAN-<버전>-mac-arm64.dmg` |
-| 맥 (Intel) | `installer-macos-latest` | `todoBAN-<버전>-mac-x64.dmg` |
-| 윈도우 | `installer-windows-latest` | `todoBAN-<버전>-win-x64-setup.exe` |
+| 컴퓨터 | 바로 받기 |
+|---|---|
+| Mac (Apple Silicon) | [todoBAN-mac-arm64.dmg](https://github.com/space-angel/todoban-releases/releases/latest/download/todoBAN-mac-arm64.dmg) |
+| Mac (Intel) | [todoBAN-mac-x64.dmg](https://github.com/space-angel/todoban-releases/releases/latest/download/todoBAN-mac-x64.dmg) |
+| Windows | [todoBAN-win-x64-setup.exe](https://github.com/space-angel/todoban-releases/releases/latest/download/todoBAN-win-x64-setup.exe) |
 
-아직 서명하지 않은 앱이라 처음 열 때 경고가 떠요.
+아직 서명하지 않은 앱이라 처음 열 때 경고가 떠요. 한 번만 허용하면 돼요.
 
-- **맥**: 앱을 응용 프로그램 폴더로 옮긴 뒤, **오른쪽 클릭 → 열기 → 열기**를 한 번 해 주세요.
-- **윈도우**: SmartScreen 창에서 **추가 정보 → 실행**을 눌러 주세요.
+- **맥**: 앱을 열면 뜨는 창을 닫고, **시스템 설정 → 개인정보 보호 및 보안** 맨 아래의 **그래도 열기**를 눌러요.
+- **윈도우**: SmartScreen 창에서 **추가 정보 → 실행**을 눌러요.
+
+새 버전이 나오면 앱이 알아서 확인해요. 윈도우는 다시 켤 때 자동으로 바뀌고, 맥은 설정 → 일반 → 버전에서 **받기**를 누르면 돼요.
 
 ### 3. 처음 열면
 

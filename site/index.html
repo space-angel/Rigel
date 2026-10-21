@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>todoBAN 다운로드</title>
+<meta name="description" content="해야 하는 건 아는데 뭐부터 할지 모를 때. 떠오른 일을 적으면 바로 시작할 첫 행동으로 바꿔 주는 메뉴바 할 일 앱이에요." />
+<meta property="og:title" content="todoBAN" />
+<meta property="og:description" content="떠오른 일을 적으면 바로 시작할 첫 행동으로 바꿔 주는 메뉴바 할 일 앱" />
+<meta property="og:image" content="images/first-step.png" />
+<link rel="icon" href="images/icon.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<style>
+  :root {
+    --bg: #101216;
+    --ink-2: #15181d;
+    --panel: rgb(255 255 255 / 4%);
+    --panel-strong: rgb(255 255 255 / 7%);
+    --line: rgb(255 255 255 / 9%);
+    --text: #f2f4f7;
+    --text-2: rgb(242 244 247 / 66%);
+    --text-3: rgb(242 244 247 / 44%);
+    --blue: #3f7bff;
+    --blue-2: #6fa6ff;
+    --radius: 20px;
+    --ease: cubic-bezier(0.2, 0, 0, 1);
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(900px 520px at 50% -120px, rgb(63 123 255 / 22%), transparent 70%),
+      var(--bg);
+    color: var(--text);
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    word-break: keep-all;
+  }
+  a { color: inherit; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+
+  header { display: flex; align-items: center; gap: 10px; padding: 22px 0; }
+  header img { width: 28px; height: 28px; border-radius: 8px; }
+  header b { font-size: 17px; letter-spacing: -0.2px; }
+  header nav { margin-left: auto; display: flex; gap: 18px; font-size: 14px; color: var(--text-2); }
+  header nav a { text-decoration: none; }
+  header nav a:hover { color: var(--text); }
+
+  .hero { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 48px; align-items: center; padding: 56px 0 72px; }
+  .eyebrow { display: inline-flex; gap: 6px; align-items: center; padding: 5px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); font-size: 13px; color: var(--text-2); }
+  h1 { margin: 18px 0 16px; font-size: clamp(34px, 5vw, 54px); line-height: 1.18; letter-spacing: -1.4px; font-weight: 750; }
+  h1 em { font-style: normal; color: var(--blue-2); }
+  .lead { margin: 0 0 32px; font-size: 18px; color: var(--text-2); max-width: 30em; }
+
+  .download { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 15px 26px; border-radius: 14px; border: 0;
+    background: linear-gradient(180deg, #5b8fff, var(--blue));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 25%), 0 10px 30px rgb(63 123 255 / 35%);
+    color: #fff; font: inherit; font-size: 17px; font-weight: 650; text-decoration: none;
+    transition: transform 160ms var(--ease), box-shadow 160ms var(--ease);
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgb(255 255 255 / 25%), 0 14px 36px rgb(63 123 255 / 45%); }
+  .btn:active { transform: scale(0.98); }
+  .btn svg { width: 20px; height: 20px; flex: none; }
+  .meta { font-size: 13px; color: var(--text-3); }
+  .others { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; color: var(--text-2); }
+  .others a { text-underline-offset: 3px; text-decoration-color: rgb(255 255 255 / 25%); }
+  .others a:hover { color: var(--text); }
+
+  .shot { display: flex; justify-content: center; }
+  .shot img { width: min(360px, 100%); height: auto; border-radius: 22px; box-shadow: 0 30px 80px rgb(0 0 0 / 55%), 0 0 0 1px rgb(255 255 255 / 6%); }
+
+  section { padding: 56px 0; border-top: 1px solid var(--line); }
+  h2 { margin: 0 0 10px; font-size: 28px; letter-spacing: -0.6px; }
+  .sub { margin: 0 0 32px; color: var(--text-2); }
+
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .card { padding: 22px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); }
+  .card .num { display: inline-grid; place-items: center; width: 28px; height: 28px; margin-bottom: 14px; border-radius: 9px; background: rgb(63 123 255 / 18%); color: var(--blue-2); font-weight: 700; font-size: 14px; }
+  .card h3 { margin: 0 0 6px; font-size: 17px; }
+  .card p { margin: 0; color: var(--text-2); font-size: 15px; }
+  .card code, .warn code { padding: 1px 6px; border-radius: 6px; background: var(--panel-strong); font-size: 13.5px; }
+
+  .feature { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; margin-bottom: 48px; }
+  .feature:last-child { margin-bottom: 0; }
+  .feature img { width: 100%; height: auto; border-radius: 18px; box-shadow: 0 20px 60px rgb(0 0 0 / 45%), 0 0 0 1px rgb(255 255 255 / 6%); }
+  .feature img.narrow { width: min(270px, 100%); justify-self: center; }
+  .feature h3 { margin: 0 0 8px; font-size: 21px; letter-spacing: -0.3px; }
+  .feature p { margin: 0; color: var(--text-2); }
+
+  .warn { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .warn .card ol { margin: 8px 0 0; padding-left: 20px; color: var(--text-2); font-size: 15px; }
+  .warn .card li { margin: 4px 0; }
+
+  .privacy { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 24px; padding: 0; margin: 0; list-style: none; color: var(--text-2); }
+  .privacy li::before { content: "✓"; color: var(--blue-2); margin-right: 8px; }
+
+  footer { padding: 36px 0 56px; border-top: 1px solid var(--line); color: var(--text-3); font-size: 13px; display: flex; gap: 16px; flex-wrap: wrap; }
+
+  @media (max-width: 820px) {
+    .hero { grid-template-columns: 1fr; padding: 32px 0 48px; gap: 36px; }
+    .cards, .warn, .feature, .privacy { grid-template-columns: 1fr; }
+    .feature { gap: 20px; }
+    header nav { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .btn { transition: none; } }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <img src="images/icon.png" alt="" />
+      <b>todoBAN</b>
+      <nav>
+        <a href="#how">쓰는 법</a>
+        <a href="#start">시작하기</a>
+        <a href="#open">처음 열 때</a>
+      </nav>
+    </header>
+
+    <div class="hero">
+      <div>
+        <span class="eyebrow">macOS · Windows · 내 Claude 구독으로</span>
+        <h1>뭐부터 할지 모를 때,<br /><em>첫 행동</em>부터.</h1>
+        <p class="lead">떠오른 일을 적으면 바로 시작할 수 있는 작은 행동 하나로 바꿔 줘요. 메뉴바에서 오늘 할 일만 조용히 보여 주는 할 일 앱이에요.</p>
+        <div class="download">
+          <a class="btn" id="primary" href="#all">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16" /></svg>
+            <span id="primary-label">다운로드</span>
+          </a>
+          <span class="meta" id="version">최신 버전</span>
+          <div class="others" id="all">
+            <a id="dl-mac-arm64" href="https://github.com/space-angel/todoban-releases/releases/latest/download/todoBAN-mac-arm64.dmg">Mac (Apple Silicon)</a>
+            <a id="dl-mac-x64" href="https://github.com/space-angel/todoban-releases/releases/latest/download/todoBAN-mac-x64.dmg">Mac (Intel)</a>
+            <a id="dl-win" href="https://github.com/space-angel/todoban-releases/releases/latest/download/todoBAN-win-x64-setup.exe">Windows</a>
+            <a href="https://github.com/space-angel/todoban-releases/releases">지난 버전</a>
+          </div>
+        </div>
+      </div>
+      <div class="shot">
+        <img src="images/first-step.png" width="720" height="1210" alt="'면접 준비' 대신 '면접 예상 질문 3개만 적어 보기'를 첫 행동으로 제안하는 todoBAN 목록" />
+      </div>
+    </div>
+  </div>
+
+  <section id="how">
+    <div class="wrap">
+      <h2>이렇게 써요</h2>
+      <p class="sub">적는 순간부터 실제로 시작하기까지 거리를 줄이는 데만 집중했어요.</p>
+
+      <div class="feature">
+        <img src="images/quick.png" width="1280" height="292" alt="빠른 입력 창" />
+        <div>
+          <h3>어디서든 단축키로 적기</h3>
+          <p>어느 앱을 쓰고 있든 단축키 하나로 적어요. 짧으면 바로 오늘 할 일로, 길면 Claude가 할 일 여러 개로 나눠 줘요. ‘금요일까지’, ‘내일’ 같은 날짜 말도 알아들어요.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <img class="narrow" src="images/first-step.png" width="720" height="1210" alt="첫 행동 제안 카드" />
+        <div>
+          <h3>막막한 일은 첫 행동으로</h3>
+          <p>‘면접 준비’처럼 큰 일은 지금 바로 할 수 있는 작은 행동 하나로 바꿔 줘요. 맨 위 할 일은 묻기 전에 미리 찾아 두어서, 누르자마자 보여요.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <img class="narrow" src="images/shape.png" width="720" height="1210" alt="첫 행동 만들기 화면" />
+        <div>
+          <h3>내 자료를 보고 만들기</h3>
+          <p>Figma 바로가기, 끝낸 할 일, 그리고 연결한 Notion·Linear·Figma를 참고해 내 상황에 맞는 첫 행동을 만들어요. 어떤 자료를 참고했는지도 함께 보여 줘요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="start">
+    <div class="wrap">
+      <h2>시작하기</h2>
+      <p class="sub">3분이면 돼요.</p>
+      <div class="cards">
+        <div class="card">
+          <span class="num">1</span>
+          <h3>Claude Code 준비</h3>
+          <p><a href="https://docs.claude.com/en/docs/claude-code/setup">Claude Code</a>를 설치하고, 터미널에서 <code>claude</code>를 실행해 로그인해요. Pro·Max·Team 구독이나 API 키면 돼요.</p>
+        </div>
+        <div class="card">
+          <span class="num">2</span>
+          <h3>받아서 열기</h3>
+          <p>위에서 받은 파일로 설치해요. 처음 열면 시작하기 화면이 Claude Code를 찾았는지, 로그인했는지 확인해 줘요.</p>
+        </div>
+        <div class="card">
+          <span class="num">3</span>
+          <h3>단축키로 적기</h3>
+          <p>맥은 <code>⌥ Space</code>, 윈도우는 <code>Alt+Shift+Space</code>. 떠오른 일을 적고 Enter를 누르면 끝이에요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="open">
+    <div class="wrap">
+      <h2>처음 열 때 경고가 떠요</h2>
+      <p class="sub">아직 서명하지 않은 앱이라서 그래요. 한 번만 허용하면 다음부터는 그냥 열려요.</p>
+      <div class="warn">
+        <div class="card">
+          <h3>Mac</h3>
+          <ol>
+            <li>받은 dmg를 열고 todoBAN을 응용 프로그램 폴더로 옮겨요</li>
+            <li>todoBAN을 열면 확인할 수 없다는 창이 떠요. <b>완료</b>를 눌러 닫아요</li>
+            <li><b>시스템 설정 → 개인정보 보호 및 보안</b> 맨 아래의 <b>그래도 열기</b>를 눌러요</li>
+            <li>다시 열고 <b>열기</b>를 누르면 메뉴바에 아이콘이 생겨요</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3>Windows</h3>
+          <ol>
+            <li>받은 setup.exe를 실행해요</li>
+            <li>‘Windows의 PC 보호’ 창이 뜨면 <b>추가 정보</b>를 눌러요</li>
+            <li><b>실행</b>을 누르고 설치를 마쳐요</li>
+            <li>작업 표시줄 오른쪽 트레이에 아이콘이 생겨요. 안 보이면 <b>^</b>를 눌러 찾아요</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>내 정보는 내 컴퓨터에</h2>
+      <p class="sub">todoBAN은 내 Claude Code를 실행만 해요. 계정 정보는 직접 다루지 않아요.</p>
+      <ul class="privacy">
+        <li>할 일과 설정은 내 컴퓨터에만 저장해요</li>
+        <li>Claude에는 할 일 이름과 고른 자료의 이름만 보내요</li>
+        <li>파일 내용·링크·파일 위치는 보내지 않아요</li>
+        <li>Notion·Linear·Figma는 읽기만 해요</li>
+        <li>새 버전은 앱이 알아서 확인해요(윈도우는 자동 설치)</li>
+        <li>짧은 할 일은 Claude 없이도 적을 수 있어요</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <footer>
+      <span>todoBAN</span>
+      <a href="https://github.com/space-angel/todoban-releases/releases">모든 버전</a>
+      <a href="https://docs.claude.com/en/docs/claude-code/setup">Claude Code 설치</a>
+    </footer>
+  </div>
+
+<script>
+  // 접속한 컴퓨터에 맞는 파일을 큰 버튼으로. 애플 실리콘인지는 그래픽 정보로 짐작하고, 모르면 애플 실리콘(요즘 맥 대부분)으로 둔다.
+  (function () {
+    var ua = navigator.userAgent || "";
+    var platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+    var isMac = /Mac/i.test(platform) || /Macintosh/.test(ua);
+    var isWin = /Win/i.test(platform) || /Windows/.test(ua);
+    var appleSilicon = true;
+    try {
+      var gl = document.createElement("canvas").getContext("webgl");
+      var ext = gl && gl.getExtension("WEBGL_debug_renderer_info");
+      var renderer = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : "";
+      if (renderer && /Intel|AMD|Radeon/i.test(renderer)) appleSilicon = false;
+    } catch (e) {}
+    var primary = document.getElementById("primary");
+    var label = document.getElementById("primary-label");
+    var pick = function (id, text) {
+      var a = document.getElementById(id);
+      primary.href = a.href;
+      label.textContent = text;
+      a.style.display = "none";
+    };
+    if (isMac) pick(appleSilicon ? "dl-mac-arm64" : "dl-mac-x64", appleSilicon ? "Mac용 다운로드" : "Mac용 다운로드 (Intel)");
+    else if (isWin) pick("dl-win", "Windows용 다운로드");
+    else label.textContent = "내 컴퓨터에 맞는 파일 고르기";
+
+    // 최신 버전 번호와 날짜
+    fetch("https://api.github.com/repos/space-angel/todoban-releases/releases/latest")
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (r) {
+        if (!r || !r.tag_name) return;
+        var d = r.published_at ? new Date(r.published_at) : null;
+        document.getElementById("version").textContent =
+          r.tag_name + (d ? " · " + (d.getMonth() + 1) + "월 " + d.getDate() + "일" : "") + " · 무료";
+      })
+      .catch(function () {});
+  })();
+</script>
+</body>
+</html>

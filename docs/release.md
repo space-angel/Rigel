@@ -47,13 +47,21 @@ export APPLE_ID=… APPLE_APP_SPECIFIC_PASSWORD=… APPLE_TEAM_ID=…  # 공증
 npm run dist:mac
 ```
 
-## 업데이트
+## 배포와 업데이트
 
-지금은 자동 업데이트가 없다. 새 버전은 설치 파일을 다시 받아 덮어 설치한다(데이터는 그대로 남는다).
-- 맥: `~/Library/Application Support/todoBAN`
-- 윈도우: `%APPDATA%\todoBAN`
+설치 파일은 공개 레포 **space-angel/todoban-releases**의 GitHub Releases에 올린다(코드 레포 ban-todo는 비공개).
+- 다운로드 페이지: https://space-angel.github.io/todoban-releases/ (소스는 이 레포의 `site/`)
+- 파일 이름에 버전이 없어서 `releases/latest/download/<파일>`이 늘 최신을 가리킨다
+- 앱은 켜고 15초 뒤, 그 뒤 6시간마다 최신 릴리스를 확인한다(`src/main/updater.ts`)
+  - 윈도우: electron-updater가 뒤에서 받고 다시 켤 때 설치(`latest.yml`)
+  - 맥: 서명 전이라 자동 설치가 안 된다. 설정 → 일반 → 버전, 메뉴바 메뉴에 새 버전 받기. 서명하면 맥도 자동 설치로 바꿀 수 있다(`latest-mac.yml`, zip)
 
-자동 업데이트가 필요하면 electron-updater + GitHub Releases(맥은 서명이 있어야 함)를 붙인다.
+새 버전 올리기:
+1. `package.json`의 `version`을 올리고 커밋·푸시 → CI가 설치 파일을 만든다
+2. `bash scripts/release.sh <CI 실행 번호> "바뀐 점"` → 설치 파일과 업데이트 정보를 받아 공개 레포 릴리스로 올린다
+3. 다운로드 페이지(site/)를 바꿨으면 공개 레포에도 복사해 푸시한다
+
+데이터는 업데이트해도 그대로 남는다(맥 `~/Library/Application Support/todoBAN`, 윈도우 `%APPDATA%\todoBAN`).
 
 ## 다른 사람 컴퓨터에서 확인하기
 
