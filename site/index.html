@@ -3,290 +3,763 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>todoBAN 다운로드</title>
-<meta name="description" content="해야 하는 건 아는데 뭐부터 할지 모를 때. 떠오른 일을 적으면 바로 시작할 첫 행동으로 바꿔 주는 메뉴바 할 일 앱이에요." />
-<meta property="og:title" content="todoBAN" />
-<meta property="og:description" content="떠오른 일을 적으면 바로 시작할 첫 행동으로 바꿔 주는 메뉴바 할 일 앱" />
+<title>todoBAN — 적는 순간, 시작할 준비가 끝나요</title>
+<meta name="description" content="할 일 앱은 목록을 늘려요. todoBAN은 막막한 일을 지금 바로 시작할 첫 행동으로 바꿔요. macOS·Windows 메뉴바 할 일 앱." />
+<meta property="og:title" content="todoBAN — 적는 순간, 시작할 준비가 끝나요" />
+<meta property="og:description" content="막막한 일을 지금 바로 시작할 첫 행동으로 바꾸는 메뉴바 할 일 앱" />
 <meta property="og:image" content="images/first-step.png" />
 <link rel="icon" href="images/icon.png" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
 <style>
   :root {
-    --bg: #101216;
-    --ink-2: #15181d;
-    --panel: rgb(255 255 255 / 4%);
-    --panel-strong: rgb(255 255 255 / 7%);
-    --line: rgb(255 255 255 / 9%);
-    --text: #f2f4f7;
-    --text-2: rgb(242 244 247 / 66%);
-    --text-3: rgb(242 244 247 / 44%);
-    --blue: #3f7bff;
-    --blue-2: #6fa6ff;
-    --radius: 20px;
+    --bg: #08090a;
+    --bg-2: #0f1012;
+    --line: rgb(255 255 255 / 8%);
+    --line-2: rgb(255 255 255 / 12%);
+    --text: #f7f8f8;
+    --text-2: #8a8f98;
+    --text-3: #62666d;
+    --blue: #5e98fe;
+    --blue-2: #8fb4ff;
     --ease: cubic-bezier(0.2, 0, 0, 1);
+    --spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+    --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    /* 앱 화면 */
+    --win: linear-gradient(160deg, rgb(42 47 57 / 96%) 0%, rgb(23 26 32 / 97%) 45%, rgb(26 34 51 / 98%) 100%);
+    --row: linear-gradient(180deg, rgb(255 255 255 / 7%), rgb(255 255 255 / 3%));
   }
   * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
   body {
     margin: 0;
-    background:
-      radial-gradient(900px 520px at 50% -120px, rgb(63 123 255 / 22%), transparent 70%),
-      var(--bg);
+    background: var(--bg);
     color: var(--text);
     font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     font-size: 16px;
     line-height: 1.6;
     word-break: keep-all;
+    -webkit-font-smoothing: antialiased;
   }
-  a { color: inherit; }
-  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
 
-  header { display: flex; align-items: center; gap: 10px; padding: 22px 0; }
-  header img { width: 28px; height: 28px; border-radius: 8px; }
-  header b { font-size: 17px; letter-spacing: -0.2px; }
-  header nav { margin-left: auto; display: flex; gap: 18px; font-size: 14px; color: var(--text-2); }
-  header nav a { text-decoration: none; }
-  header nav a:hover { color: var(--text); }
+  /* 위 막대 */
+  .nav { position: sticky; top: 0; z-index: 20; border-bottom: 1px solid var(--line); background: rgb(8 9 10 / 78%); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+  .nav .wrap { display: flex; align-items: center; gap: 28px; height: 60px; }
+  .logo { display: flex; align-items: center; gap: 9px; font-weight: 650; font-size: 15px; letter-spacing: -0.2px; }
+  .logo img { width: 22px; height: 22px; border-radius: 6px; }
+  .nav .links { display: flex; gap: 24px; font-size: 14px; color: var(--text-2); }
+  .nav .links a:hover { color: var(--text); }
+  .nav .cta { margin-left: auto; }
 
-  .hero { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 48px; align-items: center; padding: 56px 0 72px; }
-  .eyebrow { display: inline-flex; gap: 6px; align-items: center; padding: 5px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); font-size: 13px; color: var(--text-2); }
-  h1 { margin: 18px 0 16px; font-size: clamp(34px, 5vw, 54px); line-height: 1.18; letter-spacing: -1.4px; font-weight: 750; }
-  h1 em { font-style: normal; color: var(--blue-2); }
-  .lead { margin: 0 0 32px; font-size: 18px; color: var(--text-2); max-width: 30em; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px; border: 0; border-radius: 999px; background: #e6e6e6; color: #08090a; font-size: 14px; font-weight: 600; white-space: nowrap; transition: background 150ms var(--ease), transform 150ms var(--ease); }
+  .pill:hover { background: #fff; }
+  .pill:active { transform: scale(0.98); }
+  .pill.big { height: 48px; padding: 0 24px; font-size: 16px; }
+  .ghost { display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 22px; border-radius: 999px; border: 1px solid var(--line-2); background: rgb(255 255 255 / 3%); color: var(--text); font-size: 16px; font-weight: 550; white-space: nowrap; }
+  .ghost:hover { background: rgb(255 255 255 / 7%); }
+  .pill svg { width: 18px; height: 18px; flex: none; }
 
-  .download { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
-  .btn {
-    display: inline-flex; align-items: center; gap: 10px;
-    padding: 15px 26px; border-radius: 14px; border: 0;
-    background: linear-gradient(180deg, #5b8fff, var(--blue));
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 25%), 0 10px 30px rgb(63 123 255 / 35%);
-    color: #fff; font: inherit; font-size: 17px; font-weight: 650; text-decoration: none;
-    transition: transform 160ms var(--ease), box-shadow 160ms var(--ease);
+  /* 첫 화면 */
+  .hero { padding: 104px 0 0; }
+  .hero h1 { margin: 0; font-size: clamp(40px, 6.6vw, 76px); line-height: 1.12; letter-spacing: -0.045em; font-weight: 680; }
+  .hero .lead { margin: 28px 0 0; max-width: 34em; font-size: 18px; color: var(--text-2); }
+  .hero .lead b { color: var(--text); font-weight: 600; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 36px; }
+  .meta { margin-top: 14px; font-size: 13px; color: var(--text-3); }
+  .meta a { color: var(--text-2); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-2); }
+
+  /* ===== 앱 화면 조각 (실제 앱과 같은 모양) ===== */
+  .win { position: relative; border-radius: 22px; border: 1px solid rgb(255 255 255 / 9%); background: var(--win); box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%), 0 30px 80px rgb(0 0 0 / 55%); overflow: hidden; }
+  /* 한글 이름표는 고정폭 글꼴·자간을 쓰지 않는다(벌어져 보임). 숫자만 고정폭 */
+  .eyebrow { font-size: 11.5px; font-weight: 500; color: var(--text-3); }
+  .chip { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 9px; border-radius: 999px; border: 1px solid var(--line-2); background: rgb(255 255 255 / 5%); font-size: 12px; color: var(--text-2); white-space: nowrap; }
+  .chip.blue { border-color: rgb(94 152 254 / 35%); background: rgb(94 152 254 / 12%); color: var(--blue-2); }
+  .chip.due { border-color: rgb(255 176 92 / 30%); background: rgb(255 176 92 / 10%); color: #ffc58a; }
+  .btn-w { height: 32px; padding: 0 14px; border: 0; border-radius: 999px; background: #fff; color: #111; font-size: 13px; font-weight: 650; }
+  .btn-t { height: 32px; padding: 0 10px; border: 0; background: none; color: var(--text-2); font-size: 13px; }
+  .btn-t:hover { color: var(--text); }
+  .spin { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid rgb(255 255 255 / 25%); border-top-color: var(--blue-2); animation: spin 0.8s linear infinite; flex: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .sparkle { width: 13px; height: 13px; color: var(--blue-2); flex: none; }
+
+  /* 빠른 입력 */
+  .quick { border-radius: 18px; border: 1px solid rgb(255 255 255 / 9%); background: var(--win); box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%), 0 24px 60px rgb(0 0 0 / 55%); }
+  .quick .q-in { display: flex; gap: 12px; align-items: flex-start; padding: 18px 18px 14px; }
+  .quick .q-in .sparkle { width: 18px; height: 18px; margin-top: 4px; }
+  .quick textarea, .quick .q-text { flex: 1; min-height: 30px; margin: 0; padding: 0; border: 0; outline: 0; resize: none; background: none; color: var(--text); font: inherit; font-size: 19px; line-height: 1.5; font-weight: 550; letter-spacing: -0.3px; }
+  .quick textarea::placeholder { color: var(--text-3); }
+  .quick .q-text .caret { display: inline-block; width: 2px; height: 1.1em; margin-left: 1px; vertical-align: -0.15em; background: var(--blue-2); animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .quick .q-hint { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 8px 18px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--text-2); }
+  .quick .q-hint .k { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+  .quick .q-hint .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  /* 목록 창 */
+  .list { padding: 18px 14px 14px; }
+  .list .l-head { display: flex; align-items: baseline; gap: 10px; padding: 0 4px 12px; }
+  .list .l-head b { font-size: 22px; letter-spacing: -0.5px; }
+  .list .l-head span { font-family: var(--mono); font-size: 10.5px; color: var(--text-3); }
+  .now { position: relative; padding: 14px 14px 14px 16px; border-radius: 16px; border: 1px solid rgb(255 255 255 / 12%); background: linear-gradient(160deg, rgb(42 47 57 / 78%), rgb(23 26 32 / 86%) 45%, rgb(26 34 51 / 90%)); box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%), inset 0 -18px 42px rgb(94 152 254 / 26%); isolation: isolate; overflow: hidden; }
+  .now .n-top { display: flex; justify-content: space-between; align-items: center; }
+  .now .ring { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid rgb(255 255 255 / 40%); }
+  .now .n-title { margin: 8px 0 12px; font-size: 17px; font-weight: 700; letter-spacing: -0.3px; min-height: 1.4em; }
+  .now .ask { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line-2); background: rgb(255 255 255 / 6%); font-size: 13px; color: var(--text); }
+  .now .ask:hover { background: rgb(255 255 255 / 10%); }
+  .now .flash { position: absolute; inset: -40% -10% auto; height: 160px; z-index: -1; background: radial-gradient(closest-side, rgb(94 152 254 / 55%), transparent); opacity: 0; transform: translateY(60px); pointer-events: none; }
+  .now.handoff .flash { animation: carry 1300ms var(--ease) both; }
+  @keyframes carry { 0% { opacity: 0.9; transform: translateY(70px); } 100% { opacity: 0; transform: translateY(40px); } }
+  .rows { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+  .row { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 12px; border-radius: 13px; border: 1px solid rgb(255 255 255 / 9%); background: var(--row); font-size: 14px; color: var(--text); }
+  .row i { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid rgb(255 255 255 / 35%); flex: none; }
+
+  /* 진행 상황 · 첫 행동 카드 */
+  .progress { display: flex; flex-direction: column; gap: 6px; padding: 10px 6px 4px 22px; font-size: 12.5px; color: var(--text-2); }
+  .progress p { display: flex; align-items: center; gap: 7px; margin: 0; }
+  .progress .done { color: var(--text-3); }
+  .progress .done svg { width: 11px; height: 11px; color: var(--blue-2); }
+  .progress .meta2 { margin-left: auto; font-family: var(--mono); font-size: 10.5px; color: var(--text-3); }
+  .fs { margin-top: 8px; padding: 14px; border-radius: 16px; border: 1px solid rgb(94 152 254 / 30%); background: linear-gradient(180deg, rgb(94 152 254 / 10%), rgb(94 152 254 / 4%)); }
+  .fs .fs-eye { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: var(--blue-2); }
+  .fs .fs-title { margin: 6px 0 2px; font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+  .fs .fs-body { margin: 0 0 12px; font-size: 12.5px; color: var(--text-2); }
+  .fs .fs-act { display: flex; gap: 4px; align-items: center; }
+
+  .pop { animation: pop 420ms var(--ease) both; }
+  @keyframes pop { from { opacity: 0; transform: translateY(10px) scale(0.98); } }
+  .fade { animation: fade 300ms var(--ease) both; }
+  @keyframes fade { from { opacity: 0; } }
+
+  /* 첫 화면 무대 (글로우는 여기 하나만) */
+  .stage { position: relative; margin-top: 72px; border: 1px solid var(--line); border-radius: 24px; background: radial-gradient(70% 90% at 70% 0%, rgb(94 152 254 / 14%), transparent 70%), var(--bg-2); }
+  .stage .inner { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: start; padding: 48px 52px 52px; }
+  .stage .left { display: flex; flex-direction: column; gap: 18px; }
+  .stage .label { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; color: var(--text-3); }
+  .stage .label b { font-family: var(--mono); font-size: 12px; color: var(--blue); font-weight: 500; }
+  .examples { display: flex; flex-wrap: wrap; gap: 8px; }
+  .examples button { height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-2); background: rgb(255 255 255 / 3%); font-size: 14px; color: var(--text-2); transition: background 150ms var(--ease), color 150ms var(--ease); }
+  .examples button:hover { color: var(--text); background: rgb(255 255 255 / 7%); }
+  .examples button[aria-pressed="true"] { color: #08090a; background: #e6e6e6; border-color: transparent; }
+  .stage .note { font-size: 12.5px; color: var(--text-3); }
+  /* 첫 행동 카드가 들어와도 무대가 출렁이지 않게 높이를 미리 잡아 둔다 */
+  .stage .list { min-height: 470px; }
+
+  /* 선언문과 원칙 */
+  .manifesto { padding: 160px 0 0; }
+  .manifesto p { margin: 0; max-width: 21em; font-size: clamp(28px, 3.6vw, 44px); line-height: 1.3; letter-spacing: -0.035em; font-weight: 600; color: var(--text-2); }
+  .manifesto p b { color: var(--text); font-weight: 600; }
+  .principles { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 96px; border-top: 1px solid var(--line); }
+  .principle { padding: 28px 28px 8px 0; }
+  .principle + .principle { padding-left: 28px; border-left: 1px solid var(--line); }
+  .fig { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--text-3); }
+  .principle svg { width: 100%; max-width: 240px; height: 150px; margin: 20px 0 24px; color: var(--text-3); }
+  .principle h3 { margin: 0 0 6px; font-size: 16px; font-weight: 600; }
+  .principle p { margin: 0; font-size: 15px; color: var(--text-2); }
+
+  /* 네 장 */
+  .chapter { padding: 140px 0 0; }
+  .chapter .head { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; padding-top: 40px; border-top: 1px solid var(--line); }
+  .chapter .no { font-size: 13px; font-weight: 500; color: var(--text-3); }
+  .chapter h2 { margin: 10px 0 0; font-size: clamp(32px, 4.4vw, 54px); line-height: 1.12; letter-spacing: -0.04em; font-weight: 650; }
+  .chapter .value { margin: 34px 0 0; font-size: 20px; line-height: 1.5; letter-spacing: -0.3px; color: var(--text-2); }
+  .chapter .value b { color: var(--text); font-weight: 600; }
+  .chapter .facts { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 22px 0 0; padding: 0; list-style: none; font-size: 14px; color: var(--text-3); }
+  .chapter .facts li::before { content: "— "; }
+  .demo { position: relative; margin-top: 56px; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 56px 24px; border: 1px solid var(--line); border-radius: 24px; background: var(--bg-2); }
+  .demo .try { font-size: 13px; font-weight: 500; color: var(--text-3); }
+  .demo .quick { width: min(640px, 100%); }
+  .demo .card-w { width: min(380px, 100%); }
+  .demo .replay { position: absolute; top: 18px; right: 18px; height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line-2); background: none; font-size: 12.5px; color: var(--text-2); }
+  .demo .replay:hover { color: var(--text); }
+
+  /* 02 나누기 */
+  .split { width: min(520px, 100%); padding: 20px; }
+  .split .raw { padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: rgb(255 255 255 / 3%); font-size: 14px; color: var(--text-2); }
+  .split .raw.go { animation: shrink 500ms var(--ease) both; }
+  @keyframes shrink { to { opacity: 0.55; transform: scale(0.98); } }
+  .split h4 { display: flex; align-items: center; gap: 6px; margin: 16px 2px 10px; font-size: 15px; font-weight: 650; }
+  .draft { padding: 12px 14px; border-radius: 14px; border: 1px solid rgb(255 255 255 / 10%); background: var(--row); }
+  .draft + .draft { margin-top: 8px; }
+  .draft.unclear { border-color: rgb(94 152 254 / 28%); }
+  .draft b { display: block; margin-bottom: 8px; font-size: 15px; font-weight: 650; }
+  .draft .chips2 { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* 04 근거 */
+  .ev { margin-top: 10px; border-radius: 12px; border: 1px solid rgb(255 255 255 / 10%); background: rgb(255 255 255 / 3%); overflow: hidden; }
+  .ev-row { display: flex; align-items: center; gap: 8px; width: 100%; height: 42px; padding: 0 12px; border: 0; background: none; text-align: left; font-size: 13.5px; }
+  .ev-row .pct { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--blue-2); }
+  .ev-row .chev { width: 12px; height: 12px; color: var(--text-3); transition: transform 250ms var(--ease); }
+  .ev.open .ev-row .chev { transform: rotate(180deg); }
+  .ev-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 300ms var(--ease); }
+  .ev.open .ev-body { grid-template-rows: 1fr; }
+  .ev-body > div { overflow: hidden; }
+  .ev-in { padding: 0 12px 12px; font-size: 12.5px; color: var(--text-2); }
+  .ev-in blockquote { margin: 0 0 8px; padding: 8px 10px; border-left: 2px solid var(--blue); background: rgb(255 255 255 / 3%); border-radius: 0 8px 8px 0; color: var(--text); }
+  .ev-in mark { background: rgb(94 152 254 / 28%); color: var(--text); border-radius: 3px; padding: 0 2px; }
+  .ev-in .m { color: #7fd6a2; }
+  .figma { width: 14px; height: 14px; flex: none; }
+
+  /* 숫자 */
+  .numbers { padding: 160px 0 0; }
+  .numbers .grid { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .num { padding: 40px 28px 40px 0; }
+  .num + .num { padding-left: 28px; border-left: 1px solid var(--line); }
+  .num strong { display: block; font-size: clamp(40px, 5vw, 60px); line-height: 1; letter-spacing: -0.04em; font-weight: 650; }
+  .num span { display: block; margin-top: 14px; font-size: 15px; color: var(--text-2); }
+  .num small { display: block; margin-top: 6px; font-size: 12px; color: var(--text-3); }
+
+  /* 시작하기 */
+  .start { padding: 160px 0 0; }
+  .start h2 { margin: 0 0 8px; font-size: 32px; letter-spacing: -0.03em; font-weight: 650; }
+  .start .sub { margin: 0 0 40px; color: var(--text-2); }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: var(--line); }
+  .steps > div { padding: 26px; background: var(--bg); }
+  .steps h3 { margin: 12px 0 6px; font-size: 16px; font-weight: 600; }
+  .steps p { margin: 0; font-size: 15px; color: var(--text-2); }
+  .steps code { padding: 1px 6px; border-radius: 6px; background: rgb(255 255 255 / 7%); font-size: 13px; color: var(--text); }
+  .steps a { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-2); }
+  details { margin-top: 16px; border: 1px solid var(--line); border-radius: 18px; }
+  summary { cursor: pointer; padding: 20px 26px; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+  summary::-webkit-details-marker { display: none; }
+  summary span { color: var(--text-3); font-weight: 400; font-size: 14px; }
+  details .open { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding: 0 26px 26px; }
+  details h4 { margin: 0 0 8px; font-size: 15px; }
+  details ol { margin: 0; padding-left: 20px; color: var(--text-2); font-size: 15px; }
+  details li { margin: 4px 0; }
+  details li b { color: var(--text); font-weight: 600; }
+  .trust { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 72px; }
+  .trust h4 { margin: 0 0 6px; font-size: 15px; font-weight: 600; }
+  .trust p { margin: 0; font-size: 14px; color: var(--text-2); }
+
+  .closing { padding: 180px 0 160px; text-align: center; }
+  .closing h2 { margin: 0; font-size: clamp(40px, 6vw, 68px); line-height: 1.12; letter-spacing: -0.045em; font-weight: 680; }
+  .closing .actions { justify-content: center; margin-top: 40px; }
+
+  footer { border-top: 1px solid var(--line); }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: center; padding: 32px 24px 48px; font-size: 13px; color: var(--text-3); }
+  footer a:hover { color: var(--text-2); }
+
+  .reveal { opacity: 0; transform: translateY(16px); transition: opacity 700ms var(--ease), transform 700ms var(--ease); }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .pop, .fade, .now.handoff .flash, .split .raw.go { animation: none; }
+    .spin { animation-duration: 2.4s; }
+    html { scroll-behavior: auto; }
   }
-  .btn:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgb(255 255 255 / 25%), 0 14px 36px rgb(63 123 255 / 45%); }
-  .btn:active { transform: scale(0.98); }
-  .btn svg { width: 20px; height: 20px; flex: none; }
-  .meta { font-size: 13px; color: var(--text-3); }
-  .others { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; color: var(--text-2); }
-  .others a { text-underline-offset: 3px; text-decoration-color: rgb(255 255 255 / 25%); }
-  .others a:hover { color: var(--text); }
 
-  .shot { display: flex; justify-content: center; }
-  .shot img { width: min(360px, 100%); height: auto; border-radius: 22px; box-shadow: 0 30px 80px rgb(0 0 0 / 55%), 0 0 0 1px rgb(255 255 255 / 6%); }
-
-  section { padding: 56px 0; border-top: 1px solid var(--line); }
-  h2 { margin: 0 0 10px; font-size: 28px; letter-spacing: -0.6px; }
-  .sub { margin: 0 0 32px; color: var(--text-2); }
-
-  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  .card { padding: 22px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); }
-  .card .num { display: inline-grid; place-items: center; width: 28px; height: 28px; margin-bottom: 14px; border-radius: 9px; background: rgb(63 123 255 / 18%); color: var(--blue-2); font-weight: 700; font-size: 14px; }
-  .card h3 { margin: 0 0 6px; font-size: 17px; }
-  .card p { margin: 0; color: var(--text-2); font-size: 15px; }
-  .card code, .warn code { padding: 1px 6px; border-radius: 6px; background: var(--panel-strong); font-size: 13.5px; }
-
-  .feature { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; margin-bottom: 48px; }
-  .feature:last-child { margin-bottom: 0; }
-  .feature img { width: 100%; height: auto; border-radius: 18px; box-shadow: 0 20px 60px rgb(0 0 0 / 45%), 0 0 0 1px rgb(255 255 255 / 6%); }
-  .feature img.narrow { width: min(270px, 100%); justify-self: center; }
-  .feature h3 { margin: 0 0 8px; font-size: 21px; letter-spacing: -0.3px; }
-  .feature p { margin: 0; color: var(--text-2); }
-
-  .warn { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .warn .card ol { margin: 8px 0 0; padding-left: 20px; color: var(--text-2); font-size: 15px; }
-  .warn .card li { margin: 4px 0; }
-
-  .privacy { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 24px; padding: 0; margin: 0; list-style: none; color: var(--text-2); }
-  .privacy li::before { content: "✓"; color: var(--blue-2); margin-right: 8px; }
-
-  footer { padding: 36px 0 56px; border-top: 1px solid var(--line); color: var(--text-3); font-size: 13px; display: flex; gap: 16px; flex-wrap: wrap; }
-
-  @media (max-width: 820px) {
-    .hero { grid-template-columns: 1fr; padding: 32px 0 48px; gap: 36px; }
-    .cards, .warn, .feature, .privacy { grid-template-columns: 1fr; }
-    .feature { gap: 20px; }
-    header nav { display: none; }
+  @media (max-width: 860px) {
+    .nav .links { display: none; }
+    .hero { padding-top: 64px; }
+    .stage .inner { grid-template-columns: 1fr; padding: 24px 16px 20px; gap: 28px; }
+    .principles, .numbers .grid, .steps, .trust, details .open { grid-template-columns: 1fr; }
+    .principle, .principle + .principle, .num, .num + .num { padding-left: 0; border-left: 0; }
+    .principle + .principle, .num + .num { border-top: 1px solid var(--line); }
+    .chapter .head { grid-template-columns: 1fr; gap: 0; }
+    .demo { padding: 56px 14px 24px; }
+    .manifesto, .chapter, .numbers, .start { padding-top: 100px; }
+    .closing { padding: 120px 0 100px; }
+    .quick textarea, .quick .q-text { font-size: 17px; }
   }
-  @media (prefers-reduced-motion: reduce) { .btn { transition: none; } }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <img src="images/icon.png" alt="" />
-      <b>todoBAN</b>
-      <nav>
-        <a href="#how">쓰는 법</a>
-        <a href="#start">시작하기</a>
-        <a href="#open">처음 열 때</a>
-      </nav>
-    </header>
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+    <symbol id="i-spark" viewBox="0 0 16 16"><path fill="currentColor" d="M8 1.5c.4 2.9 1.6 4.1 4.5 4.5-2.9.4-4.1 1.6-4.5 4.5-.4-2.9-1.6-4.1-4.5-4.5C6.4 5.6 7.6 4.4 8 1.5Zm4.6 7.3c.2 1.4.8 2 2.2 2.2-1.4.2-2 .8-2.2 2.2-.2-1.4-.8-2-2.2-2.2 1.4-.2 2-.8 2.2-2.2Z" /></symbol>
+    <symbol id="i-check" viewBox="0 0 16 16"><path d="m3.5 8.4 2.9 2.9 6.1-6.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+    <symbol id="i-chev" viewBox="0 0 16 16"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+    <symbol id="i-figma" viewBox="0 0 16 24"><path fill="#f24e1e" d="M4 0h4v8H4a4 4 0 0 1 0-8Z" /><path fill="#ff7262" d="M8 0h4a4 4 0 0 1 0 8H8V0Z" /><path fill="#a259ff" d="M4 8h4v8H4a4 4 0 0 1 0-8Z" /><circle fill="#1abcfe" cx="12" cy="12" r="4" /><path fill="#0acf83" d="M4 16h4v4a4 4 0 1 1-4-4Z" /></symbol>
+  </svg>
 
-    <div class="hero">
-      <div>
-        <span class="eyebrow">macOS · Windows · 내 Claude 구독으로</span>
-        <h1>뭐부터 할지 모를 때,<br /><em>첫 행동</em>부터.</h1>
-        <p class="lead">떠오른 일을 적으면 바로 시작할 수 있는 작은 행동 하나로 바꿔 줘요. 메뉴바에서 오늘 할 일만 조용히 보여 주는 할 일 앱이에요.</p>
-        <div class="download">
-          <a class="btn" id="primary" href="#all">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16" /></svg>
-            <span id="primary-label">다운로드</span>
+  <div class="nav">
+    <div class="wrap">
+      <a class="logo" href="#"><img src="images/icon.png" alt="" />todoBAN</a>
+      <nav class="links">
+        <a href="#why">왜 todoBAN</a>
+        <a href="#how">작동 방식</a>
+        <a href="#start">시작하기</a>
+      </nav>
+      <a class="pill cta dl-primary" href="#start">다운로드</a>
+    </div>
+  </div>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <h1>적는 순간,<br />시작할 준비가 끝나요</h1>
+        <p class="lead">할 일 앱은 목록을 늘려요. <b>todoBAN은 막막한 일을 지금 바로 시작할 첫 행동으로 바꿔요.</b></p>
+        <div class="actions">
+          <a class="pill big dl-primary" href="#start">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14" /></svg>
+            <span class="dl-label">다운로드</span>
           </a>
-          <span class="meta" id="version">최신 버전</span>
-          <div class="others" id="all">
-            <a id="dl-mac-arm64" href="https://github.com/space-angel/todoban-releases/releases/latest/download/todoBAN-mac-arm64.dmg">Mac (Apple Silicon)</a>
-            <a id="dl-mac-x64" href="https://github.com/space-angel/todoban-releases/releases/latest/download/todoBAN-mac-x64.dmg">Mac (Intel)</a>
-            <a id="dl-win" href="https://github.com/space-angel/todoban-releases/releases/latest/download/todoBAN-win-x64-setup.exe">Windows</a>
-            <a href="https://github.com/space-angel/todoban-releases/releases">지난 버전</a>
+          <a class="ghost" href="#how">어떻게 동작하나요</a>
+        </div>
+        <p class="meta"><span class="version">무료</span> · macOS · Windows · 내 Claude 구독으로 · <a href="#start">다른 컴퓨터용</a></p>
+
+        <!-- 첫 화면 장면: 예시를 고르면 적고 → 목록에 들어가고 → 첫 행동이 온다 -->
+        <div class="stage reveal" id="hero-demo">
+          <div class="inner">
+            <div class="left">
+              <span class="label"><b>01</b> 막막한 일 하나 골라 보세요</span>
+              <div class="examples" role="group" aria-label="예시 할 일"></div>
+              <div class="quick" aria-live="off">
+                <div class="q-in"><svg class="sparkle"><use href="#i-spark" /></svg><div class="q-text"></div></div>
+                <div class="q-hint"><span class="q-kind">해야 할 일을 적어 보세요</span><span class="k">↵ 넣기</span></div>
+              </div>
+              <span class="note">예시 화면이에요. 실제 첫 행동은 내 Claude가 내 자료를 보고 만들어요.</span>
+            </div>
+            <div class="win list" aria-live="polite">
+              <div class="l-head"><b>오늘</b><span class="h-date"></span></div>
+              <div class="now">
+                <span class="flash"></span>
+                <div class="n-top"><span class="eyebrow">지금 할 일</span><span class="ring"></span></div>
+                <div class="n-title"></div>
+                <div class="n-slot"></div>
+              </div>
+              <div class="fs-slot"></div>
+              <div class="rows">
+                <div class="row"><i></i>우테크 과제 README 마무리하기</div>
+                <div class="row"><i></i>이력서 PDF 다시 내보내기</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="shot">
-        <img src="images/first-step.png" width="720" height="1210" alt="'면접 준비' 대신 '면접 예상 질문 3개만 적어 보기'를 첫 행동으로 제안하는 todoBAN 목록" />
-      </div>
-    </div>
-  </div>
+    </section>
 
-  <section id="how">
+    <section class="manifesto" id="why">
+      <div class="wrap">
+        <p class="reveal"><b>목록은 이미 충분히 길어요.</b> 막히는 건 ‘뭐부터’예요. todoBAN은 할 일을 더 잘 정리하는 대신, 지금 손댈 수 있는 한 가지를 찾아 줘요.</p>
+        <div class="principles reveal">
+          <div class="principle">
+            <span class="fig">FIG 0.1</span>
+            <svg viewBox="0 0 240 150" fill="none" stroke="currentColor" aria-hidden="true">
+              <rect x="40" y="96" width="160" height="30" rx="8" /><rect x="40" y="58" width="160" height="30" rx="8" />
+              <rect x="30" y="12" width="180" height="40" rx="10" stroke="#5e98fe" stroke-width="1.5" />
+              <circle cx="190" cy="32" r="6" stroke="#5e98fe" stroke-width="1.5" /><path d="M48 32h70" stroke="#f7f8f8" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            <h3>판단은 하나만</h3>
+            <p>열면 지금 할 일 하나만 크게 보여요. 나머지는 거기 있지만, 고를 필요는 없어요.</p>
+          </div>
+          <div class="principle">
+            <span class="fig">FIG 0.2</span>
+            <svg viewBox="0 0 240 150" fill="none" stroke="currentColor" aria-hidden="true">
+              <rect x="20" y="30" width="90" height="90" rx="12" /><path d="M128 75h34m0 0-8-8m8 8-8 8" stroke-linecap="round" stroke-linejoin="round" />
+              <rect x="180" y="60" width="30" height="30" rx="7" stroke="#5e98fe" stroke-width="1.5" />
+            </svg>
+            <h3>첫 행동은 작게</h3>
+            <p>‘면접 준비’는 시작할 수 없어요. ‘예상 질문 3개 적기’는 지금 할 수 있어요.</p>
+          </div>
+          <div class="principle">
+            <span class="fig">FIG 0.3</span>
+            <svg viewBox="0 0 240 150" fill="none" stroke="currentColor" aria-hidden="true">
+              <circle cx="40" cy="30" r="12" /><circle cx="40" cy="75" r="12" /><circle cx="40" cy="120" r="12" />
+              <path d="M52 30C110 30 120 75 168 75M52 75h116M52 120C110 120 120 75 168 75" />
+              <circle cx="186" cy="75" r="18" stroke="#5e98fe" stroke-width="1.5" />
+            </svg>
+            <h3>내 맥락으로</h3>
+            <p>내 Figma, Notion, Linear, 끝낸 일을 보고 만들어요. 누구에게나 맞는 조언이 아니라 나에게 맞는 한 걸음이에요.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="how"></div>
+
+    <!-- 01 적기: 직접 적어 보면 앱과 같은 규칙으로 알아듣는다 -->
+    <section class="chapter">
+      <div class="wrap">
+        <div class="head reveal">
+          <div><span class="no">01 — 적기</span><h2>떠오른 순간<br />바로 적어요</h2></div>
+          <div>
+            <p class="value">어느 앱을 쓰고 있든 <b>단축키 한 번</b>이면 돼요. 정리는 나중 일이에요. 일단 머리에서 꺼내요.</p>
+            <ul class="facts"><li>맥 ⌥ Space · 윈도우 Alt+Shift+Space</li><li>‘금요일까지’, ‘내일’ 같은 날짜 말도 알아들어요</li></ul>
+          </div>
+        </div>
+        <div class="demo reveal" id="type-demo">
+          <span class="try">직접 적어 보세요</span>
+          <div class="quick">
+            <div class="q-in"><svg class="sparkle"><use href="#i-spark" /></svg><textarea rows="1" placeholder="예: 금요일까지 보고서 초안" aria-label="할 일 적어 보기"></textarea></div>
+            <div class="q-hint"><span class="q-kind">짧으면 바로 오늘 할 일로, 길면 Claude가 나눠 줘요</span><span class="chips"></span><span class="k">esc 닫기 · ↵ 넣기</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 나누기: 긴 문장이 할 일 카드로 갈라진다 -->
+    <section class="chapter">
+      <div class="wrap">
+        <div class="head reveal">
+          <div><span class="no">02 — 나누기</span><h2>긴 생각은<br />할 일로 나눠요</h2></div>
+          <div>
+            <p class="value">한 문장에 섞인 일을 Claude가 <b>할 일 하나하나로</b> 나눠요. 언제 할지, 언제까지인지도 함께요.</p>
+            <ul class="facts"><li>넣기 전에 한 번 확인해요</li><li>마감 전에 할 준비는 오늘로 잡아요</li></ul>
+          </div>
+        </div>
+        <div class="demo reveal" id="split-demo">
+          <button type="button" class="replay">다시 보기</button>
+          <div class="win split">
+            <div class="raw">금요일 토스 PO 면접이라 자기소개 다시 쓰고 포트폴리오 피드백도 반영해야 함</div>
+            <div class="out"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 첫 행동: 다시 만들기로 다른 제안 -->
+    <section class="chapter">
+      <div class="wrap">
+        <div class="head reveal">
+          <div><span class="no">03 — 첫 행동</span><h2>막막한 일은<br />첫 행동으로</h2></div>
+          <div>
+            <p class="value">큰 일 대신 <b>지금 시작할 수 있는 작은 행동 하나</b>를 제안해요. 맨 위 할 일은 미리 찾아 두어서, 누르자마자 보여요.</p>
+            <ul class="facts"><li>필요하면 답하기 쉬운 질문 하나만 해요</li><li>마음에 안 들면 다시 만들어요</li></ul>
+          </div>
+        </div>
+        <div class="demo reveal" id="redo-demo">
+          <span class="try">다시 만들기를 눌러 보세요</span>
+          <div class="card-w">
+            <div class="fs">
+              <span class="fs-eye"><svg class="sparkle"><use href="#i-spark" /></svg>첫 행동</span>
+              <p class="fs-title"></p>
+              <p class="fs-body">‘포트폴리오 정리’ 대신</p>
+              <div class="fs-act"><button type="button" class="btn-w">이 행동으로 바꾸기</button><button type="button" class="btn-t redo">다시 만들기</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 내 자료로: 근거를 펼치면 읽은 문장과 겹친 낱말 -->
+    <section class="chapter">
+      <div class="wrap">
+        <div class="head reveal">
+          <div><span class="no">04 — 내 자료로</span><h2>무엇을 보고<br />만들었는지까지</h2></div>
+          <div>
+            <p class="value">고른 낱말과 내 자료를 근거로 만들고, <b>어떤 자료의 어느 부분을 참고했는지</b> 보여 줘요. 바로 열어서 시작할 수도 있어요.</p>
+            <ul class="facts"><li>Figma 바로가기 · 끝낸 할 일</li><li>Notion · Linear · Figma 프레임(MCP)</li><li>맥: 캘린더 · 최근 문서</li></ul>
+          </div>
+        </div>
+        <div class="demo reveal" id="ev-demo">
+          <span class="try">근거를 눌러 보세요</span>
+          <div class="win card-w" style="padding: 16px">
+            <div class="fs" style="margin: 0">
+              <span class="fs-eye"><svg class="sparkle"><use href="#i-spark" /></svg>첫 행동 <span class="chip" style="margin-left: auto; height: 20px; font-family: var(--mono); font-size: 10.5px">30분</span></span>
+              <p class="fs-title">포폴 12-408 지표 문장 하나만 숫자로 바꾸기</p>
+              <span class="eyebrow">참고한 자료</span>
+              <div class="ev">
+                <button type="button" class="ev-row" aria-expanded="false"><svg class="figma"><use href="#i-figma" /></svg>포폴 · frame 12-408<span class="pct">60%</span><svg class="chev"><use href="#i-chev" /></svg></button>
+                <div class="ev-body"><div><div class="ev-in">
+                  <blockquote>“올리브영 리뷰 분석으로 구매 전환을 높였다” — <mark>지표</mark>가 없는 <mark>문장</mark></blockquote>
+                  <span class="m">겹치는 낱말 · 포폴 · 지표 · 문장</span>
+                  <div style="margin-top: 10px"><button type="button" class="btn-w" style="height: 28px; font-size: 12px">Figma에서 열기</button></div>
+                </div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="numbers">
+      <div class="wrap">
+        <div class="grid reveal">
+          <div class="num"><strong>1번</strong><span>어디서든 적는 데 드는 단축키</span></div>
+          <div class="num"><strong>6.5초</strong><span>첫 행동을 받기까지 걸린 평균 시간</span><small>직접 잰 값 · Claude Sonnet 기준</small></div>
+          <div class="num"><strong>0.01초</strong><span>미리 찾아 둔 첫 행동이 보이기까지</span><small>직접 잰 값 · 12ms</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="start" id="start">
+      <div class="wrap">
+        <h2>시작하기</h2>
+        <p class="sub">3분이면 돼요. 내 컴퓨터의 Claude Code로 동작해요.</p>
+        <div class="steps reveal">
+          <div>
+            <span class="fig">01</span>
+            <h3>Claude Code 준비</h3>
+            <p><a href="https://docs.claude.com/en/docs/claude-code/setup">Claude Code</a>를 설치하고 터미널에서 <code>claude</code>로 로그인해요. Pro · Max · Team 구독이나 API 키면 돼요.</p>
+          </div>
+          <div>
+            <span class="fig">02</span>
+            <h3>받아서 열기</h3>
+            <p>
+              <a class="dl-mac-arm64" href="https://github.com/space-angel/todoban-releases/releases/latest/download/todoBAN-mac-arm64.dmg">Mac (Apple Silicon)</a> ·
+              <a class="dl-mac-x64" href="https://github.com/space-angel/todoban-releases/releases/latest/download/todoBAN-mac-x64.dmg">Mac (Intel)</a> ·
+              <a class="dl-win" href="https://github.com/space-angel/todoban-releases/releases/latest/download/todoBAN-win-x64-setup.exe">Windows</a>
+            </p>
+          </div>
+          <div>
+            <span class="fig">03</span>
+            <h3>단축키로 적기</h3>
+            <p>떠오른 일을 적고 Enter. 시작하기 화면이 Claude Code를 찾았는지, 로그인했는지 먼저 확인해 줘요.</p>
+          </div>
+        </div>
+        <details>
+          <summary>처음 열 때 경고가 떠요 <span>서명 전이라 그래요. 한 번만 허용하면 돼요</span></summary>
+          <div class="open">
+            <div>
+              <h4>Mac</h4>
+              <ol>
+                <li>dmg를 열고 todoBAN을 응용 프로그램 폴더로 옮겨요</li>
+                <li>todoBAN을 열면 뜨는 창에서 <b>완료</b>를 눌러요</li>
+                <li><b>시스템 설정 → 개인정보 보호 및 보안</b> 맨 아래 <b>그래도 열기</b></li>
+                <li>다시 열고 <b>열기</b>를 누르면 메뉴바에 아이콘이 생겨요</li>
+              </ol>
+            </div>
+            <div>
+              <h4>Windows</h4>
+              <ol>
+                <li>setup.exe를 실행해요</li>
+                <li>‘Windows의 PC 보호’ 창에서 <b>추가 정보</b></li>
+                <li><b>실행</b>을 누르고 설치를 마쳐요</li>
+                <li>작업 표시줄 오른쪽 트레이에 아이콘이 생겨요</li>
+              </ol>
+            </div>
+          </div>
+        </details>
+        <div class="trust reveal">
+          <div><h4>내 컴퓨터에만</h4><p>할 일과 설정은 내 컴퓨터에만 저장해요. Claude에는 이름만 보내고, 파일 내용과 링크는 보내지 않아요.</p></div>
+          <div><h4>내 Claude로</h4><p>todoBAN은 내 Claude Code를 실행만 해요. 계정 정보는 직접 다루지 않아요.</p></div>
+          <div><h4>알아서 새 버전</h4><p>새 버전이 나오면 앱이 알려 줘요. 윈도우는 다시 켤 때 자동으로 바뀌어요.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="closing">
+      <div class="wrap">
+        <h2 class="reveal">막막한 일,<br />오늘은 시작해요</h2>
+        <div class="actions">
+          <a class="pill big dl-primary" href="#start"><span class="dl-label">다운로드</span></a>
+          <a class="ghost" href="https://github.com/space-angel/todoban-releases/releases">모든 버전</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
     <div class="wrap">
-      <h2>이렇게 써요</h2>
-      <p class="sub">적는 순간부터 실제로 시작하기까지 거리를 줄이는 데만 집중했어요.</p>
-
-      <div class="feature">
-        <img src="images/quick.png" width="1280" height="292" alt="빠른 입력 창" />
-        <div>
-          <h3>어디서든 단축키로 적기</h3>
-          <p>어느 앱을 쓰고 있든 단축키 하나로 적어요. 짧으면 바로 오늘 할 일로, 길면 Claude가 할 일 여러 개로 나눠 줘요. ‘금요일까지’, ‘내일’ 같은 날짜 말도 알아들어요.</p>
-        </div>
-      </div>
-      <div class="feature">
-        <img class="narrow" src="images/first-step.png" width="720" height="1210" alt="첫 행동 제안 카드" />
-        <div>
-          <h3>막막한 일은 첫 행동으로</h3>
-          <p>‘면접 준비’처럼 큰 일은 지금 바로 할 수 있는 작은 행동 하나로 바꿔 줘요. 맨 위 할 일은 묻기 전에 미리 찾아 두어서, 누르자마자 보여요.</p>
-        </div>
-      </div>
-      <div class="feature">
-        <img class="narrow" src="images/shape.png" width="720" height="1210" alt="첫 행동 만들기 화면" />
-        <div>
-          <h3>내 자료를 보고 만들기</h3>
-          <p>Figma 바로가기, 끝낸 할 일, 그리고 연결한 Notion·Linear·Figma를 참고해 내 상황에 맞는 첫 행동을 만들어요. 어떤 자료를 참고했는지도 함께 보여 줘요.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="start">
-    <div class="wrap">
-      <h2>시작하기</h2>
-      <p class="sub">3분이면 돼요.</p>
-      <div class="cards">
-        <div class="card">
-          <span class="num">1</span>
-          <h3>Claude Code 준비</h3>
-          <p><a href="https://docs.claude.com/en/docs/claude-code/setup">Claude Code</a>를 설치하고, 터미널에서 <code>claude</code>를 실행해 로그인해요. Pro·Max·Team 구독이나 API 키면 돼요.</p>
-        </div>
-        <div class="card">
-          <span class="num">2</span>
-          <h3>받아서 열기</h3>
-          <p>위에서 받은 파일로 설치해요. 처음 열면 시작하기 화면이 Claude Code를 찾았는지, 로그인했는지 확인해 줘요.</p>
-        </div>
-        <div class="card">
-          <span class="num">3</span>
-          <h3>단축키로 적기</h3>
-          <p>맥은 <code>⌥ Space</code>, 윈도우는 <code>Alt+Shift+Space</code>. 떠오른 일을 적고 Enter를 누르면 끝이에요.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="open">
-    <div class="wrap">
-      <h2>처음 열 때 경고가 떠요</h2>
-      <p class="sub">아직 서명하지 않은 앱이라서 그래요. 한 번만 허용하면 다음부터는 그냥 열려요.</p>
-      <div class="warn">
-        <div class="card">
-          <h3>Mac</h3>
-          <ol>
-            <li>받은 dmg를 열고 todoBAN을 응용 프로그램 폴더로 옮겨요</li>
-            <li>todoBAN을 열면 확인할 수 없다는 창이 떠요. <b>완료</b>를 눌러 닫아요</li>
-            <li><b>시스템 설정 → 개인정보 보호 및 보안</b> 맨 아래의 <b>그래도 열기</b>를 눌러요</li>
-            <li>다시 열고 <b>열기</b>를 누르면 메뉴바에 아이콘이 생겨요</li>
-          </ol>
-        </div>
-        <div class="card">
-          <h3>Windows</h3>
-          <ol>
-            <li>받은 setup.exe를 실행해요</li>
-            <li>‘Windows의 PC 보호’ 창이 뜨면 <b>추가 정보</b>를 눌러요</li>
-            <li><b>실행</b>을 누르고 설치를 마쳐요</li>
-            <li>작업 표시줄 오른쪽 트레이에 아이콘이 생겨요. 안 보이면 <b>^</b>를 눌러 찾아요</li>
-          </ol>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="wrap">
-      <h2>내 정보는 내 컴퓨터에</h2>
-      <p class="sub">todoBAN은 내 Claude Code를 실행만 해요. 계정 정보는 직접 다루지 않아요.</p>
-      <ul class="privacy">
-        <li>할 일과 설정은 내 컴퓨터에만 저장해요</li>
-        <li>Claude에는 할 일 이름과 고른 자료의 이름만 보내요</li>
-        <li>파일 내용·링크·파일 위치는 보내지 않아요</li>
-        <li>Notion·Linear·Figma는 읽기만 해요</li>
-        <li>새 버전은 앱이 알아서 확인해요(윈도우는 자동 설치)</li>
-        <li>짧은 할 일은 Claude 없이도 적을 수 있어요</li>
-      </ul>
-    </div>
-  </section>
-
-  <div class="wrap">
-    <footer>
       <span>todoBAN</span>
       <a href="https://github.com/space-angel/todoban-releases/releases">모든 버전</a>
       <a href="https://docs.claude.com/en/docs/claude-code/setup">Claude Code 설치</a>
-    </footer>
-  </div>
+    </div>
+  </footer>
 
 <script>
-  // 접속한 컴퓨터에 맞는 파일을 큰 버튼으로. 애플 실리콘인지는 그래픽 정보로 짐작하고, 모르면 애플 실리콘(요즘 맥 대부분)으로 둔다.
-  (function () {
-    var ua = navigator.userAgent || "";
-    var platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
-    var isMac = /Mac/i.test(platform) || /Macintosh/.test(ua);
-    var isWin = /Win/i.test(platform) || /Windows/.test(ua);
-    var appleSilicon = true;
-    try {
-      var gl = document.createElement("canvas").getContext("webgl");
-      var ext = gl && gl.getExtension("WEBGL_debug_renderer_info");
-      var renderer = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : "";
-      if (renderer && /Intel|AMD|Radeon/i.test(renderer)) appleSilicon = false;
-    } catch (e) {}
-    var primary = document.getElementById("primary");
-    var label = document.getElementById("primary-label");
-    var pick = function (id, text) {
-      var a = document.getElementById(id);
-      primary.href = a.href;
-      label.textContent = text;
-      a.style.display = "none";
-    };
-    if (isMac) pick(appleSilicon ? "dl-mac-arm64" : "dl-mac-x64", appleSilicon ? "Mac용 다운로드" : "Mac용 다운로드 (Intel)");
-    else if (isWin) pick("dl-win", "Windows용 다운로드");
-    else label.textContent = "내 컴퓨터에 맞는 파일 고르기";
+(function () {
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var wait = function (ms) { return new Promise(function (r) { setTimeout(r, reduce ? Math.min(ms, 120) : ms); }); };
+  var $ = function (root, sel) { return root.querySelector(sel); };
+  var el = function (html) { var t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstChild; };
+  var CHECK = '<svg viewBox="0 0 16 16"><use href="#i-check" /></svg>';
+  var SPARK = '<svg class="sparkle"><use href="#i-spark" /></svg>';
 
-    // 최신 버전 번호와 날짜
-    fetch("https://api.github.com/repos/space-angel/todoban-releases/releases/latest")
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (r) {
-        if (!r || !r.tag_name) return;
-        var d = r.published_at ? new Date(r.published_at) : null;
-        document.getElementById("version").textContent =
-          r.tag_name + (d ? " · " + (d.getMonth() + 1) + "월 " + d.getDate() + "일" : "") + " · 무료";
-      })
-      .catch(function () {});
-  })();
+  /* ===== 다운로드 버튼: 접속한 컴퓨터에 맞게 ===== */
+  var ua = navigator.userAgent || "";
+  var platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+  var isMac = /Mac/i.test(platform) || /Macintosh/.test(ua);
+  var isWin = /Win/i.test(platform) || /Windows/.test(ua);
+  var appleSilicon = true;
+  try {
+    var gl = document.createElement("canvas").getContext("webgl");
+    var ext = gl && gl.getExtension("WEBGL_debug_renderer_info");
+    var renderer = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : "";
+    if (renderer && /Intel|AMD|Radeon/i.test(renderer)) appleSilicon = false;
+  } catch (e) {}
+  var pick = isMac ? (appleSilicon ? "dl-mac-arm64" : "dl-mac-x64") : isWin ? "dl-win" : null;
+  var label = isMac ? (appleSilicon ? "Mac용 다운로드" : "Mac용 다운로드 (Intel)") : isWin ? "Windows용 다운로드" : "다운로드";
+  var href = pick ? document.querySelector("." + pick).href : "#start";
+  document.querySelectorAll(".dl-primary").forEach(function (a) { a.href = href; });
+  document.querySelectorAll(".dl-label").forEach(function (s) { s.textContent = label; });
+  fetch("https://api.github.com/repos/space-angel/todoban-releases/releases/latest")
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (r) { if (r && r.tag_name) document.querySelector(".version").textContent = r.tag_name + " · 무료"; })
+    .catch(function () {});
+
+  /* ===== 첫 화면 장면 ===== */
+  var EXAMPLES = [
+    { task: "면접 준비", typed: "금요일 면접 준비", step: "면접 예상 질문 3개만 적어 보기", due: "D-2" },
+    { task: "포트폴리오 정리", typed: "포트폴리오 정리", step: "지난 프로젝트 하나 골라 한 줄 요약 쓰기", due: null },
+    { task: "이사 준비", typed: "다음 주 이사 준비", step: "이사 업체 견적 두 곳만 문의하기", due: "D-6" },
+  ];
+  var hero = document.getElementById("hero-demo");
+  var d = new Date();
+  $(hero, ".h-date").textContent = (d.getMonth() + 1) + "월 " + d.getDate() + "일 (" + "일월화수목금토"[d.getDay()] + ")";
+  var exWrap = $(hero, ".examples"), qText = $(hero, ".q-text"), qKind = $(hero, ".q-kind");
+  var now = $(hero, ".now"), nTitle = $(hero, ".n-title"), nSlot = $(hero, ".n-slot"), fsSlot = $(hero, ".fs-slot");
+  var run = 0;
+  EXAMPLES.forEach(function (ex, i) {
+    var b = el('<button type="button" aria-pressed="false">' + ex.task + "</button>");
+    b.addEventListener("click", function () { play(i); });
+    exWrap.appendChild(b);
+  });
+
+  async function play(i) {
+    var my = ++run;
+    var ex = EXAMPLES[i];
+    exWrap.querySelectorAll("button").forEach(function (b, k) { b.setAttribute("aria-pressed", String(k === i)); });
+    fsSlot.innerHTML = ""; nSlot.innerHTML = ""; now.classList.remove("handoff");
+    // 1) 빠른 입력에 글자가 써진다
+    qText.innerHTML = '<span class="t"></span><span class="caret"></span>';
+    qKind.textContent = "해야 할 일을 적어 보세요";
+    var t = $(qText, ".t");
+    for (var c = 1; c <= ex.typed.length; c++) {
+      if (my !== run) return;
+      t.textContent = ex.typed.slice(0, c);
+      await wait(70);
+    }
+    qKind.innerHTML = "→ " + ex.typed.length + "자 · 바로 오늘 할 일로 넣어요";
+    await wait(650);
+    if (my !== run) return;
+    // 2) 목록 맨 위 '지금 할 일'로 들어간다
+    qText.innerHTML = '<span style="color: var(--text-3)">해야 할 일을 적어 보세요</span>';
+    qKind.textContent = "넣었어요";
+    nTitle.textContent = ex.task;
+    nTitle.className = "n-title pop";
+    nSlot.innerHTML = "";
+    if (ex.due) nSlot.appendChild(el('<span class="chip due fade" style="margin-right: 6px">' + ex.due + "</span>"));
+    var ask = el('<button type="button" class="ask fade">' + SPARK + "Claude에게 첫 행동 물어보기</button>");
+    nSlot.appendChild(ask);
+    await wait(900);
+    if (my !== run) return;
+    // 3) 물어보면 실제로 일어나는 일만 보여 준다
+    ask.remove();
+    fsSlot.innerHTML = "";
+    var prog = el('<div class="progress fade"><p class="done">' + CHECK + 'Claude에 할 일을 보냈어요</p><p><span class="spin"></span>첫 행동을 찾고 있어요<span class="meta2">보통 6초</span></p></div>');
+    fsSlot.appendChild(prog);
+    await wait(1700);
+    if (my !== run) return;
+    // 4) 첫 행동 도착
+    fsSlot.innerHTML = "";
+    var card = el('<div class="fs pop"><span class="fs-eye">' + SPARK + '첫 행동</span><p class="fs-title">' + ex.step + '</p><p class="fs-body">‘' + ex.task + '’ 대신</p><div class="fs-act"><button type="button" class="btn-w">이 행동으로 바꾸기</button><button type="button" class="btn-t">그대로 두기</button></div></div>');
+    fsSlot.appendChild(card);
+    $(card, ".btn-w").addEventListener("click", function () {
+      run++;
+      fsSlot.innerHTML = "";
+      nTitle.textContent = ex.step;
+      nTitle.className = "n-title pop";
+      nSlot.innerHTML = '<span class="chip blue fade">' + CHECK.replace("<svg", '<svg style="width:11px;height:11px"') + " 바로 시작하면 돼요</span>";
+      void now.offsetWidth; now.classList.add("handoff");
+    });
+    $(card, ".btn-t").addEventListener("click", function () { run++; fsSlot.innerHTML = ""; nSlot.innerHTML = ""; nSlot.appendChild(el('<button type="button" class="ask">' + SPARK + "Claude에게 첫 행동 물어보기</button>")); $(nSlot, ".ask").addEventListener("click", function () { play(i); }); });
+  }
+
+  // 화면에 들어오면 첫 예시를 한 번 튼다
+  var started = false;
+  var startHero = function () { if (!started) { started = true; play(0); } };
+  if ("IntersectionObserver" in window) {
+    var heroIO = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { startHero(); heroIO.disconnect(); } }, { threshold: 0.35 });
+    heroIO.observe(hero);
+  } else startHero();
+
+  /* ===== 01 적기: 앱과 같은 규칙(30자, 날짜 말)으로 알아듣는다 ===== */
+  var typeDemo = document.getElementById("type-demo");
+  var ta = $(typeDemo, "textarea"), tKind = $(typeDemo, ".q-kind"), tChips = $(typeDemo, ".chips");
+  var WD = "일월화수목금토";
+  function iso(x) { return x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0"); }
+  function plus(n) { var x = new Date(); x.setHours(0, 0, 0, 0); x.setDate(x.getDate() + n); return x; }
+  function md(x) { return (x.getMonth() + 1) + "/" + x.getDate(); }
+  function readDate(text) {
+    var m = text.match(/(이번\s*주|다음\s*주|다음주|이번주)?\s*([일월화수목금토])요일/);
+    var date = null, end = 0;
+    if (m) {
+      var target = WD.indexOf(m[2]), today = new Date().getDay(), mon = function (v) { return (v + 6) % 7; }, diff;
+      if (m[1] && /다음/.test(m[1])) diff = 7 - mon(today) + mon(target);
+      else if (m[1]) diff = mon(target) - mon(today);
+      else diff = (target - today + 7) % 7;
+      if (diff < 0) diff += 7;
+      date = plus(diff); end = m.index + m[0].length;
+    } else {
+      var rel = [["오늘", 0], ["내일", 1], ["모레", 2]];
+      for (var k = 0; k < rel.length; k++) { var i = text.indexOf(rel[k][0]); if (i >= 0) { date = plus(rel[k][1]); end = i + 2; break; } }
+    }
+    if (!date) return null;
+    var isDue = /^\s*까지/.test(text.slice(end, end + 6)) || (/면접|발표|마감|제출|미팅|시험/.test(text) && /준비|연습|정리|쓰기|작성|보기|검토/.test(text));
+    return { date: date, isDue: isDue };
+  }
+  function days(x) { var t = plus(0); return Math.round((x - t) / 86400000); }
+  function updateType() {
+    var v = ta.value.trim();
+    ta.style.height = "auto"; ta.style.height = ta.scrollHeight + "px";
+    tChips.innerHTML = "";
+    if (!v) { tKind.textContent = "짧으면 바로 오늘 할 일로, 길면 Claude가 나눠 줘요"; return; }
+    var n = [...v].length;
+    if (n > 30) { tKind.innerHTML = SPARK.replace('class="sparkle"', 'class="sparkle" style="width:12px;height:12px"') + " " + n + "자 · Claude가 할 일로 나눠 줘요"; return; }
+    tKind.textContent = "→ " + n + "자 · 바로 오늘 할 일로 넣어요";
+    var r = readDate(v);
+    if (!r) return;
+    var dd = days(r.date);
+    if (r.isDue) {
+      tChips.appendChild(el('<span class="chip">할 날 · 오늘</span>'));
+      tChips.appendChild(el('<span class="chip due">' + (dd === 0 ? "D-day" : "D-" + dd) + " · " + md(r.date) + "까지</span>"));
+    } else tChips.appendChild(el('<span class="chip">할 날 · ' + (dd === 0 ? "오늘" : dd === 1 ? "내일" : md(r.date)) + "</span>"));
+  }
+  ta.addEventListener("input", updateType);
+
+  /* ===== 02 나누기 ===== */
+  var splitDemo = document.getElementById("split-demo");
+  var raw = $(splitDemo, ".raw"), out = $(splitDemo, ".out");
+  var fri = plus((5 - new Date().getDay() + 7) % 7 || 7), friD = days(fri);
+  var DRAFTS = [
+    { title: "자기소개 다시 쓰기", chips: ['<span class="chip">오늘</span>', '<span class="chip due">D-' + friD + '</span>', '<span class="chip blue">첫 행동 필요</span>'], unclear: true },
+    { title: "포트폴리오 피드백 반영하기", chips: ['<span class="chip">오늘</span>', '<span class="chip due">D-' + friD + '</span>', '<span class="chip">▶ 포폴</span>', '<span class="chip blue">첫 행동 필요</span>'], unclear: true },
+    { title: "토스 PO 면접", chips: ['<span class="chip">' + md(fri) + '</span>', '<span class="chip">바로 할 수 있음</span>'], unclear: false },
+  ];
+  async function playSplit() {
+    out.innerHTML = ""; raw.classList.remove("go");
+    await wait(300);
+    var p = el('<div class="progress fade" style="padding-left: 4px"><p><span class="spin"></span>할 일로 나누고 있어요</p></div>');
+    out.appendChild(p);
+    await wait(1300);
+    out.innerHTML = ""; void raw.offsetWidth; raw.classList.add("go");
+    out.appendChild(el('<h4 class="fade">' + SPARK + " 할 일 3개로 나눴어요</h4>"));
+    for (var i = 0; i < DRAFTS.length; i++) {
+      var dft = DRAFTS[i];
+      var node = el('<div class="draft pop' + (dft.unclear ? " unclear" : "") + '"><b>' + dft.title + '</b><div class="chips2">' + dft.chips.join("") + "</div></div>");
+      out.appendChild(node);
+      await wait(160);
+    }
+  }
+  $(splitDemo, ".replay").addEventListener("click", playSplit);
+  var splitStarted = false;
+  if ("IntersectionObserver" in window) {
+    var sIO = new IntersectionObserver(function (es) { if (es[0].isIntersecting && !splitStarted) { splitStarted = true; playSplit(); sIO.disconnect(); } }, { threshold: 0.5 });
+    sIO.observe(splitDemo);
+  } else playSplit();
+
+  /* ===== 03 다시 만들기 ===== */
+  var redo = document.getElementById("redo-demo");
+  var REDO = ["지난 프로젝트 하나 골라 한 줄 요약 쓰기", "가장 자랑할 만한 화면 3장만 고르기", "포트폴리오 첫 장 제목만 다시 쓰기"];
+  var ri = 0, rTitle = $(redo, ".fs-title");
+  rTitle.textContent = REDO[0];
+  $(redo, ".redo").addEventListener("click", async function () {
+    var btn = this; btn.disabled = true;
+    rTitle.innerHTML = '<span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:var(--text-2)"><span class="spin"></span>다시 만들고 있어요</span>';
+    await wait(800);
+    ri = (ri + 1) % REDO.length;
+    rTitle.textContent = REDO[ri]; rTitle.classList.remove("pop"); void rTitle.offsetWidth; rTitle.classList.add("pop");
+    btn.disabled = false;
+  });
+  $(redo, ".btn-w").addEventListener("click", function () { this.textContent = "바꿨어요"; this.disabled = true; });
+
+  /* ===== 04 근거 펼치기 ===== */
+  var ev = document.querySelector("#ev-demo .ev");
+  $(ev, ".ev-row").addEventListener("click", function () {
+    var open = ev.classList.toggle("open");
+    this.setAttribute("aria-expanded", String(open));
+  });
+
+  /* ===== 들어올 때만 살짝(한 번) ===== */
+  var els = document.querySelectorAll(".reveal");
+  if (!("IntersectionObserver" in window)) { els.forEach(function (e) { e.classList.add("in"); }); return; }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+  }, { rootMargin: "0px 0px -10% 0px" });
+  els.forEach(function (e) { io.observe(e); });
+})();
 </script>
 </body>
 </html>
