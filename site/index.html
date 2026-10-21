@@ -44,59 +44,36 @@
   button { font: inherit; color: inherit; cursor: pointer; }
   .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
 
-  /* ===== 인트로: 흩어진 별이 이어져 거인이 되고, 발끝의 리겔이 파랗게 가장 뜨겁게 ===== */
-  .intro { position: relative; height: 100svh; min-height: 560px; overflow: hidden; background: radial-gradient(120% 80% at 50% 110%, rgb(40 70 140 / 18%), transparent 60%), #050608; }
-  .intro canvas, .intro svg.sky { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .intro .orion { position: absolute; left: 50%; top: 40%; width: min(52vh, 74vw); aspect-ratio: 600 / 700; translate: -50% -50%; transform: translate3d(var(--px, 0px), var(--py, 0px), 0); transition: transform 1200ms var(--ease); }
-  .orion .ln { fill: none; stroke: rgb(170 190 230 / 30%); stroke-width: 1.1; stroke-dasharray: var(--len); stroke-dashoffset: var(--len); }
-  .intro.go .orion .ln { animation: draw 900ms var(--ease) forwards; animation-delay: var(--d); }
-  @keyframes draw { to { stroke-dashoffset: 0; } }
-  .orion .st { opacity: 0; transform-box: fill-box; transform-origin: center; transform: scale(0.4); }
-  .intro.go .orion .st { animation: appear 700ms var(--spring) forwards; animation-delay: var(--d); }
-  @keyframes appear { to { opacity: 1; transform: scale(1); } }
-  .orion .core { fill: #e8eefc; }
-  .orion .bet .core { transition: fill 900ms var(--ease); }
-  .intro.cool .orion .bet .core { fill: #ff8a66; }
-  .orion .halo { opacity: 0; transform-box: fill-box; transform-origin: center; transform: scale(0.3); }
-  .intro.cool .orion .bet .halo { animation: halo 1200ms var(--ease) forwards; --o: 0.55; }
-  .intro.hot .orion .rig .halo { animation: halo 1400ms var(--ease) forwards; --o: 1; }
-  .intro.hot .orion .rig .flare { animation: flare 1600ms var(--ease) forwards; }
-  @keyframes halo { to { opacity: var(--o); transform: scale(1); } }
-  .orion .flare { opacity: 0; transform-box: fill-box; transform-origin: center; transform: scale(0.2) rotate(0deg); }
-  @keyframes flare { 40% { opacity: 1; } to { opacity: 0.85; transform: scale(1) rotate(45deg); } }
-  .intro.hot .orion .rig .core { fill: #ffffff; }
-  .intro.dim .orion .ln { stroke: rgb(170 190 230 / 16%); transition: stroke 1200ms var(--ease); }
-  .orion .hit { fill: transparent; cursor: pointer; }
-  .orion .name { opacity: 0; font: 500 15px "Pretendard Variable", sans-serif; fill: var(--text-2); transition: opacity 250ms var(--ease); pointer-events: none; }
-  .orion g.tip:hover .name, .orion g.tip:focus-visible .name, .intro.hot .orion .rig .name { opacity: 1; }
-  .orion g.tip:focus { outline: none; }
-  .intro .copy { position: absolute; left: 0; right: 0; bottom: 12vh; text-align: center; padding: 0 24px; pointer-events: none; }
-  .intro .copy .ko { margin: 0; font-size: clamp(30px, 4.6vw, 56px); line-height: 1.2; letter-spacing: -0.04em; font-weight: 650; }
-  .intro .copy .ko span { display: inline-block; opacity: 0; transform: translateY(14px); }
-  .intro .copy .ko em { font-style: normal; color: var(--blue-2); text-shadow: 0 0 28px rgb(94 152 254 / 55%); }
-  .intro .copy .en { margin: 14px 0 0; font-size: 15px; letter-spacing: 0.01em; color: var(--text-3); opacity: 0; }
-  .intro.say1 .copy .ko .a, .intro.say2 .copy .ko .b { animation: rise 800ms var(--ease) forwards; }
-  .intro.say2 .copy .en { animation: fadein 900ms var(--ease) 500ms forwards; }
-  @keyframes rise { to { opacity: 1; transform: none; } }
-  @keyframes fadein { to { opacity: 1; } }
-  .intro .brand { position: absolute; top: 28px; left: 50%; translate: -50% 0; display: flex; align-items: center; gap: 9px; font-weight: 650; letter-spacing: 0.02em; color: var(--text-2); opacity: 0; }
-  .intro.go .brand { animation: fadein 900ms var(--ease) 200ms forwards; }
-  .intro .down { position: absolute; left: 50%; bottom: 28px; translate: -50% 0; display: flex; flex-direction: column; align-items: center; gap: 6px; border: 0; background: none; font-size: 12px; color: var(--text-3); opacity: 0; }
-  .intro.say2 .down { animation: fadein 900ms var(--ease) 1400ms forwards; }
-  .intro .down svg { width: 16px; height: 16px; animation: nudge 1800ms ease-in-out 3000ms infinite; }
-  @keyframes nudge { 50% { transform: translateY(4px); } }
-  .intro .skip { position: absolute; top: 24px; right: 24px; height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line-2); background: none; font-size: 12.5px; color: var(--text-3); }
-  .intro .skip:hover { color: var(--text); }
-  .intro.say2 .skip { opacity: 0; pointer-events: none; transition: opacity 400ms; }
+  /* ===== 인트로 (GPT-6 Astra 형식): 캔버스 하나에 별 입자 → 흘러 모여 오리온 → 베텔게우스 붉게 → 리겔 파랗게 ===== */
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .intro { position: relative; height: calc(100svh - 60px); min-height: 560px; overflow: hidden; background: #030406; }
+  .intro .sky { position: absolute; inset: 0; width: 100%; height: 100%; opacity: calc(1 - var(--sp, 0) * 0.6); }
+  .intro .words { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(20px, 4vw, 56px); pointer-events: none; font-size: clamp(28px, 3.9vw, 56px); font-weight: 600; letter-spacing: -0.04em; opacity: calc(1 - var(--sp, 0) * 1.8); }
+  .intro .words span { opacity: 0; transform: translateY(10px); transition: opacity 1400ms var(--ease), transform 1400ms var(--ease); }
+  .intro.in .words span { opacity: 1; transform: none; }
+  .intro .words em, .intro .caption em { font-style: normal; color: var(--blue-2); }
+  .intro .caption { position: absolute; left: 0; right: 0; bottom: 9vh; margin: 0; text-align: center; pointer-events: none; opacity: 0; transform: translateY(8px); transition: opacity 1200ms var(--ease), transform 1200ms var(--ease); }
+  .intro.lit .caption { opacity: calc(1 - var(--sp, 0) * 2); transform: none; }
+  .intro .caption .ko { display: block; font-size: clamp(17px, 1.9vw, 22px); font-weight: 600; letter-spacing: -0.02em; }
+  .intro .caption .en { display: block; margin-top: 6px; font-size: 13px; color: var(--text-3); }
+  .intro .rig-hit { position: absolute; left: var(--rx, -100px); top: var(--ry, -100px); width: 72px; height: 72px; margin: -36px 0 0 -36px; border: 0; border-radius: 50%; background: none; cursor: pointer; }
+  .intro .rig-hit span { position: absolute; left: 66px; top: 50%; transform: translateY(-50%); white-space: nowrap; font-size: 13px; color: var(--text-2); opacity: 0; transition: opacity 300ms var(--ease); }
+  .intro .rig-hit:hover span, .intro .rig-hit:focus-visible span { opacity: 1; }
+  .intro .rig-hit:focus-visible { outline: 1px solid rgb(143 180 255 / 50%); }
+  .intro .replay { position: absolute; right: 20px; bottom: 20px; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line-2); background: rgb(255 255 255 / 4%); color: var(--text-2); opacity: 0; transition: opacity 600ms var(--ease); }
+  .intro.lit .replay { opacity: 1; }
+  .intro .replay:hover { color: var(--text); background: rgb(255 255 255 / 8%); }
+  .intro .replay svg { width: 16px; height: 16px; }
+  @media (max-width: 860px) {
+    .intro .words { flex-direction: column; justify-content: flex-start; align-items: center; gap: 2px; padding-top: 7vh; text-align: center; font-size: clamp(28px, 8vw, 40px); }
+    .intro .caption { bottom: 7vh; padding: 0 20px; }
+  }
   .mark { width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle, #fff 0 28%, #8fb4ff 46%, rgb(94 152 254 / 0%) 72%); box-shadow: 0 0 12px rgb(94 152 254 / 70%); flex: none; }
-  .hero h1 em, .closing h2 em { font-style: normal; color: var(--blue-2); }
+  .hero .h1 em, .closing h2 em { font-style: normal; color: var(--blue-2); }
   .manifesto .story2 { margin-top: 28px; }
   .manifesto b.blue { color: var(--blue-2); }
   .closing-sub { margin: 18px 0 0; font-size: 18px; color: var(--text-2); }
   .start .sub .rename { display: block; margin-top: 6px; font-size: 13px; color: var(--text-3); }
-  @media (prefers-reduced-motion: reduce) {
-    .intro .orion { transition: none; }
-  }
 
   /* 위 막대 */
   .nav { position: sticky; top: 0; z-index: 20; border-bottom: 1px solid var(--line); background: rgb(8 9 10 / 78%); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
@@ -117,7 +94,7 @@
 
   /* 첫 화면 */
   .hero { padding: 104px 0 0; }
-  .hero h1 { margin: 0; font-size: clamp(40px, 6.6vw, 76px); line-height: 1.12; letter-spacing: -0.045em; font-weight: 680; }
+  .hero .h1 { margin: 0; font-size: clamp(40px, 6.6vw, 76px); line-height: 1.12; letter-spacing: -0.045em; font-weight: 680; }
   .hero .lead { margin: 28px 0 0; max-width: 34em; font-size: 18px; color: var(--text-2); }
   .hero .lead b { color: var(--text); font-weight: 600; }
   .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 36px; }
@@ -201,7 +178,7 @@
 
   /* 선언문과 원칙 */
   .manifesto { padding: 160px 0 0; }
-  .manifesto p { margin: 0; max-width: 21em; font-size: clamp(28px, 3.6vw, 44px); line-height: 1.3; letter-spacing: -0.035em; font-weight: 600; color: var(--text-2); }
+  .manifesto p { margin: 0; max-width: 30em; font-size: clamp(21px, 2.4vw, 30px); line-height: 1.45; letter-spacing: -0.025em; font-weight: 600; color: var(--text-2); }
   .manifesto p b { color: var(--text); font-weight: 600; }
   .principles { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 96px; border-top: 1px solid var(--line); }
   .principle { padding: 28px 28px 8px 0; }
@@ -326,30 +303,6 @@
     <symbol id="i-figma" viewBox="0 0 16 24"><path fill="#f24e1e" d="M4 0h4v8H4a4 4 0 0 1 0-8Z" /><path fill="#ff7262" d="M8 0h4a4 4 0 0 1 0 8H8V0Z" /><path fill="#a259ff" d="M4 8h4v8H4a4 4 0 0 1 0-8Z" /><circle fill="#1abcfe" cx="12" cy="12" r="4" /><path fill="#0acf83" d="M4 16h4v4a4 4 0 1 1-4-4Z" /></symbol>
   </svg>
 
-  <!-- 인트로 -->
-  <section class="intro" id="intro" aria-label="Rigel — 가장 뜨거운 별은 발끝에 있어요">
-    <canvas aria-hidden="true"></canvas>
-    <div class="brand"><span class="mark" aria-hidden="true"></span>Rigel</div>
-    <button type="button" class="skip">건너뛰기</button>
-    <svg class="orion" viewBox="0 0 600 700" role="img" aria-label="별을 이어 그린 오리온자리. 어깨의 베텔게우스는 붉게, 발끝의 리겔은 파랗게 빛나요">
-      <defs>
-        <radialGradient id="g-blue"><stop offset="0" stop-color="#cfe0ff" /><stop offset="0.25" stop-color="#7fa9ff" stop-opacity="0.9" /><stop offset="1" stop-color="#3f7bff" stop-opacity="0" /></radialGradient>
-        <radialGradient id="g-red"><stop offset="0" stop-color="#ffb199" /><stop offset="0.3" stop-color="#ff6b4a" stop-opacity="0.55" /><stop offset="1" stop-color="#ff4a2a" stop-opacity="0" /></radialGradient>
-        <linearGradient id="g-flare" x1="0" x2="1"><stop offset="0" stop-color="#8fb4ff" stop-opacity="0" /><stop offset="0.5" stop-color="#e4edff" /><stop offset="1" stop-color="#8fb4ff" stop-opacity="0" /></linearGradient>
-      </defs>
-      <g class="lines"></g>
-      <g class="stars"></g>
-    </svg>
-    <div class="copy">
-      <p class="ko"><span class="a">가장 뜨거운 별은</span> <span class="b"><em>발끝</em>에 있어요.</span></p>
-      <p class="en">The hottest star is at the giant’s feet.</p>
-    </div>
-    <button type="button" class="down" aria-label="아래로">
-      <span>일은 거인, 시작은 한 걸음</span>
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6 4 4 4-4" /></svg>
-    </button>
-  </section>
-
   <div class="nav">
     <div class="wrap">
       <a class="logo" href="#intro"><span class="mark" aria-hidden="true"></span>Rigel</a>
@@ -362,10 +315,19 @@
     </div>
   </div>
 
+  <!-- 인트로: 흩어진 별이 흘러 모여 거인(오리온)이 되고, 발끝의 리겔이 파랗게 가장 밝게 -->
+  <section class="intro" id="intro">
+    <h1 class="sr">Rigel — 일은 거인, 시작은 한 걸음. 가장 뜨거운 별은 발끝에 있어요.</h1>
+    <canvas class="sky" aria-hidden="true"></canvas>
+    <div class="words" aria-hidden="true"><span class="w1">일은 거인,</span><span class="w2">시작은 <em>한 걸음.</em></span></div>
+    <p class="caption" aria-hidden="true"><span class="ko">가장 뜨거운 별은 <em>발끝</em>에 있어요.</span><span class="en">The hottest star is at the giant’s feet.</span></p>
+    <button type="button" class="rig-hit" aria-label="Rigel · 첫 걸음. 누르면 아래로"><span>Rigel · 첫 걸음</span></button>
+    <button type="button" class="replay" aria-label="다시 보기"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 8a5 5 0 1 1-1.5-3.6M13 2.5V5h-2.5" /></svg></button>
+  </section>
   <main>
     <section class="hero">
       <div class="wrap">
-        <h1>일은 거인,<br />시작은 <em>한 걸음.</em></h1>
+        <h2 class="h1">막막한 할 일,<br /><em>첫 걸음부터.</em></h2>
         <p class="lead">내 일정·문서·노트를 읽고, <b>막막한 할 일을 지금 바로 디딜 첫 걸음 하나로</b> 바꿔 주는 할 일 앱이에요.</p>
         <div class="actions">
           <a class="pill big dl-primary" href="#start">
@@ -638,88 +600,155 @@
   var SPARK = '<svg class="sparkle"><use href="#i-spark" /></svg>';
 
 
-  /* ===== 인트로: 별 → 선 → 베텔게우스 식고 → 리겔 밝아짐 → 문장 ===== */
+  /* ===== 인트로 (캔버스 별 입자) ===== */
   (function intro() {
     var root = document.getElementById("intro");
     if (!root) return;
-    var NS = "http://www.w3.org/2000/svg";
-    // 오리온자리(600×700 안의 자리). 이름, 좌표, 크기
-    var S = {
-      mei: ["메이사", 300, 92, 3.2], bet: ["Betelgeuse · 큰 일", 186, 196, 6.5], bel: ["벨라트릭스", 414, 218, 4.4],
-      aln: ["알니탁", 254, 388, 4], alm: ["알닐람", 300, 372, 4.2], min: ["민타카", 346, 354, 3.8],
-      sai: ["사이프", 214, 566, 4.2], rig: ["Rigel · 첫 걸음", 424, 584, 7],
+    var cv = root.querySelector(".sky"), ctx = cv.getContext("2d");
+    var rigHit = root.querySelector(".rig-hit");
+    // 오리온자리(600×700 기준). 이름, x, y, 밝기
+    var STARS = {
+      mei: [300, 96, 0.7], bet: [188, 200, 1.4], bel: [412, 222, 1.0],
+      aln: [256, 390, 0.95], alm: [300, 374, 1.0], min: [344, 357, 0.9],
+      sai: [216, 568, 0.9], rig: [424, 586, 1.6],
     };
-    var L = [["mei", "bet"], ["mei", "bel"], ["bet", "aln"], ["bel", "min"], ["aln", "alm"], ["alm", "min"], ["aln", "sai"], ["min", "rig"]];
-    var linesG = root.querySelector(".lines"), starsG = root.querySelector(".stars");
-    var mk = function (tag, attrs) { var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; };
-    L.forEach(function (pair, i) {
-      var a = S[pair[0]], b = S[pair[1]];
-      var len = Math.hypot(b[1] - a[1], b[2] - a[2]);
-      var ln = mk("line", { class: "ln", x1: a[1], y1: a[2], x2: b[1], y2: b[2] });
-      ln.style.setProperty("--len", String(Math.ceil(len)));
-      ln.style.setProperty("--d", (700 + i * 110) + "ms");
-      linesG.appendChild(ln);
-    });
-    var order = ["mei", "bel", "bet", "min", "alm", "aln", "sai", "rig"];
-    order.forEach(function (key, i) {
-      var s = S[key], g = mk("g", { class: "tip " + (key === "bet" ? "bet" : key === "rig" ? "rig" : ""), tabindex: key === "rig" || key === "bet" ? "0" : "-1" });
-      if (key === "rig") {
-        g.appendChild(mk("circle", { class: "halo", cx: s[1], cy: s[2], r: 70, fill: "url(#g-blue)" }));
-        var fl = mk("g", { class: "flare" });
-        fl.appendChild(mk("rect", { x: s[1] - 60, y: s[2] - 0.8, width: 120, height: 1.6, fill: "url(#g-flare)" }));
-        fl.appendChild(mk("rect", { x: s[1] - 0.8, y: s[2] - 60, width: 1.6, height: 120, fill: "url(#g-flare)", transform: "rotate(0)" }));
-        g.appendChild(fl);
-      }
-      if (key === "bet") g.appendChild(mk("circle", { class: "halo", cx: s[1], cy: s[2], r: 46, fill: "url(#g-red)" }));
-      var st = mk("circle", { class: "st core", cx: s[1], cy: s[2], r: s[3] });
-      st.style.setProperty("--d", (i * 70) + "ms");
-      g.appendChild(st);
-      if (key === "rig" || key === "bet") {
-        g.appendChild(mk("circle", { class: "hit", cx: s[1], cy: s[2], r: 34 }));
-        var t = mk("text", { class: "name", x: s[1] + (key === "rig" ? 30 : -30), y: s[2] + 5, "text-anchor": key === "rig" ? "start" : "end" });
-        t.textContent = s[0];
-        g.appendChild(t);
-      }
-      starsG.appendChild(g);
-    });
+    // 거인으로 읽히게: 몸(선) + 든 몽둥이(왼팔) + 방패(오른쪽)
+    var LINES = [
+      ["mei", "bet"], ["mei", "bel"], ["bet", "aln"], ["bel", "min"], ["aln", "alm"], ["alm", "min"], ["aln", "sai"], ["min", "rig"],
+      [[188, 200], [150, 128]], [[150, 128], [168, 54]], [[150, 128], [118, 92]],
+      [[412, 222], [470, 190]], [[470, 190], [498, 236]], [[498, 236], [504, 290]], [[504, 290], [488, 340]],
+    ];
+    var pt = function (p) { return typeof p === "string" ? [STARS[p][0], STARS[p][1]] : p; };
 
-    // 뒤 하늘: 작은 별들(캔버스 한 번 그리기, 움직이지 않음)
-    var cv = root.querySelector("canvas"), ctx = cv.getContext("2d");
-    function sky() {
-      var w = root.clientWidth, h = root.clientHeight, dpr = Math.min(window.devicePixelRatio || 1, 2);
-      cv.width = w * dpr; cv.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
-      var seed = 7; var rnd = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
-      for (var i = 0; i < Math.round((w * h) / 5200); i++) {
-        ctx.globalAlpha = 0.15 + rnd() * 0.45;
-        ctx.fillStyle = rnd() > 0.85 ? "#c9d8ff" : "#ffffff";
-        ctx.beginPath(); ctx.arc(rnd() * w, rnd() * h, rnd() * 1.1 + 0.2, 0, Math.PI * 2); ctx.fill();
+    // 빛나는 점을 미리 그려 둔다(색마다 한 장). 그릴 때는 찍기만 한다.
+    function sprite(rgb) {
+      var c = document.createElement("canvas"); c.width = c.height = 64;
+      var g = c.getContext("2d"), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      gr.addColorStop(0, "rgba(" + rgb + ",1)"); gr.addColorStop(0.18, "rgba(" + rgb + ",0.85)"); gr.addColorStop(0.45, "rgba(" + rgb + ",0.18)"); gr.addColorStop(1, "rgba(" + rgb + ",0)");
+      g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+      return c;
+    }
+    var SPR = { w: sprite("236,241,255"), b: sprite("150,188,255"), o: sprite("255,178,138"), r: sprite("255,110,80"), B: sprite("110,160,255") };
+
+    var W = 0, H = 0, dpr = 1, box = { x: 0, y: 0, s: 1 }, parts = [], seed = 11;
+    var rnd = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    var gauss = function () { return (rnd() + rnd() + rnd() - 1.5) / 1.5; };
+    var map = function (p) { return [box.x + p[0] * box.s, box.y + p[1] * box.s]; };
+
+    function layout() {
+      W = root.clientWidth; H = root.clientHeight; dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var narrow = W < 860;
+      var fh = narrow ? H * 0.56 : H * 0.8, s = Math.min(fh / 700, (W * (narrow ? 0.92 : 0.5)) / 600);
+      box = { s: s, x: W / 2 - 300 * s, y: (narrow ? H * 0.5 : H * 0.47) - 350 * s };
+      var r = map(pt("rig"));
+      root.style.setProperty("--rx", r[0] + "px"); root.style.setProperty("--ry", r[1] + "px");
+      build();
+    }
+
+    function build() {
+      seed = 11; parts = [];
+      var n = Math.round(Math.min(3200, Math.max(1200, (W * H) / 420)));
+      var total = LINES.reduce(function (a, l) { var p = pt(l[0]), q = pt(l[1]); return a + Math.hypot(q[0] - p[0], q[1] - p[1]); }, 0);
+      for (var i = 0; i < n; i++) {
+        var kind = rnd(), tx, ty, col = rnd() < 0.22 ? "b" : rnd() < 0.08 ? "o" : "w", size = 0.35 + rnd() * rnd() * 1.6, alpha = 0.25 + rnd() * 0.55;
+        if (kind < 0.34) {
+          // 하늘에 남는 별
+          tx = rnd() * W; ty = rnd() * H; alpha *= 0.55; size *= 0.8;
+        } else if (kind < 0.74) {
+          // 선을 따라 흐르는 별
+          var d = rnd() * total, l = LINES[0];
+          for (var k = 0; k < LINES.length; k++) { var p0 = pt(LINES[k][0]), q0 = pt(LINES[k][1]), len = Math.hypot(q0[0] - p0[0], q0[1] - p0[1]); if (d < len) { l = LINES[k]; break; } d -= len; }
+          var p = pt(l[0]), q = pt(l[1]), u = rnd(), nx = -(q[1] - p[1]), ny = q[0] - p[0], nl = Math.hypot(nx, ny) || 1, off = gauss() * 7;
+          var m = map([p[0] + (q[0] - p[0]) * u + (nx / nl) * off, p[1] + (q[1] - p[1]) * u + (ny / nl) * off]); tx = m[0]; ty = m[1];
+          alpha *= 0.8;
+        } else {
+          // 큰 별 둘레의 별 무리(리겔·베텔게우스는 더 촘촘하게, 제 색으로)
+          var keys = ["mei", "bet", "bet", "bel", "aln", "alm", "min", "sai", "rig", "rig", "rig"], key = keys[Math.floor(rnd() * keys.length)], st = STARS[key];
+          var sp = key === "rig" ? 16 : key === "bet" ? 13 : 9;
+          var m2 = map([st[0] + gauss() * sp, st[1] + gauss() * sp]); tx = m2[0]; ty = m2[1];
+          if (key === "rig") col = rnd() < 0.7 ? "B" : "b"; else if (key === "bet") col = rnd() < 0.6 ? "r" : "o";
+          size *= 1.15; alpha = Math.min(1, alpha * 1.25);
+        }
+        parts.push({ sx: rnd() * W, sy: rnd() * H, tx: tx, ty: ty, d: 900 + rnd() * 900, dur: 1700 + rnd() * 900, size: size, a: alpha, col: col, ph: rnd() * 6.28, z: 0.3 + size });
       }
     }
-    sky(); window.addEventListener("resize", sky);
 
-    // 순서대로
-    var steps = [["go", 0], ["cool", 1700], ["dim", 2300], ["hot", 2300], ["say1", 2500], ["say2", 3300]];
-    var timers = [];
-    function finish() { timers.forEach(clearTimeout); steps.forEach(function (s) { root.classList.add(s[0]); }); }
-    if (reduce) finish();
-    else steps.forEach(function (s) { timers.push(setTimeout(function () { root.classList.add(s[0]); }, s[1] + 250)); });
-    root.querySelector(".skip").addEventListener("click", finish);
+    var t0 = 0, raf = 0, running = false, px = 0, py = 0, mx = 0, my = 0, lastDraw = 0;
+    var ease = function (x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+    var clamp01 = function (x) { return x < 0 ? 0 : x > 1 ? 1 : x; };
+    var BET = 3300, RIG = 3800, WORDS = 300, SETTLE = 5600;
 
-    // 마우스를 따라 별자리가 살짝(깊이감)
-    var orion = root.querySelector(".orion");
+    function draw(now) {
+      var t = now - t0;
+      // 다 모인 뒤에는 반짝임만, 덜 자주 그린다
+      if (t > SETTLE && now - lastDraw < 32) { raf = requestAnimationFrame(draw); return; }
+      lastDraw = now;
+      mx += (px - mx) * 0.06; my += (py - my) * 0.06;
+      ctx.globalCompositeOperation = "source-over";
+      ctx.fillStyle = "#030406"; ctx.fillRect(0, 0, W, H);
+      ctx.globalCompositeOperation = "lighter";
+      var appear = clamp01(t / 1100);
+      for (var i = 0; i < parts.length; i++) {
+        var p = parts[i];
+        var k = ease(clamp01((t - p.d) / p.dur));
+        var tw = 0.75 + 0.25 * Math.sin(now / 900 + p.ph);
+        var x = p.sx + (p.tx - p.sx) * k + mx * p.z, y = p.sy + (p.ty - p.sy) * k + my * p.z;
+        var a = p.a * appear * tw;
+        if (a < 0.02) continue;
+        var s = p.size * 7;
+        ctx.globalAlpha = a;
+        ctx.drawImage(SPR[p.col], x - s / 2, y - s / 2, s, s);
+      }
+      // 큰 별: 모인 뒤 밝아지고, 베텔게우스는 붉게, 리겔은 파랗게 가장 밝게
+      var form = clamp01((t - 2300) / 1200);
+      for (var key in STARS) {
+        var st = STARS[key], c = map([st[0], st[1]]), cx = c[0] + mx * 1.4, cy = c[1] + my * 1.4;
+        var base = 10 * st[2] * box.s * (W < 860 ? 1.6 : 1);
+        ctx.globalAlpha = form * 0.9; ctx.drawImage(SPR.w, cx - base, cy - base, base * 2, base * 2);
+        if (key === "bet") {
+          var b = clamp01((t - BET) / 1000), rb = base * (2 + 2.2 * ease(b));
+          ctx.globalAlpha = 0.75 * b; ctx.drawImage(SPR.r, cx - rb, cy - rb, rb * 2, rb * 2);
+        }
+        if (key === "rig") {
+          var g = clamp01((t - RIG) / 1300), pulse = 1 + 0.04 * Math.sin(now / 700), rr = base * (2 + 6 * ease(g)) * pulse;
+          ctx.globalAlpha = 0.95 * g; ctx.drawImage(SPR.B, cx - rr, cy - rr, rr * 2, rr * 2);
+          ctx.globalAlpha = g; ctx.drawImage(SPR.w, cx - base * 1.6, cy - base * 1.6, base * 3.2, base * 3.2);
+          // 회절 십자
+          var fl = rr * 1.1;
+          ctx.globalAlpha = 0.55 * g; ctx.drawImage(SPR.b, cx - fl, cy - 1.2, fl * 2, 2.4); ctx.drawImage(SPR.b, cx - 1.2, cy - fl, 2.4, fl * 2);
+        }
+      }
+      ctx.globalAlpha = 1;
+      if (t > WORDS) root.classList.add("in");
+      if (t > RIG + 200) root.classList.add("lit");
+      if (running) raf = requestAnimationFrame(draw);
+    }
+
+    function start(fromStart) {
+      if (fromStart) { t0 = performance.now(); root.classList.remove("in", "lit"); }
+      if (reduce) { t0 = performance.now() - 8000; running = false; draw(performance.now()); return; }
+      if (running) return;
+      running = true; raf = requestAnimationFrame(draw);
+    }
+    function stop() { running = false; cancelAnimationFrame(raf); }
+
+    layout();
+    t0 = performance.now();
+    start(false);
+    var rt; window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(function () { layout(); if (!running) draw(performance.now()); }, 150); });
+    // 안 보이면 멈춘다(배터리·GPU)
+    if ("IntersectionObserver" in window) new IntersectionObserver(function (es) { es[0].isIntersecting ? start(false) : stop(); }).observe(root);
+    document.addEventListener("visibilitychange", function () { document.hidden ? stop() : start(false); });
     if (!reduce) root.addEventListener("pointermove", function (e) {
       var r = root.getBoundingClientRect();
-      orion.style.setProperty("--px", ((e.clientX - r.left) / r.width - 0.5) * -14 + "px");
-      orion.style.setProperty("--py", ((e.clientY - r.top) / r.height - 0.5) * -10 + "px");
+      px = ((e.clientX - r.left) / r.width - 0.5) * -8; py = ((e.clientY - r.top) / r.height - 0.5) * -6;
     });
-    // 리겔을 누르면 첫 화면으로
-    var toHero = function () { finish(); document.querySelector(".hero").scrollIntoView({ behavior: reduce ? "auto" : "smooth" }); };
-    var rig = root.querySelector(".rig");
-    rig.addEventListener("click", toHero);
-    rig.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toHero(); } });
-    root.querySelector(".down").addEventListener("click", toHero);
+    // 스크롤하면 양 끝 글자와 문장이 먼저 흐려진다
+    window.addEventListener("scroll", function () { root.style.setProperty("--sp", String(Math.min(1, window.scrollY / (H * 0.7)))); }, { passive: true });
+    root.querySelector(".replay").addEventListener("click", function () { start(true); });
+    rigHit.addEventListener("click", function () { document.querySelector(".hero").scrollIntoView({ behavior: reduce ? "auto" : "smooth" }); });
   })();
-
   /* ===== 다운로드 버튼: 접속한 컴퓨터에 맞게 ===== */
   var ua = navigator.userAgent || "";
   var platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
