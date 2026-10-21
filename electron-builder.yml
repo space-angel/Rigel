@@ -1,7 +1,7 @@
 # 배포 패키지 설정. 만들기: npm run dist:mac / npm run dist:win (먼저 npm run build)
 appId: com.todoban.app
-productName: todoBAN
-copyright: Copyright © 2026 todoBAN
+productName: Rigel
+copyright: Copyright © 2026 Rigel
 directories:
   output: dist
   buildResources: build
@@ -61,4 +61,4 @@ nsis:
   allowToChangeInstallationDirectory: true
   createStartMenuShortcut: true
   createDesktopShortcut: false
-  shortcutName: todoBAN
+  shortcutName: Rigel

@@ -114,6 +114,23 @@ export interface FirstStepInput {
   previous: string[]; // 이미 제안했던 첫 행동. "다른 제안"을 눌렀을 때 같은 걸 다시 내지 않게 한다.
   shape?: ShapeInput | null; // C1에서 고른 낱말, 크기, 자료
   dueDate?: string | null; // 마감. 그 전에 끝낼 수 있는 첫 행동을 고르게 한다
+  others?: OtherTask[]; // 같은 목록의 다른 할 일. 대상을 알아내고, 다른 할 일과 겹치는 첫 행동을 고르지 않게 한다
+}
+
+export interface OtherTask {
+  title: string;
+  dueDate: string | null;
+  rawText: string; // 같은 메모에서 나뉜 할 일은 이 할 일의 rawText와 같아서 비우고 sameNote로 알린다
+  sameNote?: true;
+}
+
+// 첫 행동을 찾을 때 함께 보낼 다른 할 일: 끝내지 않은 것, 같은 메모에서 나뉜 것부터, 최대 12개.
+export function otherTasks(todo: { id: string; rawText: string }, todos: { id: string; title: string; dueDate: string | null; rawText: string; completedAt: string | null; order: number }[]): OtherTask[] {
+  const open = todos.filter((t) => t.id !== todo.id && !t.completedAt);
+  const same = (t: { rawText: string }) => t.rawText.trim() !== "" && t.rawText === todo.rawText;
+  return [...open.filter(same), ...open.filter((t) => !same(t)).sort((a, b) => a.order - b.order)]
+    .slice(0, 12)
+    .map((t) => (same(t) ? { title: t.title, dueDate: t.dueDate, rawText: "", sameNote: true as const } : { title: t.title, dueDate: t.dueDate, rawText: t.rawText === t.title ? "" : t.rawText.slice(0, 200) }));
 }
 
 export function firstStepRequest(input: FirstStepInput, today: string, shortcuts: Shortcut[]): string {
@@ -125,6 +142,7 @@ export function firstStepRequest(input: FirstStepInput, today: string, shortcuts
     answer: input.answer,
     previous: input.previous,
     ...(input.dueDate && { dueDate: input.dueDate }),
+    ...(input.others?.length && { others: input.others }),
     shortcuts: shortcutHints(shortcuts),
     ...(input.shape && {
       words: input.shape.words,

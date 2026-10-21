@@ -29,5 +29,5 @@ export function compareVersions(a: string, b: string): number {
 
 // 맥에서 받을 설치 파일. 이름에 버전이 없어서 늘 최신 릴리스를 가리킨다(electron-builder.yml artifactName).
 export function macDownloadUrl(arch: string, repo = RELEASES_REPO): string {
-  return `https://github.com/${repo}/releases/latest/download/todoBAN-mac-${arch === "arm64" ? "arm64" : "x64"}.dmg`;
+  return `https://github.com/${repo}/releases/latest/download/Rigel-mac-${arch === "arm64" ? "arm64" : "x64"}.dmg`;
 }

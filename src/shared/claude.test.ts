@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { ClaudeError, FirstStepResult, SplitResult, firstStepRequest, matchShortcutId, parseClaudeOutput, splitRequest } from "./claude.ts";
+import { ClaudeError, FirstStepResult, SplitResult, firstStepRequest, matchShortcutId, otherTasks, parseClaudeOutput, splitRequest } from "./claude.ts";
 
 const ok = (result: string) => JSON.stringify({ type: "result", is_error: false, result });
 const task = { title: "포폴 장표 고치기", plannedDate: "2026-10-21", isClear: true, shortcut: "포폴" };
@@ -71,6 +71,26 @@ test("firstStep 요청 본문에 이전 제안과 답을 넣는다", () => {
   assert.equal(body.type, "firstStep");
   assert.equal(body.answer, "토스 PO");
   assert.deepEqual(body.previous, ["a"]);
+});
+
+test("첫 행동 요청에 같은 목록의 다른 할 일을 넣는다: 끝내지 않은 것, 같은 메모에서 나뉜 것부터", () => {
+  const memo = "목요일까지 케이스 스터디 정리하고 케이스 하나 더";
+  const todo = { id: "a", title: "케이스 하나 더 만들기", dueDate: null, rawText: memo, completedAt: null, order: 3 };
+  const todos = [
+    todo,
+    { id: "b", title: "포폴 표지 고치기", dueDate: null, rawText: "포폴 표지 고치기", completedAt: null, order: 1 },
+    { id: "c", title: "끝낸 일", dueDate: null, rawText: "끝낸 일", completedAt: "2026-10-20T01:00:00Z", order: 2 },
+    { id: "d", title: "케이스 스터디 정리하기", dueDate: "2026-10-22", rawText: memo, completedAt: null, order: 4 },
+  ];
+  const others = otherTasks(todo, todos);
+  assert.deepEqual(others, [
+    { title: "케이스 스터디 정리하기", dueDate: "2026-10-22", rawText: "", sameNote: true },
+    { title: "포폴 표지 고치기", dueDate: null, rawText: "" },
+  ]);
+  const body = JSON.parse(firstStepRequest({ title: todo.title, rawText: memo, answer: null, previous: [], others }, "2026-10-20", []));
+  assert.equal(body.others.length, 2);
+  // 다른 할 일이 없으면 넣지 않는다
+  assert.equal("others" in JSON.parse(firstStepRequest({ title: "x", rawText: "x", answer: null, previous: [], others: [] }, "2026-10-20", [])), false);
 });
 
 test("다른 사람이 처음 쓸 때의 실패를 종류로 나눈다", async () => {

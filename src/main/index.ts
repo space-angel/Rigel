@@ -21,7 +21,9 @@ import { runE2E } from "./e2e";
 import { Updater } from "./updater";
 import { claudeAuth, claudeVersion, ensureWorkDir, findClaude, resetRules, resourcePath, rulesStatus } from "./claude/setup";
 
-app.setName("todoBAN");
+// 앱 이름은 Rigel(2026-10). 데이터 폴더는 예전 이름 todoBAN 그대로 둔다 — 바꾸면 업데이트한 사람의 할 일이 안 보인다.
+if (!process.env.TODOBAN_USER_DATA) app.setPath("userData", join(app.getPath("appData"), "todoBAN"));
+app.setName("Rigel");
 const IS_MAC = process.platform === "darwin";
 const IS_WIN = process.platform === "win32";
 // 윈도우는 알림·작업 표시줄이 앱을 이 ID로 묶는다(배포 설정의 appId와 같아야 한다).
@@ -90,7 +92,7 @@ function updateTray(): void {
   const { open } = todayView(data.todos, today, pendingCarryOver(data, today));
   // 맥은 메뉴바 아이콘 옆에 숫자, 윈도우 트레이는 글자를 못 붙여서 툴팁으로
   if (IS_MAC) tray?.setTitle(open.length ? ` ${open.length}` : "", { fontType: "monospacedDigit" });
-  else tray?.setToolTip(open.length ? `todoBAN · ${tr("{n} open", { n: open.length })}` : "todoBAN");
+  else tray?.setToolTip(open.length ? `Rigel · ${tr("{n} open", { n: open.length })}` : "Rigel");
 }
 
 function broadcast(): void {
@@ -499,7 +501,7 @@ function trayMenu(): Menu {
     ...updateMenuItems(),
     ...(hotkeyFail ? [{ type: "separator" as const }, { label: hotkeyError()!, enabled: false }] : []),
     { type: "separator" },
-    { label: tr("Quit todoBAN"), role: "quit" },
+    { label: tr("Quit Rigel"), role: "quit" },
   ]);
 }
 
@@ -760,14 +762,14 @@ app.whenReady().then(() => {
   ipcMain.on("review:openTerminal", () => openTerminal());
 
   // 화면 확인용 실행에서는 메뉴바 아이콘과 전역 단축키를 만들지 않는다.
-  // 만들면 쓰고 있는 todoBAN과 겹쳐서, 사용자의 입력이 확인용 앱으로 들어간다.
+  // 만들면 쓰고 있는 앱과 겹쳐서, 사용자의 입력이 확인용 앱으로 들어간다.
   if (!HEADLESS) {
     // 맥은 메뉴바 색을 따르는 템플릿 아이콘, 윈도우는 밝은·어두운 작업 표시줄 모두에서 보이는 색 아이콘.
     // 배포한 앱에서도 찾도록 resourcePath로 읽는다.
     const icon = nativeImage.createFromPath(resourcePath(IS_MAC ? "trayTemplate.png" : "tray-win.png"));
     if (IS_MAC) icon.setTemplateImage(true);
     tray = new Tray(icon);
-    tray.setToolTip("todoBAN");
+    tray.setToolTip("Rigel");
     tray.on("click", toggleListWindow);
     tray.on("right-click", () => tray?.popUpContextMenu(trayMenu()));
   }

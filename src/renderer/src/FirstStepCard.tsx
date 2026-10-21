@@ -16,7 +16,7 @@ const ERROR_TEXT: Record<string, string> = {
   notFound: msg("Claude Code isn't installed."),
   usageLimit: msg("You've reached your Claude usage limit. Try again a little later."),
   network: msg("Couldn't reach Claude. Check your internet connection."),
-  outdated: msg("Your Claude Code is too old for todoBAN. Run claude update in a terminal."),
+  outdated: msg("Your Claude Code is too old for Rigel. Run claude update in a terminal."),
   parseFailed: msg("Couldn't read Claude's answer."),
   failed: msg("Couldn't get a first step."),
 };

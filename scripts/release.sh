@@ -28,5 +28,7 @@ ls -la "$WORK/files"
 grep -q "version: $VERSION" "$WORK/files/latest.yml"
 grep -q "version: $VERSION" "$WORK/files/latest-mac.yml"
 
-gh release create "v$VERSION" --repo "$RELEASES" --title "todoBAN $VERSION" --notes "${NOTES:-todoBAN $VERSION}" "$WORK"/files/*
+# 0.1.0(todoBAN 이름)의 맥 앱은 todoBAN-mac-*.dmg 주소로 새 버전을 받는다. 같은 파일을 예전 이름으로도 올린다.
+for arch in arm64 x64; do cp "$WORK/files/Rigel-mac-$arch.dmg" "$WORK/files/todoBAN-mac-$arch.dmg"; done
+gh release create "v$VERSION" --repo "$RELEASES" --title "Rigel $VERSION" --notes "${NOTES:-Rigel $VERSION}" "$WORK"/files/*
 echo "올림: https://github.com/$RELEASES/releases/tag/v$VERSION"
