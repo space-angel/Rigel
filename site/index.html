@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>todoBAN — 적는 순간, 시작할 준비가 끝나요</title>
-<meta name="description" content="할 일 앱은 목록을 늘려요. todoBAN은 막막한 일을 지금 바로 시작할 첫 행동으로 바꿔요. macOS·Windows 메뉴바 할 일 앱." />
-<meta property="og:title" content="todoBAN — 적는 순간, 시작할 준비가 끝나요" />
-<meta property="og:description" content="막막한 일을 지금 바로 시작할 첫 행동으로 바꾸는 메뉴바 할 일 앱" />
+<title>Rigel — 가장 뜨거운 별은 발끝에 있어요</title>
+<meta name="description" content="내 일정·문서·노트를 읽고, 막막한 할 일을 지금 바로 디딜 첫 걸음 하나로 바꿔 주는 할 일 앱. 일은 거인, 시작은 한 걸음." />
+<meta property="og:title" content="Rigel — 가장 뜨거운 별은 발끝에 있어요" />
+<meta property="og:description" content="막막한 할 일을 지금 바로 디딜 첫 걸음 하나로. Big task. Blue step." />
 <meta property="og:image" content="images/first-step.png" />
-<link rel="icon" href="images/icon.png" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%2308090a'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%238fb4ff'/%3E%3Ccircle cx='16' cy='16' r='3.5' fill='%23fff'/%3E%3C/svg%3E" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
 <style>
   :root {
@@ -43,6 +43,60 @@
   a { color: inherit; text-decoration: none; }
   button { font: inherit; color: inherit; cursor: pointer; }
   .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  /* ===== 인트로: 흩어진 별이 이어져 거인이 되고, 발끝의 리겔이 파랗게 가장 뜨겁게 ===== */
+  .intro { position: relative; height: 100svh; min-height: 560px; overflow: hidden; background: radial-gradient(120% 80% at 50% 110%, rgb(40 70 140 / 18%), transparent 60%), #050608; }
+  .intro canvas, .intro svg.sky { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .intro .orion { position: absolute; left: 50%; top: 40%; width: min(52vh, 74vw); aspect-ratio: 600 / 700; translate: -50% -50%; transform: translate3d(var(--px, 0px), var(--py, 0px), 0); transition: transform 1200ms var(--ease); }
+  .orion .ln { fill: none; stroke: rgb(170 190 230 / 30%); stroke-width: 1.1; stroke-dasharray: var(--len); stroke-dashoffset: var(--len); }
+  .intro.go .orion .ln { animation: draw 900ms var(--ease) forwards; animation-delay: var(--d); }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  .orion .st { opacity: 0; transform-box: fill-box; transform-origin: center; transform: scale(0.4); }
+  .intro.go .orion .st { animation: appear 700ms var(--spring) forwards; animation-delay: var(--d); }
+  @keyframes appear { to { opacity: 1; transform: scale(1); } }
+  .orion .core { fill: #e8eefc; }
+  .orion .bet .core { transition: fill 900ms var(--ease); }
+  .intro.cool .orion .bet .core { fill: #ff8a66; }
+  .orion .halo { opacity: 0; transform-box: fill-box; transform-origin: center; transform: scale(0.3); }
+  .intro.cool .orion .bet .halo { animation: halo 1200ms var(--ease) forwards; --o: 0.55; }
+  .intro.hot .orion .rig .halo { animation: halo 1400ms var(--ease) forwards; --o: 1; }
+  .intro.hot .orion .rig .flare { animation: flare 1600ms var(--ease) forwards; }
+  @keyframes halo { to { opacity: var(--o); transform: scale(1); } }
+  .orion .flare { opacity: 0; transform-box: fill-box; transform-origin: center; transform: scale(0.2) rotate(0deg); }
+  @keyframes flare { 40% { opacity: 1; } to { opacity: 0.85; transform: scale(1) rotate(45deg); } }
+  .intro.hot .orion .rig .core { fill: #ffffff; }
+  .intro.dim .orion .ln { stroke: rgb(170 190 230 / 16%); transition: stroke 1200ms var(--ease); }
+  .orion .hit { fill: transparent; cursor: pointer; }
+  .orion .name { opacity: 0; font: 500 15px "Pretendard Variable", sans-serif; fill: var(--text-2); transition: opacity 250ms var(--ease); pointer-events: none; }
+  .orion g.tip:hover .name, .orion g.tip:focus-visible .name, .intro.hot .orion .rig .name { opacity: 1; }
+  .orion g.tip:focus { outline: none; }
+  .intro .copy { position: absolute; left: 0; right: 0; bottom: 12vh; text-align: center; padding: 0 24px; pointer-events: none; }
+  .intro .copy .ko { margin: 0; font-size: clamp(30px, 4.6vw, 56px); line-height: 1.2; letter-spacing: -0.04em; font-weight: 650; }
+  .intro .copy .ko span { display: inline-block; opacity: 0; transform: translateY(14px); }
+  .intro .copy .ko em { font-style: normal; color: var(--blue-2); text-shadow: 0 0 28px rgb(94 152 254 / 55%); }
+  .intro .copy .en { margin: 14px 0 0; font-size: 15px; letter-spacing: 0.01em; color: var(--text-3); opacity: 0; }
+  .intro.say1 .copy .ko .a, .intro.say2 .copy .ko .b { animation: rise 800ms var(--ease) forwards; }
+  .intro.say2 .copy .en { animation: fadein 900ms var(--ease) 500ms forwards; }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  @keyframes fadein { to { opacity: 1; } }
+  .intro .brand { position: absolute; top: 28px; left: 50%; translate: -50% 0; display: flex; align-items: center; gap: 9px; font-weight: 650; letter-spacing: 0.02em; color: var(--text-2); opacity: 0; }
+  .intro.go .brand { animation: fadein 900ms var(--ease) 200ms forwards; }
+  .intro .down { position: absolute; left: 50%; bottom: 28px; translate: -50% 0; display: flex; flex-direction: column; align-items: center; gap: 6px; border: 0; background: none; font-size: 12px; color: var(--text-3); opacity: 0; }
+  .intro.say2 .down { animation: fadein 900ms var(--ease) 1400ms forwards; }
+  .intro .down svg { width: 16px; height: 16px; animation: nudge 1800ms ease-in-out 3000ms infinite; }
+  @keyframes nudge { 50% { transform: translateY(4px); } }
+  .intro .skip { position: absolute; top: 24px; right: 24px; height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line-2); background: none; font-size: 12.5px; color: var(--text-3); }
+  .intro .skip:hover { color: var(--text); }
+  .intro.say2 .skip { opacity: 0; pointer-events: none; transition: opacity 400ms; }
+  .mark { width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle, #fff 0 28%, #8fb4ff 46%, rgb(94 152 254 / 0%) 72%); box-shadow: 0 0 12px rgb(94 152 254 / 70%); flex: none; }
+  .hero h1 em, .closing h2 em { font-style: normal; color: var(--blue-2); }
+  .manifesto .story2 { margin-top: 28px; }
+  .manifesto b.blue { color: var(--blue-2); }
+  .closing-sub { margin: 18px 0 0; font-size: 18px; color: var(--text-2); }
+  .start .sub .rename { display: block; margin-top: 6px; font-size: 13px; color: var(--text-3); }
+  @media (prefers-reduced-motion: reduce) {
+    .intro .orion { transition: none; }
+  }
 
   /* 위 막대 */
   .nav { position: sticky; top: 0; z-index: 20; border-bottom: 1px solid var(--line); background: rgb(8 9 10 / 78%); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
@@ -272,11 +326,35 @@
     <symbol id="i-figma" viewBox="0 0 16 24"><path fill="#f24e1e" d="M4 0h4v8H4a4 4 0 0 1 0-8Z" /><path fill="#ff7262" d="M8 0h4a4 4 0 0 1 0 8H8V0Z" /><path fill="#a259ff" d="M4 8h4v8H4a4 4 0 0 1 0-8Z" /><circle fill="#1abcfe" cx="12" cy="12" r="4" /><path fill="#0acf83" d="M4 16h4v4a4 4 0 1 1-4-4Z" /></symbol>
   </svg>
 
+  <!-- 인트로 -->
+  <section class="intro" id="intro" aria-label="Rigel — 가장 뜨거운 별은 발끝에 있어요">
+    <canvas aria-hidden="true"></canvas>
+    <div class="brand"><span class="mark" aria-hidden="true"></span>Rigel</div>
+    <button type="button" class="skip">건너뛰기</button>
+    <svg class="orion" viewBox="0 0 600 700" role="img" aria-label="별을 이어 그린 오리온자리. 어깨의 베텔게우스는 붉게, 발끝의 리겔은 파랗게 빛나요">
+      <defs>
+        <radialGradient id="g-blue"><stop offset="0" stop-color="#cfe0ff" /><stop offset="0.25" stop-color="#7fa9ff" stop-opacity="0.9" /><stop offset="1" stop-color="#3f7bff" stop-opacity="0" /></radialGradient>
+        <radialGradient id="g-red"><stop offset="0" stop-color="#ffb199" /><stop offset="0.3" stop-color="#ff6b4a" stop-opacity="0.55" /><stop offset="1" stop-color="#ff4a2a" stop-opacity="0" /></radialGradient>
+        <linearGradient id="g-flare" x1="0" x2="1"><stop offset="0" stop-color="#8fb4ff" stop-opacity="0" /><stop offset="0.5" stop-color="#e4edff" /><stop offset="1" stop-color="#8fb4ff" stop-opacity="0" /></linearGradient>
+      </defs>
+      <g class="lines"></g>
+      <g class="stars"></g>
+    </svg>
+    <div class="copy">
+      <p class="ko"><span class="a">가장 뜨거운 별은</span> <span class="b"><em>발끝</em>에 있어요.</span></p>
+      <p class="en">The hottest star is at the giant’s feet.</p>
+    </div>
+    <button type="button" class="down" aria-label="아래로">
+      <span>일은 거인, 시작은 한 걸음</span>
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6 4 4 4-4" /></svg>
+    </button>
+  </section>
+
   <div class="nav">
     <div class="wrap">
-      <a class="logo" href="#"><img src="images/icon.png" alt="" />todoBAN</a>
+      <a class="logo" href="#intro"><span class="mark" aria-hidden="true"></span>Rigel</a>
       <nav class="links">
-        <a href="#why">왜 todoBAN</a>
+        <a href="#why">이야기</a>
         <a href="#how">작동 방식</a>
         <a href="#start">시작하기</a>
       </nav>
@@ -287,8 +365,8 @@
   <main>
     <section class="hero">
       <div class="wrap">
-        <h1>적는 순간,<br />시작할 준비가 끝나요</h1>
-        <p class="lead">할 일 앱은 목록을 늘려요. <b>todoBAN은 막막한 일을 지금 바로 시작할 첫 행동으로 바꿔요.</b></p>
+        <h1>일은 거인,<br />시작은 <em>한 걸음.</em></h1>
+        <p class="lead">내 일정·문서·노트를 읽고, <b>막막한 할 일을 지금 바로 디딜 첫 걸음 하나로</b> 바꿔 주는 할 일 앱이에요.</p>
         <div class="actions">
           <a class="pill big dl-primary" href="#start">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14" /></svg>
@@ -331,7 +409,8 @@
 
     <section class="manifesto" id="why">
       <div class="wrap">
-        <p class="reveal"><b>목록은 이미 충분히 길어요.</b> 막히는 건 ‘뭐부터’예요. todoBAN은 할 일을 더 잘 정리하는 대신, 지금 손댈 수 있는 한 가지를 찾아 줘요.</p>
+        <p class="reveal"><b>오리온은 흩어진 별을 이어 그린 거인이에요.</b> 어깨의 베텔게우스는 붉고 차갑고, 발끝의 리겔은 파랗고 가장 뜨거워요.</p>
+        <p class="reveal story2"><b>할 일도 그래요.</b> 어깨에 진 큰 일은 무겁고, 나를 움직이게 하는 건 발끝의 첫 걸음이에요. <b class="blue">Rigel은 흩어진 내 자료를 이어, 그 첫 걸음 하나를 파랗게 밝혀요.</b></p>
         <div class="principles reveal">
           <div class="principle">
             <span class="fig">FIG 0.1</span>
@@ -476,7 +555,7 @@
     <section class="start" id="start">
       <div class="wrap">
         <h2>시작하기</h2>
-        <p class="sub">3분이면 돼요. 내 컴퓨터의 Claude Code로 동작해요.</p>
+        <p class="sub">3분이면 돼요. 내 컴퓨터의 Claude Code로 동작해요. <span class="rename">지금 받는 앱은 아직 todoBAN이라는 이름으로 보여요. 곧 Rigel로 바뀌어요.</span></p>
         <div class="steps reveal">
           <div>
             <span class="fig">01</span>
@@ -504,8 +583,8 @@
             <div>
               <h4>Mac</h4>
               <ol>
-                <li>dmg를 열고 todoBAN을 응용 프로그램 폴더로 옮겨요</li>
-                <li>todoBAN을 열면 뜨는 창에서 <b>완료</b>를 눌러요</li>
+                <li>dmg를 열고 앱을 응용 프로그램 폴더로 옮겨요</li>
+                <li>앱을 열면 뜨는 창에서 <b>완료</b>를 눌러요</li>
                 <li><b>시스템 설정 → 개인정보 보호 및 보안</b> 맨 아래 <b>그래도 열기</b></li>
                 <li>다시 열고 <b>열기</b>를 누르면 메뉴바에 아이콘이 생겨요</li>
               </ol>
@@ -523,7 +602,7 @@
         </details>
         <div class="trust reveal">
           <div><h4>내 컴퓨터에만</h4><p>할 일과 설정은 내 컴퓨터에만 저장해요. Claude에는 이름만 보내고, 파일 내용과 링크는 보내지 않아요.</p></div>
-          <div><h4>내 Claude로</h4><p>todoBAN은 내 Claude Code를 실행만 해요. 계정 정보는 직접 다루지 않아요.</p></div>
+          <div><h4>내 Claude로</h4><p>Rigel은 내 Claude Code를 실행만 해요. 계정 정보는 직접 다루지 않아요.</p></div>
           <div><h4>알아서 새 버전</h4><p>새 버전이 나오면 앱이 알려 줘요. 윈도우는 다시 켤 때 자동으로 바뀌어요.</p></div>
         </div>
       </div>
@@ -531,7 +610,8 @@
 
     <section class="closing">
       <div class="wrap">
-        <h2 class="reveal">막막한 일,<br />오늘은 시작해요</h2>
+        <h2 class="reveal">Big task.<br /><em>Blue step.</em></h2>
+        <p class="closing-sub reveal">막막한 일, 오늘은 첫 걸음부터 디뎌요.</p>
         <div class="actions">
           <a class="pill big dl-primary" href="#start"><span class="dl-label">다운로드</span></a>
           <a class="ghost" href="https://github.com/space-angel/todoban-releases/releases">모든 버전</a>
@@ -542,7 +622,7 @@
 
   <footer>
     <div class="wrap">
-      <span>todoBAN</span>
+      <span>Rigel · 가장 뜨거운 별은 발끝에 있어요</span>
       <a href="https://github.com/space-angel/todoban-releases/releases">모든 버전</a>
       <a href="https://docs.claude.com/en/docs/claude-code/setup">Claude Code 설치</a>
     </div>
@@ -556,6 +636,89 @@
   var el = function (html) { var t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstChild; };
   var CHECK = '<svg viewBox="0 0 16 16"><use href="#i-check" /></svg>';
   var SPARK = '<svg class="sparkle"><use href="#i-spark" /></svg>';
+
+
+  /* ===== 인트로: 별 → 선 → 베텔게우스 식고 → 리겔 밝아짐 → 문장 ===== */
+  (function intro() {
+    var root = document.getElementById("intro");
+    if (!root) return;
+    var NS = "http://www.w3.org/2000/svg";
+    // 오리온자리(600×700 안의 자리). 이름, 좌표, 크기
+    var S = {
+      mei: ["메이사", 300, 92, 3.2], bet: ["Betelgeuse · 큰 일", 186, 196, 6.5], bel: ["벨라트릭스", 414, 218, 4.4],
+      aln: ["알니탁", 254, 388, 4], alm: ["알닐람", 300, 372, 4.2], min: ["민타카", 346, 354, 3.8],
+      sai: ["사이프", 214, 566, 4.2], rig: ["Rigel · 첫 걸음", 424, 584, 7],
+    };
+    var L = [["mei", "bet"], ["mei", "bel"], ["bet", "aln"], ["bel", "min"], ["aln", "alm"], ["alm", "min"], ["aln", "sai"], ["min", "rig"]];
+    var linesG = root.querySelector(".lines"), starsG = root.querySelector(".stars");
+    var mk = function (tag, attrs) { var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; };
+    L.forEach(function (pair, i) {
+      var a = S[pair[0]], b = S[pair[1]];
+      var len = Math.hypot(b[1] - a[1], b[2] - a[2]);
+      var ln = mk("line", { class: "ln", x1: a[1], y1: a[2], x2: b[1], y2: b[2] });
+      ln.style.setProperty("--len", String(Math.ceil(len)));
+      ln.style.setProperty("--d", (700 + i * 110) + "ms");
+      linesG.appendChild(ln);
+    });
+    var order = ["mei", "bel", "bet", "min", "alm", "aln", "sai", "rig"];
+    order.forEach(function (key, i) {
+      var s = S[key], g = mk("g", { class: "tip " + (key === "bet" ? "bet" : key === "rig" ? "rig" : ""), tabindex: key === "rig" || key === "bet" ? "0" : "-1" });
+      if (key === "rig") {
+        g.appendChild(mk("circle", { class: "halo", cx: s[1], cy: s[2], r: 70, fill: "url(#g-blue)" }));
+        var fl = mk("g", { class: "flare" });
+        fl.appendChild(mk("rect", { x: s[1] - 60, y: s[2] - 0.8, width: 120, height: 1.6, fill: "url(#g-flare)" }));
+        fl.appendChild(mk("rect", { x: s[1] - 0.8, y: s[2] - 60, width: 1.6, height: 120, fill: "url(#g-flare)", transform: "rotate(0)" }));
+        g.appendChild(fl);
+      }
+      if (key === "bet") g.appendChild(mk("circle", { class: "halo", cx: s[1], cy: s[2], r: 46, fill: "url(#g-red)" }));
+      var st = mk("circle", { class: "st core", cx: s[1], cy: s[2], r: s[3] });
+      st.style.setProperty("--d", (i * 70) + "ms");
+      g.appendChild(st);
+      if (key === "rig" || key === "bet") {
+        g.appendChild(mk("circle", { class: "hit", cx: s[1], cy: s[2], r: 34 }));
+        var t = mk("text", { class: "name", x: s[1] + (key === "rig" ? 30 : -30), y: s[2] + 5, "text-anchor": key === "rig" ? "start" : "end" });
+        t.textContent = s[0];
+        g.appendChild(t);
+      }
+      starsG.appendChild(g);
+    });
+
+    // 뒤 하늘: 작은 별들(캔버스 한 번 그리기, 움직이지 않음)
+    var cv = root.querySelector("canvas"), ctx = cv.getContext("2d");
+    function sky() {
+      var w = root.clientWidth, h = root.clientHeight, dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width = w * dpr; cv.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+      var seed = 7; var rnd = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+      for (var i = 0; i < Math.round((w * h) / 5200); i++) {
+        ctx.globalAlpha = 0.15 + rnd() * 0.45;
+        ctx.fillStyle = rnd() > 0.85 ? "#c9d8ff" : "#ffffff";
+        ctx.beginPath(); ctx.arc(rnd() * w, rnd() * h, rnd() * 1.1 + 0.2, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    sky(); window.addEventListener("resize", sky);
+
+    // 순서대로
+    var steps = [["go", 0], ["cool", 1700], ["dim", 2300], ["hot", 2300], ["say1", 2500], ["say2", 3300]];
+    var timers = [];
+    function finish() { timers.forEach(clearTimeout); steps.forEach(function (s) { root.classList.add(s[0]); }); }
+    if (reduce) finish();
+    else steps.forEach(function (s) { timers.push(setTimeout(function () { root.classList.add(s[0]); }, s[1] + 250)); });
+    root.querySelector(".skip").addEventListener("click", finish);
+
+    // 마우스를 따라 별자리가 살짝(깊이감)
+    var orion = root.querySelector(".orion");
+    if (!reduce) root.addEventListener("pointermove", function (e) {
+      var r = root.getBoundingClientRect();
+      orion.style.setProperty("--px", ((e.clientX - r.left) / r.width - 0.5) * -14 + "px");
+      orion.style.setProperty("--py", ((e.clientY - r.top) / r.height - 0.5) * -10 + "px");
+    });
+    // 리겔을 누르면 첫 화면으로
+    var toHero = function () { finish(); document.querySelector(".hero").scrollIntoView({ behavior: reduce ? "auto" : "smooth" }); };
+    var rig = root.querySelector(".rig");
+    rig.addEventListener("click", toHero);
+    rig.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toHero(); } });
+    root.querySelector(".down").addEventListener("click", toHero);
+  })();
 
   /* ===== 다운로드 버튼: 접속한 컴퓨터에 맞게 ===== */
   var ua = navigator.userAgent || "";
