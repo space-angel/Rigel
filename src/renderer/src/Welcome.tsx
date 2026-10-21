@@ -4,7 +4,7 @@ import { LOCAL_AVAILABLE, showHotkey } from "./platform";
 import type { ClaudeInfo } from "@shared/claude";
 import { authLabel, homeShort, shortVersion } from "./claudeLabels";
 import { MCP_SOURCES, statusOf, type McpSource, type McpStatus } from "@shared/mcp";
-import { ArrowRightIcon, CheckIcon, Spinner } from "./components/icons";
+import { ArrowRightIcon, CheckIcon, RigelIcon, Spinner } from "./components/icons";
 import { sourceName } from "./components/SourceIcon";
 import { t } from "./i18n";
 
@@ -118,7 +118,9 @@ export function Welcome() {
   return (
     <div className="welcome" ref={rootRef}>
       <div className="welcome__drag" />
-      <span className="welcome__mark" aria-hidden="true" />
+      <span className="welcome__mark" aria-hidden="true">
+        <RigelIcon size={30} />
+      </span>
       <h1>{t("Welcome to Rigel")}</h1>
       <p className="welcome__sub">{t("Write what's on your mind. Shape the first step with your own words and tools.")}</p>
 

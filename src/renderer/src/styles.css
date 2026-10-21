@@ -2007,16 +2007,20 @@ body::-webkit-scrollbar-thumb {
   height: 40px;
   -webkit-app-region: drag;
 }
-/* Rigel 마크: 밤하늘 사각형 안의 파란 별(앱 아이콘과 같은 모양) */
+/* Rigel 마크: 밤하늘 사각형 안의 흰 마크와 옅은 파란 빛(앱 아이콘과 같은 모양) */
 .welcome__mark {
   width: 48px;
   height: 48px;
+  display: grid;
+  place-items: center;
   margin-bottom: 10px;
   border-radius: 14px;
-  background:
-    radial-gradient(circle, #fff 0 8%, #b5ceff 13%, rgb(94 152 254 / 38%) 30%, rgb(94 152 254 / 0%) 60%),
-    linear-gradient(#121a33, #05070d);
+  color: #fff;
+  background: linear-gradient(#121a33, #05070d);
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 12%);
+}
+.welcome__mark svg {
+  filter: drop-shadow(0 0 5px rgb(111 166 255 / 80%));
 }
 .welcome h1 {
   font-size: 24px;
