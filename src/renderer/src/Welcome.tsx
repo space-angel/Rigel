@@ -3,13 +3,12 @@ import type { AppData } from "@shared/types";
 import { LOCAL_AVAILABLE, showHotkey } from "./platform";
 import type { ClaudeInfo } from "@shared/claude";
 import { authLabel, homeShort, shortVersion } from "./claudeLabels";
-import { MCP_SERVICES, MCP_SOURCES, statusOf, type McpStatus } from "@shared/mcp";
-import { ArrowRightIcon, CheckIcon, Spinner } from "./components/icons";
+import { MCP_SOURCES, statusOf, type McpSource, type McpStatus } from "@shared/mcp";
+import { ArrowRightIcon, CheckIcon, RigelIcon, Spinner } from "./components/icons";
 import { sourceName } from "./components/SourceIcon";
 import { t } from "./i18n";
 
 const api = window.todoban;
-
 
 function Step({ n, state, title, desc, action }: { n: number; state: "done" | "todo" | "error" | "wait"; title: string; desc: React.ReactNode; action?: React.ReactNode }) {
   return (
@@ -31,6 +30,9 @@ export function Welcome() {
   const [hotkeyError, setHotkeyError] = useState<string | null>(null);
   const [mcp, setMcp] = useState<Record<string, McpStatus> | null>(null);
   const [toolsSeen, setToolsSeen] = useState(false);
+  // Claude에 이미 연결된 서비스를 여기서 바로 켠다. 켤 때 어느 워크스페이스를 읽는지 확인한다(10초쯤).
+  const [turning, setTurning] = useState<"idle" | "testing">("idle");
+  const [failed, setFailed] = useState<McpSource[]>([]);
   const rootRef = useRef<HTMLDivElement>(null);
 
   const refresh = () => {
@@ -70,16 +72,56 @@ export function Welcome() {
   const localOn = LOCAL_AVAILABLE.filter((s) => data.settings.tools.local[s]).map((s) => sourceName(s));
   const connected = mcp ? MCP_SOURCES.filter((s) => statusOf(mcp, s) === "connected").map((s) => sourceName(s)) : [];
   const mcpOn = MCP_SOURCES.filter((s) => data.settings.tools.mcp[s]).map((s) => sourceName(s));
-  const toolsState = toolsSeen ? "done" : "todo";
+  // 연결돼 있지만 아직 켜지 않은 서비스. 첫날에도 내 자료로 첫 행동을 찾게 켤지 묻는다.
+  const suggest = mcp ? MCP_SOURCES.filter((s) => statusOf(mcp, s) === "connected" && !data.settings.tools.mcp[s] && !failed.includes(s)) : [];
+  const turnOnConnected = async () => {
+    setTurning("testing");
+    const latest = await api.getData();
+    const tools = latest.settings.tools;
+    api.act({
+      type: "setSettings",
+      patch: {
+        tools: {
+          ...tools,
+          mcp: {
+            ...tools.mcp,
+            ...Object.fromEntries(suggest.map((s) => [s, true])),
+          },
+        },
+      },
+    });
+    const results = await Promise.all(suggest.map(async (s) => ({ s, ok: (await api.verifyMcp(s)).ok })));
+    const bad = results.filter((r) => !r.ok).map((r) => r.s);
+    // 확인하지 못한 서비스는 다시 끈다(읽지 못하는 걸 켜 두지 않는다)
+    if (bad.length) {
+      const now = (await api.getData()).settings.tools;
+      api.act({
+        type: "setSettings",
+        patch: {
+          tools: {
+            ...now,
+            mcp: {
+              ...now.mcp,
+              ...Object.fromEntries(bad.map((s) => [s, false])),
+            },
+          },
+        },
+      });
+    }
+    setFailed(bad);
+    setTurning("idle");
+    setToolsSeen(true);
+  };
+  const toolsState = turning === "testing" ? "wait" : toolsSeen ? "done" : "todo";
   const hero = claudeState !== "done" ? 1 : hotkeyState !== "done" ? 2 : toolsState !== "done" ? 3 : 0;
 
   return (
     <div className="welcome" ref={rootRef}>
       <div className="welcome__drag" />
-      <span className="welcome__mark">
-        <CheckIcon size={24} />
+      <span className="welcome__mark" aria-hidden="true">
+        <RigelIcon size={30} />
       </span>
-      <h1>{t("Welcome to todoBAN")}</h1>
+      <h1>{t("Welcome to Rigel")}</h1>
       <p className="welcome__sub">{t("Write what's on your mind. Shape the first step with your own words and tools.")}</p>
 
       <div className={`steps stagger hero-${hero}`}>
@@ -146,24 +188,42 @@ export function Welcome() {
               <br />
               {mcp === null ? (
                 <span className="step__note">{t("Checking what's connected in Claude…")}</span>
+              ) : turning === "testing" ? (
+                <span className="step__note">{t("Checking which workspace it reads… about 10 seconds")}</span>
+              ) : failed.length ? (
+                <span className="step__note">{t("Couldn't turn on: {names}. Try again in Settings → Tools.", { names: failed.map((s) => sourceName(s)).join(", ") })}</span>
+              ) : suggest.length ? (
+                <span className="step__note">
+                  {t("Connected in Claude: {names}. Read them when finding first steps?", { names: suggest.map((s) => sourceName(s)).join(", ") })}
+                </span>
               ) : connected.length ? (
-                <span className="step__note">{t("Connected in Claude: {names}", { names: connected.join(", ") })}</span>
+                <span className="step__note">
+                  {t("Connected in Claude: {names}", {
+                    names: connected.join(", "),
+                  })}
+                </span>
               ) : (
                 <span className="step__note">{t("Optional — you can add these anytime")}</span>
               )}
             </>
           }
           action={
-            <button
-              type="button"
-              className="button button--secondary button--sm"
-              onClick={() => {
-                setToolsSeen(true);
-                api.openSettings("tools");
-              }}
-            >
-              {t("Choose")}
-            </button>
+            suggest.length && turning === "idle" ? (
+              <button type="button" className="button button--primary button--sm" onClick={turnOnConnected}>
+                {t("Turn on")}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="button button--secondary button--sm"
+                onClick={() => {
+                  setToolsSeen(true);
+                  api.openSettings("tools");
+                }}
+              >
+                {t("Choose")}
+              </button>
+            )
           }
         />
       </div>

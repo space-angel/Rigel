@@ -1,13 +1,13 @@
 import { msg } from "@shared/i18n";
 import type { SourceId } from "@shared/shape";
 import { t } from "../i18n";
-import { AiSparkle, CalendarIcon, CheckIcon, DocIcon, FigmaMark, IssueIcon, NoteIcon } from "./icons";
+import { AiSparkle, CalendarIcon, DocIcon, FigmaMark, IssueIcon, NoteIcon, RigelIcon } from "./icons";
 
 export const SOURCE_NAME: Record<SourceId, string> = {
   figma: msg("Figma"),
   calendar: msg("Calendar"),
   files: msg("Files"),
-  todoban: msg("todoBAN"),
+  todoban: msg("Past tasks"), // 앱 안의 다른 할 일(앱 이름과 겹치지 않게)
   notion: msg("Notion"),
   linear: msg("Linear"),
   frame: msg("Figma frame"),
@@ -30,7 +30,7 @@ export function SourceIcon({ source, size = 13 }: { source: string; size?: numbe
     case "files":
       return <DocIcon size={size} />;
     case "todoban":
-      return <CheckIcon size={size} />;
+      return <RigelIcon size={size} />;
     case "notion":
       return <NoteIcon size={size} />;
     case "linear":

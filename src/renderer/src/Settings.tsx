@@ -335,7 +335,7 @@ function McpGuide({ source, status, onClose }: { source: McpSource; status: McpS
             )}
           </li>
           <li>{t("Pick “{server}” and finish signing in in your browser", { server: MCP_SERVICES[source].server })}</li>
-          <li>{t("Come back here — todoBAN checks again on its own")}</li>
+          <li>{t("Come back here — Rigel checks again on its own")}</li>
         </ol>
       ) : (
         <ol className="guide__steps">
@@ -346,7 +346,7 @@ function McpGuide({ source, status, onClose }: { source: McpSource; status: McpS
             </button>
           </li>
           <li>{t("Connect {name} with the same account you use in Claude Code", { name })}</li>
-          <li>{t("Come back here — todoBAN checks again on its own")}</li>
+          <li>{t("Come back here — Rigel checks again on its own")}</li>
         </ol>
       )}
     </div>

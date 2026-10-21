@@ -1,6 +1,6 @@
 # 배포
 
-todoBAN은 사용자 컴퓨터에 깔린 **Claude Code**(사용자 본인의 Claude 구독이나 API 키)로 할 일을 나누고 첫 행동을 찾는다.
+Rigel(예전 이름 todoBAN)은 사용자 컴퓨터에 깔린 **Claude Code**(사용자 본인의 Claude 구독이나 API 키)로 할 일을 나누고 첫 행동을 찾는다.
 앱은 Claude 계정 정보를 직접 다루지 않는다. 사용자가 터미널에서 `claude`로 로그인해 두면, 앱은 그 claude를 실행만 한다.
 
 ## 받는 사람이 준비할 것
@@ -10,7 +10,7 @@ todoBAN은 사용자 컴퓨터에 깔린 **Claude Code**(사용자 본인의 Cla
    - 윈도우: 공식 설치 프로그램(`%USERPROFILE%\.local\bin\claude.exe`), npm(`%APPDATA%\npm\claude.cmd`)을 찾는다
    - 다른 자리라면 설정 → 일반 → Claude Code → 실행 파일에 경로를 적는다
 2. 터미널에서 `claude`를 한 번 실행해 로그인한다(Pro·Max·Team 구독 또는 API 키)
-3. todoBAN을 연다. 시작하기 화면이 찾았는지·로그인했는지·어떤 구독인지 보여 준다
+3. Rigel을 연다. 시작하기 화면이 찾았는지·로그인했는지·어떤 구독인지 보여 준다
 4. (선택) Notion·Linear·Figma: claude.ai → 설정 → 커넥터에서 연결하고, 터미널 `claude` → `/mcp`에서 로그인
 
 짧은 할 일(30자 이하)은 Claude 없이도 바로 들어간다.
@@ -19,8 +19,8 @@ todoBAN은 사용자 컴퓨터에 깔린 **Claude Code**(사용자 본인의 Cla
 
 ```sh
 npm ci
-npm run dist:mac   # dist/todoBAN-<버전>-mac-arm64.dmg, -x64.dmg, zip
-npm run dist:win   # dist/todoBAN-<버전>-win-x64-setup.exe, -arm64-setup.exe
+npm run dist:mac   # dist/Rigel-mac-arm64.dmg, Rigel-mac-x64.dmg, zip
+npm run dist:win   # dist/Rigel-win-x64-setup.exe
 npm run dist:dir   # 설치 파일 없이 앱 폴더만(확인용)
 ```
 
@@ -49,8 +49,8 @@ npm run dist:mac
 
 ## 배포와 업데이트
 
-설치 파일은 공개 레포 **space-angel/todoban-releases**의 GitHub Releases에 올린다(코드 레포 ban-todo는 비공개).
-- 다운로드 페이지: https://space-angel.github.io/todoban-releases/ (소스는 이 레포의 `site/`)
+설치 파일은 공개 레포 **space-angel/rigel-releases**의 GitHub Releases에 올린다(코드 레포 ban-todo는 비공개).
+- 다운로드 페이지: https://space-angel.github.io/rigel-releases/ (소스는 이 레포의 `site/`)
 - 파일 이름에 버전이 없어서 `releases/latest/download/<파일>`이 늘 최신을 가리킨다
 - 앱은 켜고 15초 뒤, 그 뒤 6시간마다 최신 릴리스를 확인한다(`src/main/updater.ts`)
   - 윈도우: electron-updater가 뒤에서 받고 다시 켤 때 설치(`latest.yml`)
@@ -61,7 +61,8 @@ npm run dist:mac
 2. `bash scripts/release.sh <CI 실행 번호> "바뀐 점"` → 설치 파일과 업데이트 정보를 받아 공개 레포 릴리스로 올린다
 3. 다운로드 페이지(site/)를 바꿨으면 공개 레포에도 복사해 푸시한다
 
-데이터는 업데이트해도 그대로 남는다(맥 `~/Library/Application Support/todoBAN`, 윈도우 `%APPDATA%\todoBAN`).
+데이터는 업데이트해도 그대로 남는다(맥 `~/Library/Application Support/todoBAN`, 윈도우 `%APPDATA%\todoBAN`). 이름을 Rigel로 바꿀 때 데이터 폴더는 todoBAN 그대로 두었다(src/main/index.ts).
+0.1.0(todoBAN)의 맥 앱은 todoBAN-mac-*.dmg 주소로 새 버전을 받으므로, release.sh가 같은 dmg를 예전 이름으로도 올린다.
 
 ## 다른 사람 컴퓨터에서 확인하기
 

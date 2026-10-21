@@ -6,7 +6,7 @@ import type { AppData, Shortcut, TodoItem } from "@shared/types";
 import { localDate, pendingCarryOver, todayView } from "@shared/todos";
 import { modKey, modLabel, showHotkey } from "./platform";
 import type { FirstStepState } from "@shared/firstStep";
-import { AiSparkle, ArrowRightIcon, CalendarIcon, CheckIcon, ChevronRightIcon, FigmaMark, MoreIcon, PinIcon, PlayIcon, SettingsIcon } from "./components/icons";
+import { AiSparkle, ArrowRightIcon, CalendarIcon, CheckIcon, ChevronRightIcon, FigmaMark, MoreIcon, PinIcon, PlayIcon, RigelIcon, SettingsIcon } from "./components/icons";
 import { FirstStepCard } from "./FirstStepCard";
 import { ShapePanel } from "./Shape";
 import { Attachments } from "./components/Attachments";
@@ -353,11 +353,12 @@ const EMPTY_TEXT: Record<Exclude<DialView, "today">, { title: string; sub: strin
 };
 
 // sub 자리에 action을 두면 설명 대신 한 줄짜리 버튼이 들어간다(높이는 같다).
-function EmptyState({ title, sub, action }: { title: string; sub: string; action?: { label: string; onClick: () => void } }) {
+// 마크는 Rigel 로고. 오늘 할 일을 다 끝냈으면(celebrate) 한 번 반짝인다.
+function EmptyState({ title, sub, action, celebrate = false }: { title: string; sub: string; action?: { label: string; onClick: () => void }; celebrate?: boolean }) {
   return (
     <div className="empty motion-rise">
-      <span className="empty__mark">
-        <CheckIcon size={18} />
+      <span className={`empty__mark${celebrate ? " empty__mark--lit" : ""}`}>
+        <RigelIcon size={22} />
       </span>
       <p className="empty__title">{title}</p>
       {action ? (
@@ -915,6 +916,7 @@ export function TodayList() {
           {open.length === 0 && carry.length === 0 && (
             <EmptyState
               title={done.length ? t("All clear for today") : t("Nothing for today yet")}
+              celebrate={done.length > 0}
               sub={done.length ? t("{n} done. Capture the next thought below.", { n: done.length }) : t("Write what's on your mind below.")}
             />
           )}

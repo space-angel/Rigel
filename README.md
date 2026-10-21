@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="build/icon.png" width="96" alt="todoBAN" />
+  <img src="build/icon.png" width="96" alt="Rigel" />
 </p>
 
-<h1 align="center">todoBAN</h1>
+<h1 align="center">Rigel</h1>
 
 <p align="center">
   해야 하는 건 아는데, 뭐부터 할지 몰라 시작을 못 할 때.<br />
@@ -22,7 +22,7 @@
 할 일 목록은 길어지는데, 정작 손이 안 가는 일이 있어요.
 '면접 준비', '포트폴리오 정리'처럼 **크고 막막한 일**은 무엇부터 해야 할지 정하는 것부터가 일이라서요.
 
-todoBAN은 그 첫 판단을 대신 해 줘요. 할 일을 적는 순간부터 실제로 시작하기까지 거리를 줄이는 게 목표예요.
+Rigel은 그 첫 판단을 대신 해 줘요. 할 일을 적는 순간부터 실제로 시작하기까지 거리를 줄이는 게 목표예요.
 
 ## 이렇게 써요
 
@@ -70,7 +70,7 @@ todoBAN은 그 첫 판단을 대신 해 줘요. 할 일을 적는 순간부터 �
 
 ### 1. Claude Code 설치하고 로그인하기
 
-todoBAN은 **내 컴퓨터의 Claude Code**로 할 일을 나누고 첫 행동을 찾아요. Claude Pro · Max · Team 구독이나 API 키가 필요해요.
+Rigel은 **내 컴퓨터의 Claude Code**로 할 일을 나누고 첫 행동을 찾아요. Claude Pro · Max · Team 구독이나 API 키가 필요해요.
 
 1. [Claude Code 설치 안내](https://docs.claude.com/en/docs/claude-code/setup)를 따라 설치해요.
 2. 터미널(윈도우는 명령 프롬프트)에서 `claude`를 실행하고 로그인해요.
@@ -79,15 +79,15 @@ todoBAN은 **내 컴퓨터의 Claude Code**로 할 일을 나누고 첫 행동�
 
 > 짧은 할 일은 Claude 없이도 적을 수 있어요. 할 일 나누기와 첫 행동 찾기에만 Claude가 필요해요.
 
-### 2. todoBAN 받기
+### 2. Rigel 받기
 
-**[다운로드 페이지](https://space-angel.github.io/todoban-releases/)**에서 내 컴퓨터에 맞는 버튼을 눌러요.
+**[다운로드 페이지](https://space-angel.github.io/rigel-releases/)**에서 내 컴퓨터에 맞는 버튼을 눌러요.
 
 | 컴퓨터 | 바로 받기 |
 |---|---|
-| Mac (Apple Silicon) | [todoBAN-mac-arm64.dmg](https://github.com/space-angel/todoban-releases/releases/latest/download/todoBAN-mac-arm64.dmg) |
-| Mac (Intel) | [todoBAN-mac-x64.dmg](https://github.com/space-angel/todoban-releases/releases/latest/download/todoBAN-mac-x64.dmg) |
-| Windows | [todoBAN-win-x64-setup.exe](https://github.com/space-angel/todoban-releases/releases/latest/download/todoBAN-win-x64-setup.exe) |
+| Mac (Apple Silicon) | [Rigel-mac-arm64.dmg](https://github.com/space-angel/rigel-releases/releases/latest/download/Rigel-mac-arm64.dmg) |
+| Mac (Intel) | [Rigel-mac-x64.dmg](https://github.com/space-angel/rigel-releases/releases/latest/download/Rigel-mac-x64.dmg) |
+| Windows | [Rigel-win-x64-setup.exe](https://github.com/space-angel/rigel-releases/releases/latest/download/Rigel-win-x64-setup.exe) |
 
 아직 서명하지 않은 앱이라 처음 열 때 경고가 떠요. 한 번만 허용하면 돼요.
 
@@ -110,14 +110,14 @@ todoBAN은 **내 컴퓨터의 Claude Code**로 할 일을 나누고 첫 행동�
 
 1. claude.ai → 설정 → 커넥터에서 서비스를 연결해요.
 2. 터미널에서 `claude`를 실행하고 `/mcp`를 입력해 로그인해요.
-3. todoBAN 설정 → 도구에서 켜요. 어느 워크스페이스를 읽는지 확인해서 보여 줘요.
+3. Rigel 설정 → 도구에서 켜요. 어느 워크스페이스를 읽는지 확인해서 보여 줘요.
 
 ## 내 정보는 어떻게 다루나요
 
-- 할 일과 설정은 **내 컴퓨터에만** 저장돼요(맥 `~/Library/Application Support/todoBAN`, 윈도우 `%APPDATA%\todoBAN`).
+- 할 일과 설정은 **내 컴퓨터에만** 저장돼요(맥 `~/Library/Application Support/todoBAN`, 윈도우 `%APPDATA%\todoBAN`). 앱 이름이 Rigel로 바뀌기 전 폴더 이름을 그대로 써요.
 - Claude에는 할 일 이름과 고른 낱말, 고른 자료의 **이름**만 보내요. 파일 내용·링크·파일 위치는 보내지 않아요.
 - Notion·Linear·Figma는 Claude Code가 내 계정으로 **읽기만** 해요.
-- todoBAN은 Claude 계정 정보를 직접 다루지 않아요. 로그인은 Claude Code가 해요.
+- Rigel은 Claude 계정 정보를 직접 다루지 않아요. 로그인은 Claude Code가 해요.
 
 ## 자주 묻는 것
 

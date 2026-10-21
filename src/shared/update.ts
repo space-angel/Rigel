@@ -1,7 +1,7 @@
-// 앱 업데이트. 설치 파일은 공개 레포 space-angel/todoban-releases의 GitHub Releases에 올린다.
+// 앱 업데이트. 설치 파일은 공개 레포 space-angel/rigel-releases의 GitHub Releases에 올린다.
 // 윈도우는 뒤에서 받아 두었다가 다시 켤 때 설치(electron-updater), 맥은 서명 전이라 자동 설치가 안 돼서 새 버전을 알리고 받게 한다.
-export const RELEASES_REPO = "space-angel/todoban-releases";
-export const DOWNLOAD_PAGE = "https://space-angel.github.io/todoban-releases/";
+export const RELEASES_REPO = "space-angel/rigel-releases";
+export const DOWNLOAD_PAGE = "https://space-angel.github.io/rigel-releases/";
 
 export type UpdateState =
   | { status: "idle" | "checking" | "latest"; current: string }
@@ -29,5 +29,5 @@ export function compareVersions(a: string, b: string): number {
 
 // 맥에서 받을 설치 파일. 이름에 버전이 없어서 늘 최신 릴리스를 가리킨다(electron-builder.yml artifactName).
 export function macDownloadUrl(arch: string, repo = RELEASES_REPO): string {
-  return `https://github.com/${repo}/releases/latest/download/todoBAN-mac-${arch === "arm64" ? "arm64" : "x64"}.dmg`;
+  return `https://github.com/${repo}/releases/latest/download/Rigel-mac-${arch === "arm64" ? "arm64" : "x64"}.dmg`;
 }

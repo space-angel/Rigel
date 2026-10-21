@@ -5,7 +5,7 @@ import { MCP_SERVICES, type McpSource } from "@shared/mcp";
 import { noteOpen } from "@shared/shape";
 import { dueLabel } from "@shared/due";
 import { SourceIcon, sourceName } from "./components/SourceIcon";
-import { Spinner } from "./components/icons";
+import { RigelLoader } from "./components/RigelLoader";
 import { localDate } from "@shared/todos";
 import { currentLang, t } from "./i18n";
 import { modKey } from "./platform";
@@ -49,7 +49,7 @@ function DraftNotes({ notes, loading, onRemove }: { notes: ContextNote[]; loadin
       ))}
       {loading.length > 0 && (
         <span className="note-loading">
-          <Spinner size={10} /> {t("Looking in {names}…", { names: loading.map(serviceName).join(", ") })}
+          <RigelLoader size={15} /> {t("Looking in {names}…", { names: loading.map(serviceName).join(", ") })}
         </span>
       )}
     </div>
@@ -223,7 +223,7 @@ export function Review() {
           // B2: 나누는 동안 할 일 카드가 될 빈 글래스 카드들이 흩어져 떠 있다.
           <div className="splitting motion-fade">
             <div className="splitting__pill">
-              <AiSparkle size={12} /> {slow ? t("Taking a little longer…") : t("Splitting into tasks…")}
+              <RigelLoader size={16} /> {slow ? t("Taking a little longer…") : t("Splitting into tasks…")}
             </div>
             {[0, 1, 2, 3].map((i) => (
               <div className={`ghost ghost--${i}`} key={i} aria-hidden="true">

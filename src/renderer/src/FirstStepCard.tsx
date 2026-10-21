@@ -1,7 +1,8 @@
 import { msg } from "@shared/i18n";
 import { useEffect, useState } from "react";
 import type { FirstStepState } from "@shared/firstStep";
-import { AiSparkle, Spinner } from "./components/icons";
+import { RigelIcon } from "./components/icons";
+import { RigelLoader } from "./components/RigelLoader";
 import { t } from "./i18n";
 import { CheckIcon } from "./components/icons";
 import { sourceName } from "./components/SourceIcon";
@@ -16,7 +17,7 @@ const ERROR_TEXT: Record<string, string> = {
   notFound: msg("Claude Code isn't installed."),
   usageLimit: msg("You've reached your Claude usage limit. Try again a little later."),
   network: msg("Couldn't reach Claude. Check your internet connection."),
-  outdated: msg("Your Claude Code is too old for todoBAN. Run claude update in a terminal."),
+  outdated: msg("Your Claude Code is too old for Rigel. Run claude update in a terminal."),
   parseFailed: msg("Couldn't read Claude's answer."),
   failed: msg("Couldn't get a first step."),
 };
@@ -47,7 +48,7 @@ export function FirstStepProgress({ state }: { state: FirstStepState }) {
         <CheckIcon size={11} /> {sent}
       </p>
       <p className="fs-progress__row">
-        <Spinner size={11} /> {state.answer && !shape ? t("Shaping a step from your answer…") : t("Finding a first step…")}
+        <RigelLoader size={16} /> {state.answer && !shape ? t("Shaping a step from your answer…") : t("Finding a first step…")}
         {meta && <span className="fs-progress__meta">{meta}</span>}
       </p>
     </div>
@@ -117,7 +118,7 @@ export function FirstStepCard({ state, originalTitle }: { state: FirstStepState;
   return (
     <div className="fs-card fs-card--hero motion-rise" {...stop}>
       <p className="fs-card__eyebrow fs-card__eyebrow--ai">
-        <AiSparkle size={12} /> {t("First step")}
+        <RigelIcon size={13} className="rigel-lit" /> {t("First step")}
       </p>
       <p className="fs-card__title">{state.title}</p>
       <p className="fs-card__body">{t("Instead of “{title}”", { title: originalTitle })}</p>

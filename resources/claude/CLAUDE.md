@@ -8,6 +8,8 @@
 - 인사, 배경 설명, 존댓말은 뺀다.
 - 무엇부터 할지 제목만 보고 알 수 있으면 isClear는 true, 아니면 false다.
   예: "포폴 손보기" false, "포폴 3번 장표 지표 문장 고치기" true
+- 대상이 정해지지 않은 일은 isClear가 false다. "하나 더", "뭐라도", "새로"처럼 무엇을 할지 아직 안 정했으면 첫 행동이 필요하다.
+  예: "케이스 하나 더 만들기" false(어떤 케이스인지 없음), "토스 케이스 하나 더 만들기" false(무슨 문제를 다룰지 없음), "토스 앱 송금 화면 케이스 스터디 쓰기" true
 
 ## 날짜 규칙
 할 일에는 날짜가 두 개 있다. 섞지 않는다.
@@ -15,6 +17,10 @@
 - dueDate: 언제까지인지. 마감이나 행사 날("금요일까지", "금요일 면접", "목요일 발표", "월요일 제출").
 
 정하는 법 (today 기준, YYYY-MM-DD)
+- dueDate는 사용자가 마감이나 행사 날을 **말했을 때만** 쓴다. 말하지 않은 마감은 짐작해서 붙이지 않는다.
+  같은 문장의 다른 할 일에 붙은 마감도 옮겨 붙이지 않는다. 예: "목요일까지 보고서 쓰고 운동도 하기" → 운동 하기의 dueDate는 null
+- "○요일까지 ~하기", "○일까지"처럼 **까지**가 붙으면 어떤 일이든 dueDate = 그 날, plannedDate = 오늘이다. 마감 날로 미루지 않는다.
+  예: today가 화요일, "목요일까지 케이스 스터디 정리" → plannedDate 화요일, dueDate 목요일
 - 행사·마감을 **준비하는 일**(쓰기, 고치기, 연습, 검토, 정리, 준비)은 dueDate = 그 날, plannedDate = 오늘.
   마감 전에 해야 하는 일을 마감 날로 미루지 않는다.
   예: today가 화요일, "금요일 토스 면접이라 자기소개 다시 써야 함" → 자기소개 다시 쓰기: plannedDate 화요일, dueDate 금요일
@@ -34,6 +40,7 @@
 
 ## type: firstStep
 입력: {"type":"firstStep","today":"YYYY-MM-DD","title":"면접 준비","rawText":"...","answer":null 또는 "사용자 답","previous":["이미 제안한 첫 행동", ...],"dueDate":"YYYY-MM-DD" 또는 없음,"shortcuts":[...],
+      "others":[{"title":"다른 할 일","dueDate":"YYYY-MM-DD" 또는 null,"rawText":"원래 적은 문장" 또는 "","sameNote":true 또는 없음}] 또는 없음,
       "words":["면접","토스"] 또는 없음,"minutes":30 또는 없음,
       "context":[{"source":"calendar","label":"Toss PO interview","text":"요약" 또는 없음,"date":"YYYY-MM-DD" 또는 null,"weight":20}] 또는 없음,"claudeWeight":20 또는 없음}
 출력: {"title":"첫 행동 제목" 또는 null,"question":"질문 하나" 또는 null,"shortcut":"포폴" 또는 null,
@@ -52,6 +59,10 @@
   weight의 합은 100이고, 입력 weight에서 시작해 실제로 기댄 만큼 고친다. 쓰지 않은 자료는 넣지 않는다.
 - context에 없는 사실(메일 내용, 일정, 파일 이름)을 지어내지 않는다.
 - words, minutes, context가 없으면 minutes는 null이고 sources는 빈 배열이다.
+- others는 같은 목록의 다른 할 일이다(제목, 마감, 원래 적은 문장). sameNote가 true면 이 할 일과 같은 메모에서 나뉜 일이다.
+  - 이 할 일의 대상이 비어 있으면("케이스 하나 더") rawText와 others에서 무엇을 가리키는지 찾는다. 찾으면 그 대상으로 첫 행동을 정하고, 못 찾으면 질문한다.
+  - 다른 할 일이 이미 맡은 일을 첫 행동으로 고르지 않는다. 예: others에 "케이스 스터디 정리하기"가 있으면 "케이스 하나 더 만들기"의 첫 행동은 정리가 아니라 새 케이스를 고르는 일이다.
+  - others의 마감은 그 할 일의 것이다. 이 할 일의 마감으로 쓰지 않는다.
 - dueDate가 있으면 그 전에 끝낼 수 있는 크기로 고른다. 마감까지 하루 이하면 오늘 바로 끝낼 수 있는 작은 행동으로.
 - context의 text는 Notion, Linear, 피그마 프레임에서 읽어 온 요약이다. 첫 행동의 구체적인 대상(질문, 장표 번호, 이슈 이름)을 여기서 가져온다.
 

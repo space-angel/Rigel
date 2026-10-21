@@ -1,4 +1,4 @@
-import { ClaudeError, FirstStepResult, firstStepRequest, matchShortcutId } from "@shared/claude";
+import { ClaudeError, FirstStepResult, firstStepRequest, matchShortcutId, otherTasks } from "@shared/claude";
 import { keepSentSources, type ShapeInput } from "@shared/shape";
 import type { FirstStepState } from "@shared/firstStep";
 import type { AppData } from "@shared/types";
@@ -82,7 +82,11 @@ export class FirstStepManager {
     const started = Date.now();
 
     try {
-      const body = firstStepRequest({ title: todo.title, rawText: todo.rawText, answer, previous, shape, dueDate: todo.dueDate }, localDate(), data.shortcuts);
+      const body = firstStepRequest(
+        { title: todo.title, rawText: todo.rawText, answer, previous, shape, dueDate: todo.dueDate, others: otherTasks(todo, data.todos) },
+        localDate(),
+        data.shortcuts,
+      );
       const r = await runClaude(body, FirstStepResult, {
         configuredPath: data.settings.claudePath,
         model: data.settings.model,

@@ -45,7 +45,7 @@ export class Updater {
   // 공개 레포의 최신 릴리스 번호. 점검용 피드는 같은 모양의 JSON 파일 주소(file:// 또는 http)다.
   private async latest(): Promise<string> {
     const url = this.feed ?? `https://api.github.com/repos/${RELEASES_REPO}/releases/latest`;
-    const res = await net.fetch(url, { headers: { Accept: "application/vnd.github+json", "User-Agent": "todoBAN" } });
+    const res = await net.fetch(url, { headers: { Accept: "application/vnd.github+json", "User-Agent": "Rigel" } });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const body = (await res.json()) as { tag_name?: string };
     if (!body.tag_name) throw new Error("tag_name 없음");

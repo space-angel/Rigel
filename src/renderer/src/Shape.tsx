@@ -11,6 +11,7 @@ import { MixBar } from "./components/MixBar";
 import { SourceIcon, sourceName } from "./components/SourceIcon";
 import { currentLang, loc, t } from "./i18n";
 import { FirstStepCard, FirstStepProgress } from "./FirstStepCard";
+import { RigelLoader } from "./components/RigelLoader";
 import { sourceColors } from "./components/sourceColors";
 import { Evidence } from "./components/Evidence";
 
@@ -335,7 +336,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
           </div>
           {tools === null ? (
             <p className="shape__empty">
-              <Spinner size={12} /> {t("Reading your tools…")}
+              <RigelLoader size={16} /> {t("Reading your tools…")}
             </p>
           ) : tools.length === 0 ? (
             <p className="shape__empty">
@@ -432,7 +433,7 @@ export function ShapePanel({ todo, data, state, auto, onClose }: { todo: TodoIte
                   </p>
                 )}
                 <p className="fs-progress__row">
-                  <Spinner size={11} /> {t("Reading {names}…", { names: waiting.map((r) => sourceName(r.source)).join(", ") })}
+                  <RigelLoader size={16} /> {t("Reading {names}…", { names: waiting.map((r) => sourceName(r.source)).join(", ") })}
                 </p>
               </div>
             ) : (
